@@ -15,41 +15,59 @@ a {
   text-decoration: none;
 }
 
-.main_div {
+.main-div {
   display: grid;
-  grid-template-columns: 50px auto 50px;
+  grid-template-columns: 80% 20%;
   grid-template-rows: 50px auto 50px;
   width: 100vw;
   height: 100vh;
 }
 
 .heading {
-  grid-column: 2 / span 1;
+  grid-column: 1 / span 2;
   grid-row: 1 / span 1;
   text-align: center;
   margin: auto;
 }
 
-.towers_canvas {
+.towers-canvas {
   display: block;
-  max-width: calc(100vw - 50px - 50px);
-  max-height: calc(100vh - 50px - 50px);
+  width: 1200px;
+  max-width: min(80%, calc(100vw - 50px - 50px));
+  max-height: min(80%, calc(100vh - 50px - 50px));
   margin: auto;
-  grid-column: 2 / span 1;
+  grid-column: 1 / span 1;
   grid-row: 2 / span 1;
   box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
     rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
-@media (max-width: 700px) {
-  .towers_canvas {
-    grid-column: 1 / span 3;
-    max-width: 100vw;
-  }
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
-.version_number {
+.chat-log {
+}
+
+.chat-input-form {
+  display: flex;
+  margin-top: auto;
   grid-column: 2 / span 1;
+  grid-row: 2 / span 1;
+}
+
+.chat-input-text {
+  width: 80%;
+}
+
+.chat-input-button {
+  width: 20%;
+}
+
+.version-number {
+  grid-column: 1 / span 2;
   grid-row: 3 / span 1;
   text-align: center;
   margin: auto;

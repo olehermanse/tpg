@@ -6,12 +6,29 @@
     <link inline rel="stylesheet" type="text/css" href="src/styles/style.css" />
   </head>
   <body>
-    <div class="main_div">
+    <div class="main-div">
       <h1 class="heading">
         <a href="https://github.com/olehermanse/towers">🏰</a>
       </h1>
-      <canvas id="towers_canvas" class="towers_canvas"></canvas>
-      <span class="version_number">
+      <canvas id="canvas" class="towers-canvas"></canvas>
+      <div class="chat-container">
+        <div id="chat_log">(Empty chat)</div>
+        <form
+          action=""
+          method="get"
+          class="chat-input-form"
+          id="chat_input_form"
+        >
+          <input
+            type="text"
+            name="chat_input_get"
+            class="chat-input-text"
+            required
+          />
+          <input type="submit" value="Send" class="chat-input-button" />
+        </form>
+      </div>
+      <span class="version-number">
         <a href="https://github.com/olehermanse/towers/commit/COMMIT_SHA">
           Version COMMIT_DATE-COMMIT_SHA
         </a>
