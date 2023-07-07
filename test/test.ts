@@ -1,8 +1,10 @@
-// example.test.js
 import { expect, test, describe } from "vitest";
+import { RedDots } from "../src/games/red_dots";
 
-describe("Game", () => {
-  test("3 is 3", () => {
-    expect(3).toBe(3);
+describe("RedDots game", () => {
+  test("can be created with width and height", () => {
+    let game = new RedDots(2000, 1000);
+    expect(game.width).toBe(2000);
+    expect(game.height).toBe(1000);
   });
 });

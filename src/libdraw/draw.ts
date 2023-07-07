@@ -1,32 +1,37 @@
 const PI = 3.14159;
 const LINE_RATIO = 0.1;
-const SCALE = window.devicePixelRatio;
+
+function SCALE(): number {
+  // This should be a constant, but I want this file to be importable by deno,
+  // so not using a global variable for this.
+  return window.devicePixelRatio;
+}
 
 import type { XY, XYR, XYWH } from "../libbasic/interfaces";
 
 function sxy(x: number, y: number): XY {
   const obj: XY = {
-    x: x * SCALE,
-    y: y * SCALE,
+    x: x * SCALE(),
+    y: y * SCALE(),
   };
   return obj;
 }
 
 function sxyr(x: number, y: number, r: number): XYR {
   const obj: XYR = {
-    x: x * SCALE,
-    y: y * SCALE,
-    r: r * SCALE,
+    x: x * SCALE(),
+    y: y * SCALE(),
+    r: r * SCALE(),
   };
   return obj;
 }
 
 function sxywh(x: number, y: number, w: number, h: number): XYWH {
   const obj: XYWH = {
-    x: x * SCALE,
-    y: y * SCALE,
-    w: w * SCALE,
-    h: h * SCALE,
+    x: x * SCALE(),
+    y: y * SCALE(),
+    w: w * SCALE(),
+    h: h * SCALE(),
   };
   return obj;
 }
