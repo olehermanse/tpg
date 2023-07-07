@@ -1,7 +1,6 @@
 import { xy } from "../libbasic/utils";
 import { ClickCallback, XY } from "../libbasic/interfaces";
 import { Draw } from "../libdraw/draw";
-import { Card } from "../libtowers/libtowers";
 
 class UIRect {
   x: number;
@@ -300,15 +299,13 @@ class UIButton extends UIRect {
 
 class UITooltip {
   pos: XY;
-  card: Card;
   opacity: number;
   fading_in: boolean;
   fade_in_time: number;
   delay: number;
 
-  constructor(pos: XY, card: Card) {
+  constructor(pos: XY) {
     this.pos = pos;
-    this.card = card;
     this.opacity = 0.0;
     this.fading_in = false;
     this.fade_in_time = 0.1;

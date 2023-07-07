@@ -1,7 +1,6 @@
 import { xy } from "../libbasic/utils";
 import type { XY } from "../libbasic/interfaces";
 import { Draw } from "../libdraw/draw";
-import { textChangeRangeIsUnchanged } from "typescript";
 
 class Game {
   dots: XY[];

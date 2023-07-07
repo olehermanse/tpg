@@ -1,7 +1,6 @@
 import { xy } from "../libbasic/utils";
 import { XY } from "../libbasic/interfaces";
 import { Draw } from "../libdraw/draw";
-import { Game } from "../libtowers/libtowers";
 import { UIButton, UIRect, UIText } from "../libdraw/ui_elements";
 
 class UI extends UIRect {
