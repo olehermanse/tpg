@@ -185,6 +185,22 @@ function text_wrap(text: any, line_length: any): string {
   return tw.run();
 }
 
+// Since we need all clients and the backend to agree on a width and height,
+// for the coordinate system in each game, we define those here.
+// Thus, by default we create games and canvas elements with a 1280x720px resolution.
+// There are various situations where the actual canvas has a different size,
+// for example due to retina displays (window.devicePixelRatio), browser zoom level,
+// and CSS (max-width, CSS grid, etc.).
+// The frontend code can account for this, and translate mouse offsets as well
+// as draw on a canvas object with a different width and height.
+function standard_canvas_width() {
+  return 1280;
+}
+
+function standard_canvas_height() {
+  return 720;
+}
+
 export {
   xy,
   position,
@@ -197,5 +213,7 @@ export {
   get_rotation,
   randint,
   shuffle,
+  standard_canvas_width,
+  standard_canvas_height,
   text_wrap,
 };

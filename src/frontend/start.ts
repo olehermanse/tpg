@@ -15,10 +15,10 @@ function start() {
     e.preventDefault();
     on_chat_send();
   });
-  let canvas = document.getElementById("canvas");
+  let canvas = document.getElementById("canvas") as HTMLCanvasElement;
   let scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
-  canvas_manager = new Application(canvas, ctx, 1280, 720, scale);
+  canvas_manager = new Application(canvas, ctx, scale);
   // canvas.style.width = `${canvas_manager.width}px`;
   // canvas.style.height = `${canvas_manager.height}px`;
   const ms = 10;

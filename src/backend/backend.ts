@@ -1,9 +1,29 @@
+import { RedDots } from "../games/red_dots.ts";
 import { randint } from "../libbasic/utils.ts";
 
 class Lobby {
   path: string;
+  games: any[];
+  chat_log: string[];
   constructor(path) {
     this.path = path;
+    this.games = [];
+    this.games.push(new RedDots("foo"));
+  }
+
+  get object() {
+    let games = [];
+    for (let game of this.games) {
+      games.push(game.object);
+    }
+    return {
+      chat: this.chat_log,
+      games: games,
+    };
+  }
+
+  get json() {
+    return JSON.stringify(this.object);
   }
 }
 
@@ -59,7 +79,27 @@ async function notFound(requestEvent) {
   await requestEvent.respondWith(notFoundResponse);
 }
 
+function stripPrefix(prefix, string) {
+  if (!string.startsWith(prefix)) {
+    return string;
+  }
+  return string.slice(prefix.length);
+}
+
+function JSONResponse(json) {
+  const headers: HeadersInit = { "content-type": "application/json" };
+  const response = new Response(json, { headers: headers });
+  return response;
+}
+
 async function handleAPI(requestEvent, path) {
+  if (path.startsWith("/api/lobbies/")) {
+    let lobby = get_lobby(stripPrefix("/api/lobbies", path));
+    if (lobby != null) {
+      await requestEvent.respondWith(JSONResponse(lobby.json));
+      return;
+    }
+  }
   await notFound(requestEvent);
 }
 

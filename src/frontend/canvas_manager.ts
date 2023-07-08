@@ -1,4 +1,8 @@
-import { xy } from "../libbasic/utils";
+import {
+  xy,
+  standard_canvas_width,
+  standard_canvas_height,
+} from "../libbasic/utils";
 import type { XY } from "../libbasic/interfaces";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
@@ -17,21 +21,19 @@ class Application {
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
-    canvas_width: number,
-    canvas_height: number,
     scale: number
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
     this.scale = scale;
-    this.canvas_width = canvas_width;
-    this.canvas_height = canvas_height;
+    this.canvas_width = standard_canvas_width();
+    this.canvas_height = standard_canvas_height();
     this.real_canvas_width = Math.floor(this.scale * this.canvas_width);
     this.real_canvas_height = Math.floor(this.scale * this.canvas_height);
     canvas.width = this.real_canvas_width;
     canvas.height = this.real_canvas_height;
     this.mouse = xy(0, 0);
-    this.game = new RedDots(canvas_width, canvas_height);
+    this.game = new RedDots("foo");
     this.setup_events(canvas);
   }
 
