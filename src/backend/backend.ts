@@ -1,5 +1,21 @@
 import { randint } from "../libbasic/utils.ts";
 
+class Lobby {
+  path: string;
+  constructor(path) {
+    this.path = path;
+  }
+}
+
+let lobbies = {};
+
+function get_lobby(path: string) {
+  if (path in lobbies) {
+    return lobbies[path];
+  }
+  return null;
+}
+
 // Start listening on port 3000 of localhost.
 const server = Deno.listen({ port: 3000 });
 console.log("Backend running on http://localhost:3000/");
@@ -93,7 +109,12 @@ async function handleHttp(conn: Deno.Conn) {
       continue;
     }
     if (filepath === "/" || filepath === "/index.html") {
-      await redirect(requestEvent, "/" + randint(10_000, 99_999));
+      let path = "/" + randint(10_000, 99_999);
+      while (get_lobby(path) != null) {
+        path = "/" + randint(10_000, 99_999);
+      }
+      lobbies[path] = new Lobby(path);
+      await redirect(requestEvent, path);
       continue;
     }
     if (filepath.startsWith("/api/")) {
@@ -101,7 +122,7 @@ async function handleHttp(conn: Deno.Conn) {
       continue;
     }
 
-    if (/^\/[0-9]{5}$/.test(filepath)) {
+    if (/^\/[0-9]{5}$/.test(filepath) && get_lobby(filepath)) {
       filepath = "/index.html";
     }
     await handleFile(requestEvent, filepath);
