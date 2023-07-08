@@ -1,3 +1,5 @@
+import { randint } from "../libbasic/utils.ts";
+
 // Start listening on port 3000 of localhost.
 const server = Deno.listen({ port: 3000 });
 console.log("Backend running on http://localhost:3000/");
@@ -41,7 +43,7 @@ async function notFound(requestEvent) {
   await requestEvent.respondWith(notFoundResponse);
 }
 
-async function handleAPI(requestEvent) {
+async function handleAPI(requestEvent, path) {
   await notFound(requestEvent);
 }
 
@@ -72,6 +74,14 @@ async function handleFile(requestEvent, filepath) {
   return;
 }
 
+async function redirect(requestEvent, newpath) {
+  const response = new Response("", {
+    status: 302,
+    headers: { Location: newpath },
+  });
+  await requestEvent.respondWith(response);
+}
+
 async function handleHttp(conn: Deno.Conn) {
   const httpConn = Deno.serveHttp(conn);
   for await (const requestEvent of httpConn) {
@@ -82,11 +92,18 @@ async function handleHttp(conn: Deno.Conn) {
       await notFound(requestEvent);
       continue;
     }
+    if (filepath === "/" || filepath === "/index.html") {
+      await redirect(requestEvent, "/" + randint(10_000, 99_999));
+      continue;
+    }
     if (filepath.startsWith("/api/")) {
       await handleAPI(requestEvent, filepath);
       continue;
     }
 
+    if (/^\/[0-9]{5}$/.test(filepath)) {
+      filepath = "/index.html";
+    }
     await handleFile(requestEvent, filepath);
   }
 }
