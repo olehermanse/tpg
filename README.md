@@ -22,4 +22,4 @@ http://127.0.0.1:3000
 docker build --tag tpg . && docker run -it -p 3000:3000 --name tpg --rm tpg
 ```
 
-http://127.0.0.1:80
+http://127.0.0.1:3000
