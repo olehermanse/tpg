@@ -162,8 +162,13 @@ async function handleHttp(conn: Deno.Conn) {
       continue;
     }
 
-    if (/^\/[0-9]{5}$/.test(filepath) && get_lobby(filepath)) {
-      filepath = "/index.html";
+    if (/^\/[0-9]{5}$/.test(filepath)) {
+      if (get_lobby(filepath)) {
+        filepath = "/index.html";
+      } else {
+        await redirect(requestEvent, "/");
+        continue;
+      }
     }
     await handleFile(requestEvent, filepath);
   }
