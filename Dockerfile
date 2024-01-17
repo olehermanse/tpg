@@ -20,7 +20,7 @@ COPY test test
 RUN npm install
 RUN npm run test
 
-FROM denoland/deno:1.34.3 AS run
+FROM denoland/deno:1.39.4 AS run
 WORKDIR /tpg
 COPY --from=build /tpg/dist/ dist/
 COPY src/ src/
