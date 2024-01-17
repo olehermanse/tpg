@@ -30,7 +30,7 @@ a {
   margin: auto;
 }
 
-.towers-canvas {
+.tpg-canvas {
   display: block;
   width: 1200px;
   max-width: min(80%, calc(100vw - 50px - 50px));

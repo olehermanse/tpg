@@ -20,7 +20,7 @@ function start() {
     e.preventDefault();
     on_chat_send();
   });
-  let canvas = document.getElementById("canvas") as HTMLCanvasElement;
+  let canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
   let scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   canvas_manager = new Application(canvas, ctx, scale);
