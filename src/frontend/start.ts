@@ -3,14 +3,19 @@ import { Application } from "./canvas_manager";
 let canvas_manager = null;
 
 function on_chat_send() {
-  let chat = document.getElementById("chat_log");
-  let text = chat.innerHTML;
-  text += "<br>Ping";
-  chat.innerHTML = text;
+  const chat = document.getElementById("chat-log");
+  const input = document.getElementById("chat-input-text");
+  const message = input.value;
+  if (message === "") {
+    return;
+  }
+  chat.innerHTML += "<br>";
+  chat.innerHTML += "You: " + message;
+  input.value = "";
 }
 
 function start() {
-  let form = document.getElementById("chat_input_form");
+  let form = document.getElementById("chat-input-form");
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     on_chat_send();
