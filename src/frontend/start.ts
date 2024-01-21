@@ -1,43 +1,12 @@
 import { Application } from "./canvas_manager";
 import { get_random_username } from "../libcommon/utils";
+import { http_get, http_put } from "./http";
 
 let canvas_manager = null;
 let username = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
-}
-
-async function http_get(url) {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return response.json();
-}
-
-async function http_put(url, data) {
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  return response.json();
-}
-
-async function http_post(url, data) {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  return response.json();
 }
 
 function get_cookie(key) {
