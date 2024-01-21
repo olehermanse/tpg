@@ -201,6 +201,16 @@ function standard_canvas_height() {
   return 720;
 }
 
+const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
+
+function random_element(a) {
+  return a[Math.floor(Math.random() * a.length)];
+}
+
+function get_random_username() {
+  return random_element(USERNAMES);
+}
+
 export {
   xy,
   position,
@@ -216,4 +226,6 @@ export {
   standard_canvas_width,
   standard_canvas_height,
   text_wrap,
+  random_element,
+  get_random_username,
 };

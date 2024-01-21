@@ -1,16 +1,8 @@
 import { Application } from "./canvas_manager";
+import { get_random_username } from "../libcommon/utils";
 
 let canvas_manager = null;
 let username = null;
-const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
-
-function random_element(a) {
-  return a[Math.floor(Math.random() * a.length)];
-}
-
-function get_random_username() {
-  return random_element(USERNAMES);
-}
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
