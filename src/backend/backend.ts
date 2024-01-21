@@ -1,5 +1,5 @@
 import { randint } from "../libcommon/utils.ts";
-import { Lobby } from "./lobby.ts";
+import { Lobby } from "../libcommon/lobby.ts";
 
 let lobbies = {};
 
