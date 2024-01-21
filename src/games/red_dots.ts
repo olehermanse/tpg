@@ -2,8 +2,8 @@ import {
   xy,
   standard_canvas_width,
   standard_canvas_height,
-} from "../libbasic/utils.ts";
-import type { XY } from "../libbasic/interfaces.ts";
+} from "../libcommon/utils.ts";
+import type { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw.ts";
 
 class RedDots {

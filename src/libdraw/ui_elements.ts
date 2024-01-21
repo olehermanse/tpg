@@ -1,5 +1,5 @@
-import { xy } from "../libbasic/utils";
-import { ClickCallback, XY } from "../libbasic/interfaces";
+import { xy } from "../libcommon/utils";
+import { ClickCallback, XY } from "../libcommon/interfaces";
 import { Draw } from "../libdraw/draw";
 
 class UIRect {

@@ -1,5 +1,5 @@
-import { xy } from "../libbasic/utils";
-import { XY } from "../libbasic/interfaces";
+import { xy } from "../libcommon/utils";
+import { XY } from "../libcommon/interfaces";
 import { Draw } from "../libdraw/draw";
 import { UIButton, UIRect, UIText } from "../libdraw/ui_elements";
 

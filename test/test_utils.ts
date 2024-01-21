@@ -1,4 +1,4 @@
-import { text_wrap } from "../src/libbasic/utils";
+import { text_wrap } from "../src/libcommon/utils";
 
 // example.test.js
 import { expect, test, describe } from "vitest";

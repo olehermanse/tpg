@@ -1,4 +1,4 @@
-import { randint } from "../libbasic/utils.ts";
+import { randint } from "../libcommon/utils.ts";
 import { Lobby } from "./lobby.ts";
 
 let lobbies = {};

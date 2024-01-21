@@ -2,8 +2,8 @@ import {
   xy,
   standard_canvas_width,
   standard_canvas_height,
-} from "../libbasic/utils";
-import type { XY } from "../libbasic/interfaces";
+} from "../libcommon/utils";
+import type { XY } from "../libcommon/interfaces";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 

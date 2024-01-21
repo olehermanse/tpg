@@ -7,7 +7,7 @@ function SCALE(): number {
   return window.devicePixelRatio;
 }
 
-import type { XY, XYR, XYWH } from "../libbasic/interfaces";
+import type { XY, XYR, XYWH } from "../libcommon/interfaces";
 
 function sxy(x: number, y: number): XY {
   const obj: XY = {
