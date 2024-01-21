@@ -1,6 +1,7 @@
 import { Application } from "./canvas_manager";
 
 let canvas_manager = null;
+const user = "Llama";
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -48,10 +49,10 @@ function network_init() {
   });
 }
 
-function render_chat_log(chat_log: string[]) {
+function render_chat_log(chat_log) {
   const chat = document.getElementById("chat-log");
-  chat.innerHTML = chat_log
-    .map((v) => "You: " + v + "<br>")
+  chat.innerHTML = chat_log.messages
+    .map((v) => v.user + ": " + v.body + "<br>")
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
 
@@ -62,7 +63,10 @@ function on_chat_send() {
     return;
   }
   input.value = "";
-  http_put("/api/chat/" + get_lobby_id(), { message: message }).then((data) => {
+  http_put("/api/chat/" + get_lobby_id(), {
+    user: user,
+    message: message,
+  }).then((data) => {
     render_chat_log(data);
   });
 }

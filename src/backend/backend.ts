@@ -87,9 +87,9 @@ async function handleAPI(requestEvent, path) {
       console.log("PUT detected");
       const body = await requestEvent.request.json();
       console.log("Received message: " + body.message);
-      lobby.add_chat_message(body.message);
+      lobby.chat.add(body.user, body.message);
     }
-    await requestEvent.respondWith(JSONResponse(lobby.get_chat_json()));
+    await requestEvent.respondWith(JSONResponse(lobby.chat.json));
     return;
   }
   await notFound(requestEvent);
