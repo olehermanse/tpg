@@ -20,26 +20,6 @@ function set_cookie(key, value) {
   document.cookie = `${key}=${value}; Secure`;
 }
 
-function username_init() {
-  username = get_cookie("username");
-  console.log("Existing username: " + username);
-  if (username === undefined || username === "") {
-    username = get_random_username();
-    set_cookie("username", username);
-    console.log("Created new username: " + username);
-  }
-}
-
-function network_init() {
-  console.log("Pathname: " + window.location.pathname);
-  const lobby = get_lobby_id();
-  http_get("/api/chat/" + lobby).then((data) => {
-    console.log("Chat:");
-    console.log(data);
-    render_chat_log(data);
-  });
-}
-
 function render_chat_log(chat_log) {
   const chat = document.getElementById("chat-log");
   chat.innerHTML = chat_log.messages
@@ -62,24 +42,55 @@ function on_chat_send() {
   });
 }
 
-function start() {
-  username_init();
-  network_init();
+function chat_refresh() {
+  const lobby = get_lobby_id();
+  http_get("/api/chat/" + lobby).then((data) => {
+    console.log("Chat:");
+    console.log(data);
+    render_chat_log(data);
+    setTimeout(() => {
+      chat_refresh();
+    }, 250);
+  });
+}
+
+function username_init() {
+  username = get_cookie("username");
+  console.log("Existing username: " + username);
+  if (username === undefined || username === "") {
+    username = get_random_username();
+    set_cookie("username", username);
+    console.log("Created new username: " + username);
+  }
+}
+
+function chat_init() {
   let form = document.getElementById("chat-input-form");
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     on_chat_send();
   });
+
+  chat_refresh();
+}
+
+function canvas_init() {
   let canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
   let scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   canvas_manager = new Application(canvas, ctx, scale);
   // canvas.style.width = `${canvas_manager.width}px`;
   // canvas.style.height = `${canvas_manager.height}px`;
-  const ms = 10;
+
   window.setInterval(() => {
-    canvas_manager.tick(ms);
-  }, ms);
+    canvas_manager.tick(10);
+  }, 10);
+}
+
+function start() {
+  username_init();
+  chat_init();
+  canvas_init();
 }
 
 export { start };
