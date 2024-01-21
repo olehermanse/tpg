@@ -1,7 +1,16 @@
 import { Application } from "./canvas_manager";
 
 let canvas_manager = null;
-const user = "Llama";
+let username = null;
+const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
+
+function random_element(a) {
+  return a[Math.floor(Math.random() * a.length)];
+}
+
+function get_random_username() {
+  return random_element(USERNAMES);
+}
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -39,6 +48,27 @@ async function http_post(url, data) {
   return response.json();
 }
 
+function get_cookie(key) {
+  return document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${key}=`))
+    ?.split("=")[1];
+}
+
+function set_cookie(key, value) {
+  document.cookie = `${key}=${value}; Secure`;
+}
+
+function username_init() {
+  username = get_cookie("username");
+  console.log("Existing username: " + username);
+  if (username === undefined || username === "") {
+    username = get_random_username();
+    set_cookie("username", username);
+    console.log("Created new username: " + username);
+  }
+}
+
 function network_init() {
   console.log("Pathname: " + window.location.pathname);
   const lobby = get_lobby_id();
@@ -52,7 +82,7 @@ function network_init() {
 function render_chat_log(chat_log) {
   const chat = document.getElementById("chat-log");
   chat.innerHTML = chat_log.messages
-    .map((v) => v.user + ": " + v.body + "<br>")
+    .map((v) => v.username + ": " + v.body + "<br>")
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
 
@@ -64,7 +94,7 @@ function on_chat_send() {
   }
   input.value = "";
   http_put("/api/chat/" + get_lobby_id(), {
-    user: user,
+    username: username,
     message: message,
   }).then((data) => {
     render_chat_log(data);
@@ -72,6 +102,7 @@ function on_chat_send() {
 }
 
 function start() {
+  username_init();
   network_init();
   let form = document.getElementById("chat-input-form");
   form.addEventListener("submit", (e) => {

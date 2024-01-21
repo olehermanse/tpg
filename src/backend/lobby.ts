@@ -1,16 +1,16 @@
 import { RedDots } from "../games/red_dots.ts";
 
 class Message {
-  user: string;
+  username: string;
   body: string;
 
-  constructor(user, body) {
-    this.user = user;
+  constructor(username, body) {
+    this.username = username;
     this.body = body;
   }
 
   get object() {
-    return { user: this.user, body: this.body };
+    return { username: this.username, body: this.body };
   }
 
   get json() {
@@ -21,8 +21,8 @@ class Message {
 class Chat {
   messages: Message[];
 
-  add(user, message) {
-    this.messages.push(new Message(user, message));
+  add(username, message) {
+    this.messages.push(new Message(username, message));
   }
 
   constructor() {
