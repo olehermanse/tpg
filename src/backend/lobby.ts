@@ -8,6 +8,7 @@ class Lobby {
     this.path = path;
     this.games = [];
     this.games.push(new RedDots("foo"));
+    this.chat_log = [];
   }
 
   get object() {
@@ -23,6 +24,14 @@ class Lobby {
 
   get json() {
     return JSON.stringify(this.object);
+  }
+
+  add_chat_message(message: string) {
+    this.chat_log.push(message);
+  }
+
+  get_chat_json() {
+    return JSON.stringify(this.chat_log);
   }
 }
 
