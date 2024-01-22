@@ -61,7 +61,6 @@ function stripPrefix(prefix, string) {
 }
 
 function JSONResponse(json: string) {
-  console.log("JSON response: " + json);
   const headers: HeadersInit = { "content-type": "application/json" };
   const response = new Response(json, { headers: headers });
   return response;
@@ -69,12 +68,15 @@ function JSONResponse(json: string) {
 
 async function handleAPI(requestEvent, path) {
   if (path.startsWith("/api/lobbies/")) {
+    console.log("GET " + path);
     let lobby = get_lobby(stripPrefix("/api/lobbies", path));
     if (lobby === null) {
       await notFound(requestEvent);
+      console.log(" -> 404");
       return;
     }
     await requestEvent.respondWith(JSONResponse(lobby.json));
+    console.log(" -> " + lobby.json);
     return;
   }
   if (path.startsWith("/api/chat/")) {
@@ -84,10 +86,10 @@ async function handleAPI(requestEvent, path) {
       return;
     }
     if (requestEvent.request.method === "PUT") {
-      console.log("PUT detected");
       const body = await requestEvent.request.json();
-      console.log("Received message: " + body.message);
+      console.log("PUT " + path + " " + JSON.stringify(body));
       lobby.chat.add(body.username, body.message);
+      console.log(" -> " + lobby.chat.json);
     }
     await requestEvent.respondWith(JSONResponse(lobby.chat.json));
     return;

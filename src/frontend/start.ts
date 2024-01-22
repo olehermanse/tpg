@@ -45,8 +45,6 @@ function on_chat_send() {
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    console.log("Chat:");
-    console.log(data);
     render_chat_log(data);
     setTimeout(() => {
       chat_refresh();
