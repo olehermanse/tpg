@@ -1,6 +1,4 @@
 import { text_wrap } from "../src/libcommon/utils";
-
-// example.test.js
 import { expect, test, describe } from "vitest";
 
 describe("text_wrap", () => {

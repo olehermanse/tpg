@@ -9,6 +9,17 @@ class Message {
     this.body = body;
   }
 
+  static from(msg: Object | Message | string): Message {
+    if (msg instanceof Message) {
+        return new Message(msg.username, msg.body);
+    }
+    if (msg instanceof Object){
+        return new Message(msg.username, msg.body);
+    }
+    const obj = JSON.parse(msg);
+    return new Message(obj.username, obj.body);
+  }
+
   get object() {
     return { username: this.username, body: this.body };
   }
@@ -21,12 +32,12 @@ class Message {
 class Chat {
   messages: Message[];
 
-  add(username, message) {
-    this.messages.push(new Message(username, message));
-  }
-
   constructor() {
     this.messages = [];
+  }
+
+  add(username, message) {
+    this.messages.push(new Message(username, message));
   }
 
   get object() {
@@ -46,17 +57,18 @@ class Chat {
 
 class Lobby {
   path: string;
-  games: any[];
   chat: Chat;
+  games: any[];
   constructor(path) {
     this.path = path;
+    this.chat = new Chat();
     this.games = [];
     this.games.push(new RedDots("foo"));
-    this.chat = new Chat();
   }
 
   get object() {
     return {
+      path: this.path,
       chat: this.chat.object,
       games: this.games.map((g) => g.object),
     };
@@ -64,10 +76,6 @@ class Lobby {
 
   get json() {
     return JSON.stringify(this.object);
-  }
-
-  add_chat_message(message: string) {
-    this.chat.messages.push(message);
   }
 }
 
