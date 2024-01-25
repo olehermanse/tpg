@@ -257,7 +257,7 @@ function text(
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const p = sxy(x, y);
-  _text(ctx, p.x, p.y, string, c, SCALE * size);
+  _text(ctx, p.x, p.y, string, c, SCALE() * size);
 }
 
 function text_bottom_right(
@@ -271,7 +271,7 @@ function text_bottom_right(
   ctx.textAlign = "right";
   ctx.textBaseline = "bottom";
   const p = sxy(x, y);
-  _text(ctx, p.x, p.y, string, c, SCALE * size);
+  _text(ctx, p.x, p.y, string, c, SCALE() * size);
 }
 
 function text_top_left(
@@ -285,7 +285,7 @@ function text_top_left(
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   const p = sxy(x, y);
-  _text(ctx, p.x, p.y, string, c, SCALE * size);
+  _text(ctx, p.x, p.y, string, c, SCALE() * size);
 }
 
 function fill_text(
@@ -298,9 +298,9 @@ function fill_text(
   textAlign: string,
   textBaseline: string
 ) {
-  x = x * SCALE;
-  y = y * SCALE;
-  ctx.font = "" + Math.floor(SCALE * font) + "px monospace";
+  x = x * SCALE();
+  y = y * SCALE();
+  ctx.font = "" + Math.floor(SCALE() * font).toString() + "px monospace";
   ctx.textAlign = textAlign as CanvasTextAlign;
   ctx.textBaseline = textBaseline as CanvasTextBaseline;
   ctx.fillStyle = c;

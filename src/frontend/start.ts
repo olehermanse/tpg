@@ -28,8 +28,8 @@ function render_chat_log(chat_log) {
 }
 
 function on_chat_send() {
-  const input = document.getElementById("chat-input-text");
-  const message = input.value;
+  const input: HTMLInputElement = <HTMLInputElement>document.getElementById("chat-input-text");
+  const message: string = input.value;
   if (message === "") {
     return;
   }

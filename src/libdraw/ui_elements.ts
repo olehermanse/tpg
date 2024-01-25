@@ -171,7 +171,7 @@ class UIButton extends UIRect {
   draw_icon_callback: any; // TODO make type for draw icon callback
   painter: any;
   name: string;
-  card: Card | null;
+  card: any | null;
 
   constructor(
     x,

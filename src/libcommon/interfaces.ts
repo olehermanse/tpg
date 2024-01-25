@@ -25,3 +25,8 @@ export interface FillStroke {
 export type Callback = () => void;
 
 export type ClickCallback = (any) => void;
+
+export interface Game {
+  draw(ctx: any);
+  mouse_click(x: number, y: number);
+}

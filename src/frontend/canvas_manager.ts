@@ -3,7 +3,7 @@ import {
   standard_canvas_width,
   standard_canvas_height,
 } from "../libcommon/utils";
-import type { XY } from "../libcommon/interfaces";
+import type { XY, Game } from "../libcommon/interfaces";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 
@@ -66,9 +66,9 @@ class Application {
     this.mouse = xy(x, y);
   }
 
-  key_down(key: string) {}
+  key_down(_key: string) {}
 
-  key_up(key: string) {}
+  key_up(_key: string) {}
 
   setup_events(canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
@@ -112,7 +112,7 @@ class Application {
     );
   }
 
-  tick(ms) {
+  tick(_ms) {
     this.draw();
   }
 }

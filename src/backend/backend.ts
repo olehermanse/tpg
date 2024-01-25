@@ -11,6 +11,7 @@ function get_lobby(path: string) {
 }
 
 // Start listening on port 3000 of localhost.
+// @ts-ignore
 const server = Deno.listen({ port: 3000 });
 console.log("Backend running on http://localhost:3000/");
 
@@ -111,6 +112,7 @@ async function handleFile(requestEvent, filepath) {
   // Try opening the file
   let file;
   try {
+    // @ts-ignore
     file = await Deno.open(`./dist${filepath}`, { read: true });
   } catch {
     await notFound(requestEvent);
@@ -132,7 +134,9 @@ async function redirect(requestEvent, newpath) {
   await requestEvent.respondWith(response);
 }
 
+// @ts-ignore
 async function handleHttp(conn: Deno.Conn) {
+  // @ts-ignore
   const httpConn = Deno.serveHttp(conn);
   for await (const requestEvent of httpConn) {
     const url = new URL(requestEvent.request.url);

@@ -120,7 +120,7 @@ class UI extends UIRect {
     }
   }
 
-  refresh(game: Game) {
+  refresh(game: any) {
     for (let i = 0; i < game.inventory.length; ++i) {
       const card = game.inventory[i];
       const button = this.inventory_buttons[i];

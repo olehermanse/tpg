@@ -14,10 +14,10 @@ class Message {
         return new Message(msg.username, msg.body);
     }
     if (msg instanceof Object){
-        return new Message(msg.username, msg.body);
+        return new Message(msg["username"], msg["body"]);
     }
     const obj = JSON.parse(msg);
-    return new Message(obj.username, obj.body);
+    return new Message(obj["username"], obj["body"]);
   }
 
   get object() {
