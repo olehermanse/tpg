@@ -39,7 +39,7 @@ function sxywh(x: number, y: number, w: number, h: number): XYWH {
 function _setLineWidth(
   ctx: CanvasRenderingContext2D,
   r: number,
-  lineWidth: number
+  lineWidth: number | null
 ) {
   if (lineWidth === null) {
     ctx.lineWidth = Math.round(r * LINE_RATIO);

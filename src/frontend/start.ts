@@ -2,8 +2,8 @@ import { Application } from "./canvas_manager";
 import { get_random_username } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
 
-let canvas_manager = null;
-let username = null;
+let canvas_manager: Application | null = null;
+let username: string | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -31,7 +31,9 @@ function render_chat_log(chat_log) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement>document.getElementById("chat-input-text");
+  const input: HTMLInputElement = <HTMLInputElement>(
+    document.getElementById("chat-input-text")
+  );
   const message: string = input.value;
   if (message === "") {
     return;
@@ -86,7 +88,9 @@ function canvas_init() {
   // canvas.style.height = `${canvas_manager.height}px`;
 
   window.setInterval(() => {
-    canvas_manager.tick(10);
+    if (canvas_manager != null) {
+      canvas_manager.tick(10);
+    }
   }, 10);
 }
 

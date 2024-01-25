@@ -12,7 +12,7 @@ class RedDots {
   width: number;
   height: number;
   dots: XY[];
-  constructor(id) {
+  constructor(id: string) {
     this.id = id;
     this.name = "RedDots";
     this.width = standard_canvas_width();

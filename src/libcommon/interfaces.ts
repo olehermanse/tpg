@@ -28,5 +28,5 @@ export type ClickCallback = (arg0: any) => void;
 
 export interface Game {
   draw(ctx: any): void;
-  mouse_click(x: number, y: number);
+  mouse_click(x: number, y: number): void;
 }

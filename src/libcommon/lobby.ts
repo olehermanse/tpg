@@ -11,10 +11,10 @@ class Message {
 
   static from(msg: Object | Message | string): Message {
     if (msg instanceof Message) {
-        return new Message(msg.username, msg.body);
+      return new Message(msg.username, msg.body);
     }
-    if (msg instanceof Object){
-        return new Message(msg["username"], msg["body"]);
+    if (msg instanceof Object) {
+      return new Message(msg["username"], msg["body"]);
     }
     const obj = JSON.parse(msg);
     return new Message(obj["username"], obj["body"]);
@@ -59,7 +59,7 @@ class Lobby {
   path: string;
   chat: Chat;
   games: any[];
-  constructor(path) {
+  constructor(path: string) {
     this.path = path;
     this.chat = new Chat();
     this.games = [];
@@ -78,7 +78,7 @@ class Lobby {
     return JSON.stringify(this.object);
   }
 
-  find_game(game_id: string): any | null{
+  find_game(game_id: string): any | null {
     for (let x of this.games) {
       if (x.id === game_id) {
         return x;

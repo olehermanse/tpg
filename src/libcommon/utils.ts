@@ -203,7 +203,7 @@ function standard_canvas_height(): number {
 
 const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
 
-function random_element(a: Array) {
+function random_element<T>(a: Array<T>): T {
   return a[Math.floor(Math.random() * a.length)];
 }
 
