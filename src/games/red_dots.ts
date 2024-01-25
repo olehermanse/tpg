@@ -20,11 +20,11 @@ class RedDots {
     this.dots = [];
   }
 
-  mouse_click(x, y) {
+  mouse_click(x: number, y: number) {
     this.dots.push(xy(x, y));
   }
 
-  draw(ctx) {
+  draw(ctx: any) {
     for (let circle of this.dots) {
       Draw.circle(ctx, circle.x, circle.y, this.width / 100, "#FF0000");
     }

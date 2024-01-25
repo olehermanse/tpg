@@ -1,9 +1,21 @@
 import { randint } from "../libcommon/utils.ts";
 import { Lobby } from "../libcommon/lobby.ts";
 
-let lobbies = {};
 
-function get_lobby(path: string) {
+interface Request {
+  method: string;
+  json(): {[key: string]: any};
+  url: string;
+};
+
+interface RequestEvent {
+  respondWith(response: any): any;
+  request: Request;
+};
+
+let lobbies: {[key: string]: Lobby} = {};
+
+function get_lobby(path: string): Lobby | null {
   if (path in lobbies) {
     return lobbies[path];
   }
@@ -19,7 +31,7 @@ for await (const conn of server) {
   handleHttp(conn).catch(console.error);
 }
 
-function illegalURL(path) {
+function illegalURL(path: string) {
   return (
     !path.startsWith("/") ||
     path.includes("..") ||
@@ -49,25 +61,25 @@ function getContentType(path: string): string {
   return "";
 }
 
-async function notFound(requestEvent) {
+async function notFound(requestEvent: RequestEvent) {
   const notFoundResponse = new Response("404 Not Found", { status: 404 });
   await requestEvent.respondWith(notFoundResponse);
 }
 
-function stripPrefix(prefix, string) {
+function stripPrefix(prefix: string, string: string) {
   if (!string.startsWith(prefix)) {
     return string;
   }
   return string.slice(prefix.length);
 }
 
-function JSONResponse(json: string) {
+function JSONResponse(json: string): Response {
   const headers: HeadersInit = { "content-type": "application/json" };
   const response = new Response(json, { headers: headers });
   return response;
 }
 
-async function handleAPI(requestEvent, path) {
+async function handleAPI(requestEvent: RequestEvent, path: string) {
   if (path.startsWith("/api/lobbies/")) {
     console.log("GET " + path);
     let lobby = get_lobby(stripPrefix("/api/lobbies", path));
@@ -98,7 +110,7 @@ async function handleAPI(requestEvent, path) {
   await notFound(requestEvent);
 }
 
-async function handleFile(requestEvent, filepath) {
+async function handleFile(requestEvent: RequestEvent, filepath: string) {
   if (filepath === "/") {
     filepath = "/index.html";
   }
@@ -126,7 +138,7 @@ async function handleFile(requestEvent, filepath) {
   return;
 }
 
-async function redirect(requestEvent, newpath) {
+async function redirect(requestEvent: RequestEvent, newpath: string) {
   const response = new Response("", {
     status: 302,
     headers: { Location: newpath },

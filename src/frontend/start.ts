@@ -22,6 +22,9 @@ function set_cookie(key, value) {
 
 function render_chat_log(chat_log) {
   const chat = document.getElementById("chat-log");
+  if (chat === null) {
+    return;
+  }
   chat.innerHTML = chat_log.messages
     .map((v) => v.username + ": " + v.body + "<br>")
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
@@ -63,13 +66,15 @@ function username_init() {
 }
 
 function chat_init() {
+  chat_refresh();
   let form = document.getElementById("chat-input-form");
+  if (form === null) {
+    return;
+  }
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     on_chat_send();
   });
-
-  chat_refresh();
 }
 
 function canvas_init() {

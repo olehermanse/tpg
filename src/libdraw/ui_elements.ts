@@ -10,7 +10,6 @@ class UIRect {
   fill: string | null;
   stroke: string | null;
   padding: number;
-  margin: number;
   line_width: number | null;
   padded: UIRect;
   children: any[];
@@ -165,23 +164,23 @@ class UIText {
 
 class UIButton extends UIRect {
   label: UIText | null;
-  on_click: ClickCallback;
+  on_click: ClickCallback | null;
   state: string;
-  base_color: string;
+  base_color: string | null;
   draw_icon_callback: any; // TODO make type for draw icon callback
   painter: any;
   name: string;
   card: any | null;
 
   constructor(
-    x,
-    y,
-    w,
-    h,
-    fill = null,
-    stroke = null,
-    label = null,
-    line_width = null
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    fill: any = null,
+    stroke: any = null,
+    label: any = null,
+    line_width: any = null
   ) {
     super(x, y, w, h, fill, stroke);
     this.line_width = line_width;
@@ -219,7 +218,7 @@ class UIButton extends UIRect {
     super.draw(ctx);
   }
 
-  set_temporary_color(label = null, rect = null) {
+  set_temporary_color(label: string | null , rect: string | null) {
     if (this.label != null) {
       if (label != null) {
         this.label.c = label;
@@ -241,7 +240,7 @@ class UIButton extends UIRect {
     const grey = "rgba(180,180,180,1)";
     const red = "rgba(255,0,0,1)";
     if (state === "active") {
-      this.set_temporary_color();
+      this.set_temporary_color(null, null);
     } else if (state === "hovered") {
       this.set_temporary_color(blue, blue);
     } else if (state === "clicked") {
@@ -327,7 +326,7 @@ class UITooltip {
     this.delay = 0.0;
   }
 
-  update(ms) {
+  update(ms: number) {
     const s = (1.0 * ms) / 1000;
     if (this.delay > 0.0) {
       this.delay -= s;

@@ -53,7 +53,7 @@ class Application {
     this.game.draw(this.ctx);
   }
 
-  mouse_click(x: number, y: number) {
+  mouse_click(x: number, y: number): void {
     this.mouse = xy(x, y);
     this.game.mouse_click(this.mouse.x, this.mouse.y);
   }
@@ -112,7 +112,7 @@ class Application {
     );
   }
 
-  tick(_ms) {
+  tick(_ms: number) {
     this.draw();
   }
 }

@@ -6,7 +6,7 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "Node",
-    "strict": false,
+    "strict": false, // TODO: Make this true & fix errors
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,

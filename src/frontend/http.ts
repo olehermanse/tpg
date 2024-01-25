@@ -1,4 +1,4 @@
-async function http_get(url) {
+async function http_get(url: string) {
   const response = await fetch(url, {
     method: "GET",
     headers: {

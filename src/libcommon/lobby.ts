@@ -4,7 +4,7 @@ class Message {
   username: string;
   body: string;
 
-  constructor(username, body) {
+  constructor(username: string, body: string) {
     this.username = username;
     this.body = body;
   }
@@ -36,7 +36,7 @@ class Chat {
     this.messages = [];
   }
 
-  add(username, message) {
+  add(username: string, message: string) {
     this.messages.push(new Message(username, message));
   }
 

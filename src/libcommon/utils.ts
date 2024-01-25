@@ -89,7 +89,7 @@ class TextWrapper {
   line_length: number;
   fragment_length: number;
 
-  constructor(text, line_length) {
+  constructor(text: string, line_length: number) {
     this.original = text;
     this.remaining = text.trim().replace("  ", " ");
     this.word = "";
@@ -193,21 +193,21 @@ function text_wrap(text: any, line_length: any): string {
 // and CSS (max-width, CSS grid, etc.).
 // The frontend code can account for this, and translate mouse offsets as well
 // as draw on a canvas object with a different width and height.
-function standard_canvas_width() {
+function standard_canvas_width(): number {
   return 1280;
 }
 
-function standard_canvas_height() {
+function standard_canvas_height(): number {
   return 720;
 }
 
 const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
 
-function random_element(a) {
+function random_element(a: Array) {
   return a[Math.floor(Math.random() * a.length)];
 }
 
-function get_random_username() {
+function get_random_username(): string {
   return random_element(USERNAMES);
 }
 
