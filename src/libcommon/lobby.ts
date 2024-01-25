@@ -77,6 +77,15 @@ class Lobby {
   get json() {
     return JSON.stringify(this.object);
   }
+
+  find_game(game_id: string): any | null{
+    for (let x of this.games) {
+      if (x.id === game_id) {
+        return x;
+      }
+    }
+    return null;
+  }
 }
 
 export { Lobby, Chat, Message };

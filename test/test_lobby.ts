@@ -149,4 +149,12 @@ describe("Lobby", () => {
     expect(obj.games).toHaveLength(lobby.games.length);
     expect(obj.games).toBeInstanceOf(Array);
   });
+  test("find_game", () => {
+    const lobby = new Lobby("5678");
+    expect(lobby).toBeInstanceOf(Object);
+    expect(lobby.games).toHaveLength(1);
+    expect(lobby.games[0].id).toBe("foo");
+    expect(lobby.find_game("foo")).toBe(lobby.games[0]);
+    expect(lobby.find_game("bar")).toBe(null);
+  });
 });
