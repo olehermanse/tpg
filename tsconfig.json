@@ -17,5 +17,5 @@
     "skipLibCheck": true,
     "outDir": "dist/frontend"
   },
-  "include": ["src", "test"]
+  "include": ["src"]
 }

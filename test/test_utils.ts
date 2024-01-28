@@ -1,5 +1,25 @@
-import { text_wrap } from "../src/libcommon/utils";
+import { get_random_userid, text_wrap } from "../src/libcommon/utils";
 import { expect, test, describe } from "vitest";
+
+describe("get_random_userid", () => {
+  test("type", () => {
+    const a = get_random_userid();
+    expect(a).toBeTypeOf("string");
+  });
+  test("unique", () => {
+    const a = get_random_userid();
+    for (let i = 0; i < 1000; i++) {
+      const b = get_random_userid();
+      expect(b).toBeTypeOf(typeof a);
+      expect(b).toHaveLength(a.length);
+      expect(a).not.toBe(b);
+    }
+  });
+  test("length", () => {
+    const a = get_random_userid();
+    expect(a).toHaveLength(14);
+  });
+});
 
 describe("text_wrap", () => {
   test("no-op", () => {

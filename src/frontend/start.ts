@@ -1,6 +1,7 @@
 import { Application } from "./canvas_manager";
 import {
   get_random_username,
+  get_random_userid,
   get_cookie,
   set_cookie,
 } from "../libcommon/utils";
@@ -9,6 +10,7 @@ import { Chat } from "../libcommon/lobby";
 
 let canvas_manager: Application | null = null;
 let username: string | null = null;
+let userid: string | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -23,7 +25,13 @@ function render_chat_log(chat_log: Chat | null) {
     return;
   }
   chat.innerHTML = chat_log.messages
-    .map((v) => v.username + ": " + v.body + "<br>")
+    .map((v) => {
+      let username = chat_log.get_username(v.userid);
+      if (username === null) {
+        username = "Unknown";
+      }
+      return username + ": " + v.body + "<br>";
+    })
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
 
@@ -54,13 +62,20 @@ function chat_refresh() {
   });
 }
 
-function username_init() {
+function user_init() {
   username = get_cookie("username");
   console.log("Existing username: " + username);
-  if (username === undefined || username === "") {
+  if (username === null || username === "") {
     username = get_random_username();
     set_cookie("username", username);
     console.log("Created new username: " + username);
+  }
+  userid = get_cookie("userid");
+  console.log("Existing userid: " + userid);
+  if (userid === null || userid === "") {
+    userid = get_random_userid();
+    set_cookie("userid", userid);
+    console.log("Created new userid: " + userid);
   }
 }
 
@@ -95,7 +110,7 @@ function canvas_init() {
 }
 
 function start() {
-  username_init();
+  user_init();
   chat_init();
   canvas_init();
 }

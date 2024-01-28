@@ -226,6 +226,13 @@ function set_cookie(key: string, value: string) {
   document.cookie = `${key}=${value}; Secure`;
 }
 
+function get_random_userid(): string {
+  const array = new Uint32Array(14);
+  crypto.getRandomValues(array);
+  const digits = array.map((d) => d % 10);
+  return digits.join("");
+}
+
 export {
   xy,
   position,
@@ -243,6 +250,7 @@ export {
   text_wrap,
   random_element,
   get_random_username,
+  get_random_userid,
   get_cookie,
   set_cookie,
 };
