@@ -1,5 +1,9 @@
 import { Application } from "./canvas_manager";
-import { get_random_username } from "../libcommon/utils";
+import {
+  get_random_username,
+  get_cookie,
+  set_cookie,
+} from "../libcommon/utils";
 import { http_get, http_put } from "./http";
 import { Chat } from "../libcommon/lobby";
 
@@ -8,21 +12,6 @@ let username: string | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
-}
-
-function get_cookie(key: string): string | null {
-  const value = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${key}=`))
-    ?.split("=")[1];
-  if (value === undefined) {
-    return null;
-  }
-  return value;
-}
-
-function set_cookie(key: string, value: string) {
-  document.cookie = `${key}=${value}; Secure`;
 }
 
 function render_chat_log(chat_log: Chat | null) {

@@ -211,6 +211,21 @@ function get_random_username(): string {
   return random_element(USERNAMES);
 }
 
+function get_cookie(key: string): string | null {
+  const value = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${key}=`))
+    ?.split("=")[1];
+  if (value === undefined) {
+    return null;
+  }
+  return value;
+}
+
+function set_cookie(key: string, value: string) {
+  document.cookie = `${key}=${value}; Secure`;
+}
+
 export {
   xy,
   position,
@@ -228,4 +243,6 @@ export {
   text_wrap,
   random_element,
   get_random_username,
+  get_cookie,
+  set_cookie,
 };
