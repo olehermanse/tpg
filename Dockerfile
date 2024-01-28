@@ -17,7 +17,8 @@ FROM node:20 AS test
 WORKDIR /tpg
 COPY --from=build /tpg /tpg
 COPY test test
-RUN npm install
+RUN npm install --include=dev
+RUN npm run tsc
 RUN npm run test
 
 FROM denoland/deno:1.39.4 AS run

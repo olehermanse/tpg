@@ -8,6 +8,7 @@
     "build": "npm run build:vite",
     "build:vite": "vite build",
     "test": "vitest",
+    "tsc": "tsc --noEmit",
     "preview": "vite preview"
   },
   "repository": {
