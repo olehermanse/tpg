@@ -11,19 +11,23 @@ describe("Message", () => {
   });
   test("from", () => {
     const source = new Message("a", "b");
-    let message = Message.from(source); // from a Message instance
+    let message: Message = <Message>Message.from(source); // from a Message instance
+    expect(message).not.toBe(null);
+
     source.username = "c";
     source.body = "d";
     expect(message.username).toBe("a");
     expect(message.body).toBe("b");
 
-    message = Message.from(source.json); // from a serialized JSON
+    message = <Message>Message.from(source.json); // from a serialized JSON
+    expect(message).not.toBe(null);
     expect(message.username).toBe("c");
     expect(message.body).toBe("d");
 
     source.username = "e";
     source.body = "f";
-    message = Message.from(source.object); // from a key-value object
+    message = <Message>Message.from(source.object); // from a key-value object
+    expect(message).not.toBe(null);
     expect(message.username).toBe("e");
     expect(message.body).toBe("f");
   });
@@ -51,7 +55,8 @@ describe("Message", () => {
     expect(obj.username).toBe("Alice");
     expect(obj.body).toBe("Hello, world!");
 
-    const final = Message.from(obj);
+    const final: Message = <Message>Message.from(obj);
+    expect(final).not.toBe(null);
     expect(final.username).toBe("Alice");
     expect(final.body).toBe("Hello, world!");
   });
