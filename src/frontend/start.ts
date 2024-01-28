@@ -1,6 +1,7 @@
 import { Application } from "./canvas_manager";
 import { get_random_username } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
+import { Chat } from "../libcommon/lobby";
 
 let canvas_manager: Application | null = null;
 let username: string | null = null;
@@ -9,18 +10,25 @@ function get_lobby_id() {
   return window.location.pathname.slice(1);
 }
 
-function get_cookie(key) {
-  return document.cookie
+function get_cookie(key: string): string | null {
+  const value = document.cookie
     .split("; ")
     .find((row) => row.startsWith(`${key}=`))
     ?.split("=")[1];
+  if (value === undefined) {
+    return null;
+  }
+  return value;
 }
 
-function set_cookie(key, value) {
+function set_cookie(key: string, value: string) {
   document.cookie = `${key}=${value}; Secure`;
 }
 
-function render_chat_log(chat_log) {
+function render_chat_log(chat_log: Chat | null) {
+  if (chat_log === null) {
+    return;
+  }
   const chat = document.getElementById("chat-log");
   if (chat === null) {
     return;
@@ -43,14 +51,14 @@ function on_chat_send() {
     username: username,
     message: message,
   }).then((data) => {
-    render_chat_log(data);
+    render_chat_log(Chat.from(data));
   });
 }
 
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    render_chat_log(data);
+    render_chat_log(Chat.from(data));
     setTimeout(() => {
       chat_refresh();
     }, 250);
@@ -83,6 +91,9 @@ function canvas_init() {
   let canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
   let scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
+  if (ctx === null) {
+    return;
+  }
   canvas_manager = new Application(canvas, ctx, scale);
   // canvas.style.width = `${canvas_manager.width}px`;
   // canvas.style.height = `${canvas_manager.height}px`;

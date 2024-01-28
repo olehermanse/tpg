@@ -9,15 +9,23 @@ class Message {
     this.body = body;
   }
 
-  static from(msg: Object | Message | string): Message {
+  static from(msg: Object | Message | string): Message | null {
     if (msg instanceof Message) {
       return new Message(msg.username, msg.body);
     }
-    if (msg instanceof Object) {
-      return new Message(msg["username"], msg["body"]);
+    let converted = msg instanceof Object ? msg : JSON.parse(msg);
+    if (
+      "username" in converted &&
+      "body" in converted &&
+      typeof converted.username === "string" &&
+      typeof converted.body === "string"
+    ) {
+      const username: string = converted["username"];
+      const body: string = converted["body"];
+      return new Message(username, body);
     }
-    const obj = JSON.parse(msg);
-    return new Message(obj["username"], obj["body"]);
+    console.log("Error: Failed to convert object to Message: " + msg);
+    return null;
   }
 
   get object() {
@@ -32,12 +40,33 @@ class Message {
 class Chat {
   messages: Message[];
 
-  constructor() {
+  constructor(messages: null | Message[] | Object[] = null) {
     this.messages = [];
+    if (messages != null) {
+      for (let m of messages) {
+        const converted = Message.from(m);
+        if (converted === null) {
+          continue;
+        }
+        this.messages.push(converted);
+      }
+    }
   }
 
   add(username: string, message: string) {
     this.messages.push(new Message(username, message));
+  }
+
+  static from(inp: Object | Chat | string): Chat | null {
+    if (inp instanceof Chat) {
+      return new Chat(inp.messages);
+    }
+    const converted = inp instanceof Object ? inp : JSON.parse(inp);
+    if ("messages" in converted && converted.messages instanceof Array) {
+      return new Chat(converted.messages);
+    }
+    console.log("Error: Failed to convert object to Chat: " + inp);
+    return null;
   }
 
   get object() {

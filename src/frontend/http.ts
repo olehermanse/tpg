@@ -1,4 +1,4 @@
-async function http_get(url: string) {
+async function http_get(url: string): Promise<Object> {
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -8,7 +8,7 @@ async function http_get(url: string) {
   return response.json();
 }
 
-async function http_put(url, data) {
+async function http_put(url: string, data: Object): Promise<Object> {
   const response = await fetch(url, {
     method: "PUT",
     headers: {
@@ -19,7 +19,7 @@ async function http_put(url, data) {
   return response.json();
 }
 
-async function http_post(url, data) {
+async function http_post(url: string, data: Object): Promise<Object> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
