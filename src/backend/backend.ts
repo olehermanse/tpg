@@ -1,19 +1,18 @@
 import { randint } from "../libcommon/utils.ts";
-import { Lobby } from "../libcommon/lobby.ts";
-
+import { Lobby, Message } from "../libcommon/lobby.ts";
 
 interface Request {
   method: string;
-  json(): {[key: string]: any};
+  json(): { [key: string]: any };
   url: string;
-};
+}
 
 interface RequestEvent {
   respondWith(response: any): any;
   request: Request;
-};
+}
 
-let lobbies: {[key: string]: Lobby} = {};
+let lobbies: { [key: string]: Lobby } = {};
 
 function get_lobby(path: string): Lobby | null {
   if (path in lobbies) {
@@ -99,9 +98,15 @@ async function handleAPI(requestEvent: RequestEvent, path: string) {
       return;
     }
     if (requestEvent.request.method === "PUT") {
-      const body = await requestEvent.request.json();
-      console.log("PUT " + path + " " + JSON.stringify(body));
-      lobby.chat.add(body.username, body.message);
+      const r = await requestEvent.request.json();
+      console.log("PUT " + path + " " + JSON.stringify(r));
+      const message: Message | null = Message.from(r);
+      if (message === null) {
+        await notFound(requestEvent);
+        console.log(" -> 404");
+        return;
+      }
+      lobby.chat.messages.push(message);
       console.log(" -> " + lobby.chat.json);
     }
     await requestEvent.respondWith(JSONResponse(lobby.chat.json));

@@ -1,42 +1,5 @@
 import { RedDots } from "../games/red_dots.ts";
 
-class Message {
-  userid: string;
-  body: string;
-
-  constructor(userid: string, body: string) {
-    this.userid = userid;
-    this.body = body;
-  }
-
-  static from(msg: Object | Message | string): Message | null {
-    if (msg instanceof Message) {
-      return new Message(msg.userid, msg.body);
-    }
-    let converted = msg instanceof Object ? msg : JSON.parse(msg);
-    if (
-      "userid" in converted &&
-      "body" in converted &&
-      typeof converted.userid === "string" &&
-      typeof converted.body === "string"
-    ) {
-      const userid: string = converted["userid"];
-      const body: string = converted["body"];
-      return new Message(userid, body);
-    }
-    console.log("Error: Failed to convert object to Message: " + msg);
-    return null;
-  }
-
-  get object(): Object {
-    return { userid: this.userid, body: this.body };
-  }
-
-  get json(): string {
-    return JSON.stringify(this.object);
-  }
-}
-
 class User {
   userid: string;
   username: string;
@@ -44,9 +7,12 @@ class User {
     this.userid = userid;
     this.username = username;
   }
+  static copy(user: User): User {
+    return new User(user.userid, user.username);
+  }
   static from(user: Object | User | string): User | null {
     if (user instanceof User) {
-      return new User(user.userid, user.username);
+      return User.copy(user);
     }
     let converted = user instanceof Object ? user : JSON.parse(user);
     if (
@@ -59,8 +25,50 @@ class User {
       const username: string = converted["username"];
       return new User(userid, username);
     }
-    console.log("Error: Failed to convert object to User: " + user);
+    console.log("Error: Failed to convert object to User:");
+    console.log(user);
     return null;
+  }
+}
+
+class Message {
+  user: User;
+  body: string;
+
+  constructor(user: User, body: string) {
+    this.user = User.copy(user);
+    this.body = body;
+  }
+
+  static from(msg: Object | Message | string): Message | null {
+    if (msg instanceof Message) {
+      return new Message(msg.user, msg.body);
+    }
+    let converted = msg instanceof Object ? msg : JSON.parse(msg);
+    if (
+      "user" in converted &&
+      "body" in converted &&
+      converted.user instanceof Object &&
+      typeof converted.body === "string"
+    ) {
+      const user: User | null = User.from(converted["user"]);
+      if (user === null) {
+        return null;
+      }
+      const body: string = converted["body"];
+      return new Message(user, body);
+    }
+    console.log("Error: Failed to convert object to Message: ");
+    console.log(msg);
+    return null;
+  }
+
+  get object(): Object {
+    return { user: this.user, body: this.body };
+  }
+
+  get json(): string {
+    return JSON.stringify(this.object);
   }
 }
 
@@ -68,8 +76,9 @@ class Chat {
   messages: Message[];
   users: User[];
 
-  add(userid: string, message: string) {
-    this.messages.push(new Message(userid, message));
+  add(username: string, userid: string, message: string) {
+    const user = new User(userid, username);
+    this.messages.push(new Message(user, message));
   }
 
   get_username(userid: string): string | null {
@@ -115,7 +124,8 @@ class Chat {
     if ("messages" in converted && converted.messages instanceof Array) {
       return new Chat(converted.messages);
     }
-    console.log("Error: Failed to convert object to Chat: " + inp);
+    console.log("Error: Failed to convert object to Chat:");
+    console.log(inp);
     return null;
   }
 
@@ -167,4 +177,4 @@ class Lobby {
   }
 }
 
-export { Lobby, Chat, Message };
+export { Lobby, Chat, Message, User };
