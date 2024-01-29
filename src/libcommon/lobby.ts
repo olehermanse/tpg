@@ -42,29 +42,34 @@ class User {
 class Message {
   user: User;
   body: string;
+  timestamp: number;
 
-  constructor(user: User, body: string) {
+  constructor(user: User, body: string, timestamp: number | null = null) {
     this.user = User.copy(user);
     this.body = body;
+    this.timestamp = timestamp ?? Date.now();
   }
 
   static from(msg: Object | Message | string): Message | null {
     if (msg instanceof Message) {
-      return new Message(msg.user, msg.body);
+      return new Message(msg.user, msg.body, msg.timestamp);
     }
     let converted = msg instanceof Object ? msg : JSON.parse(msg);
     if (
       "user" in converted &&
-      "body" in converted &&
       converted.user instanceof Object &&
-      typeof converted.body === "string"
+      "body" in converted &&
+      typeof converted.body === "string" &&
+      "timestamp" in converted &&
+      typeof converted.timestamp === "number"
     ) {
       const user: User | null = User.from(converted["user"]);
       if (user === null) {
         return null;
       }
       const body: string = converted["body"];
-      return new Message(user, body);
+      const timestamp: number = converted["timestamp"];
+      return new Message(user, body, timestamp);
     }
     console.log("Error: Failed to convert object to Message: ");
     console.log(msg);
@@ -72,7 +77,7 @@ class Message {
   }
 
   objectify(): Object {
-    return { user: this.user, body: this.body };
+    return { user: this.user, body: this.body, timestamp: this.timestamp };
   }
 
   stringify(): string {

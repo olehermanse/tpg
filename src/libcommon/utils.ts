@@ -233,6 +233,14 @@ function get_random_userid(): string {
   return digits.join("");
 }
 
+function left_pad(s: string | number, n: number, pad: string = " ") {
+  let result = "" + s;
+  while (result.length < n) {
+    result = pad + result;
+  }
+  return result;
+}
+
 export {
   xy,
   position,
@@ -242,6 +250,7 @@ export {
   number_string,
   distance,
   limit,
+  left_pad,
   get_rotation,
   randint,
   shuffle,

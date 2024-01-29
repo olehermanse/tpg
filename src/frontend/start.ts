@@ -4,6 +4,7 @@ import {
   get_random_userid,
   get_cookie,
   set_cookie,
+  left_pad,
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
 import { Chat, Message, User } from "../libcommon/lobby";
@@ -12,6 +13,12 @@ let canvas_manager: Application | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
+}
+
+function short_time(date: Date) {
+  const hours = left_pad(date.getHours(), 2, "0");
+  const minutes = left_pad(date.getMinutes(), 2, "0");
+  return "[" + hours + ":" + minutes + "]";
 }
 
 function render_chat_log(chat_log: Chat | null) {
@@ -23,7 +30,15 @@ function render_chat_log(chat_log: Chat | null) {
     return;
   }
   chat.innerHTML = chat_log.messages
-    .map((v) => v.user.username + ": " + v.body + "<br>")
+    .map(
+      (v: Message) =>
+        short_time(new Date(v.timestamp)) +
+        " <b>" +
+        v.user.username +
+        ":</b> " +
+        v.body +
+        "<br>"
+    )
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
 
