@@ -29,6 +29,14 @@ class User {
     console.log(user);
     return null;
   }
+
+  objectify(): Object {
+    return { userid: this.userid, username: this.username };
+  }
+
+  stringify(): string {
+    return JSON.stringify(this.objectify());
+  }
 }
 
 class Message {
@@ -63,12 +71,12 @@ class Message {
     return null;
   }
 
-  get object(): Object {
+  objectify(): Object {
     return { user: this.user, body: this.body };
   }
 
-  get json(): string {
-    return JSON.stringify(this.object);
+  stringify(): string {
+    return JSON.stringify(this.objectify());
   }
 }
 
@@ -129,18 +137,18 @@ class Chat {
     return null;
   }
 
-  get object(): Object {
+  objectify(): Object {
     let messages = [];
     for (let message of this.messages) {
-      messages.push(message.object);
+      messages.push(message.objectify());
     }
     return {
-      messages: this.messages.map((m) => m.object),
+      messages: this.messages.map((m) => m.objectify()),
     };
   }
 
-  get json(): string {
-    return JSON.stringify(this.object);
+  stringify(): string {
+    return JSON.stringify(this.objectify());
   }
 }
 
@@ -155,16 +163,16 @@ class Lobby {
     this.games.push(new RedDots("foo"));
   }
 
-  get object(): Object {
+  objectify(): Object {
     return {
       path: this.path,
-      chat: this.chat.object,
-      games: this.games.map((g) => g.object),
+      chat: this.chat.objectify(),
+      games: this.games.map((g) => g.objectify()),
     };
   }
 
-  get json(): string {
-    return JSON.stringify(this.object);
+  stringify(): string {
+    return JSON.stringify(this.objectify());
   }
 
   find_game(game_id: string): any | null {

@@ -57,8 +57,8 @@ export async function handle_api(request_event: RequestEvent, path: string) {
       console.log(" -> 404");
       return;
     }
-    await request_event.respondWith(json_response(lobby.json));
-    console.log(" -> " + lobby.json);
+    await request_event.respondWith(json_response(lobby.stringify()));
+    console.log(" -> " + lobby.stringify());
     return;
   }
   if (path.startsWith("/api/chat/")) {
@@ -77,9 +77,9 @@ export async function handle_api(request_event: RequestEvent, path: string) {
         return;
       }
       lobby.chat.messages.push(message);
-      console.log(" -> " + lobby.chat.json);
+      console.log(" -> " + lobby.chat.stringify());
     }
-    await request_event.respondWith(json_response(lobby.chat.json));
+    await request_event.respondWith(json_response(lobby.chat.stringify()));
     return;
   }
   await not_found(request_event);

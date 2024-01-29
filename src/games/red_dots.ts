@@ -30,7 +30,7 @@ class RedDots {
     }
   }
 
-  get object() {
+  objectify() {
     return { id: this.id, dots: this.dots };
   }
 }

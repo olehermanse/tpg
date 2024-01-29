@@ -22,14 +22,14 @@ describe("Message", () => {
     expect(message.user.username).toBe("a");
     expect(message.body).toBe("b");
 
-    message = <Message>Message.from(source.json); // from a serialized JSON
+    message = <Message>Message.from(source.stringify()); // from a serialized JSON
     expect(message).not.toBe(null);
     expect(message.user.username).toBe("c");
     expect(message.body).toBe("d");
 
     source.user.username = "e";
     source.body = "f";
-    message = <Message>Message.from(source.object); // from a key-value object
+    message = <Message>Message.from(source.objectify()); // from a key-value object
     expect(message).not.toBe(null);
     expect(message.user.username).toBe("e");
     expect(message.body).toBe("f");
@@ -39,7 +39,7 @@ describe("Message", () => {
     expect(source).toBeTypeOf("object");
     expect(source).toBeInstanceOf(Message);
 
-    const obj = source.object;
+    const obj = source.objectify();
     expect(obj).toBeTypeOf("object");
     expect(obj).not.toBeInstanceOf(Message);
     expect(obj.user.username).toBe("x");
@@ -53,7 +53,7 @@ describe("Message", () => {
     expect(source).toBeTypeOf("object");
     expect(source).toBeInstanceOf(Message);
 
-    const json_string = source.json;
+    const json_string = source.stringify();
     expect(json_string).toContain("Alice");
     expect(json_string).toContain("Hello, world!");
 
@@ -85,7 +85,7 @@ describe("Chat", () => {
     const chat = new Chat();
     chat.add("Alice", "12345678901234", "Hello, world!");
 
-    let obj = chat.object;
+    let obj = chat.objectify();
     expect(obj).toBeInstanceOf(Object);
     expect(obj.messages).toBeInstanceOf(Array);
     expect(obj.messages).toHaveLength(1);
@@ -95,7 +95,7 @@ describe("Chat", () => {
 
     chat.add("Bob", "22345678901234", "Hello, world!");
     expect(obj.messages).toHaveLength(1);
-    obj = chat.object;
+    obj = chat.objectify();
     expect(obj.messages).toHaveLength(2);
     expect(obj.messages[0]).toBeInstanceOf(Object);
     expect(obj.messages[0].user.username).toBe("Alice");
@@ -106,7 +106,7 @@ describe("Chat", () => {
 
     chat.add("foo", "32345678901234", "bar");
     expect(obj.messages).toHaveLength(2);
-    obj = chat.object;
+    obj = chat.objectify();
     expect(obj.messages).toHaveLength(3);
     expect(obj.messages[0]).toBeInstanceOf(Object);
     expect(obj.messages[0].user.username).toBe("Alice");
@@ -123,7 +123,7 @@ describe("Chat", () => {
     chat.add("a", "42345678901234", "b");
     chat.add("c", "52345678901234", "d");
     chat.add("e", "62345678901234", "f");
-    const obj = JSON.parse(chat.json);
+    const obj = JSON.parse(chat.stringify());
     expect(obj.messages).toHaveLength(3);
     expect(obj.messages[0].user.username).toBe("a");
     expect(obj.messages[0].body).toBe("b");
@@ -144,7 +144,7 @@ describe("Lobby", () => {
   });
   test("object", () => {
     const lobby = new Lobby("5678");
-    const obj = lobby.object;
+    const obj = lobby.objectify();
     expect(obj).toBeInstanceOf(Object);
     expect(obj.path).toBe(lobby.path);
     expect(obj.chat).toBeInstanceOf(Object);
@@ -153,7 +153,7 @@ describe("Lobby", () => {
   });
   test("json", () => {
     const lobby = new Lobby("5678");
-    const obj = JSON.parse(lobby.json);
+    const obj = JSON.parse(lobby.stringify());
     expect(obj).toBeInstanceOf(Object);
     expect(obj.path).toBe(lobby.path);
     expect(obj.chat).toBeInstanceOf(Object);
