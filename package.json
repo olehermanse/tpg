@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/olehermanse/tpg#readme",
   "dependencies": {
+    "ajv": "^8.12.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
   },
