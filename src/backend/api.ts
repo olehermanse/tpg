@@ -37,50 +37,50 @@ export function create_lobby(): string {
   return path;
 }
 
-export async function notFound(requestEvent: RequestEvent) {
-  const notFoundResponse = new Response("404 Not Found", { status: 404 });
-  await requestEvent.respondWith(notFoundResponse);
+export async function not_found(request_event: RequestEvent) {
+  const response = new Response("404 Not Found", { status: 404 });
+  await request_event.respondWith(response);
 }
 
-function JSONResponse(json: string): Response {
+function json_response(json: string): Response {
   const headers: HeadersInit = { "content-type": "application/json" };
   const response = new Response(json, { headers: headers });
   return response;
 }
 
-export async function handleAPI(requestEvent: RequestEvent, path: string) {
+export async function handle_api(request_event: RequestEvent, path: string) {
   if (path.startsWith("/api/lobbies/")) {
     console.log("GET " + path);
     let lobby = get_lobby(stripPrefix("/api/lobbies", path));
     if (lobby === null) {
-      await notFound(requestEvent);
+      await not_found(request_event);
       console.log(" -> 404");
       return;
     }
-    await requestEvent.respondWith(JSONResponse(lobby.json));
+    await request_event.respondWith(json_response(lobby.json));
     console.log(" -> " + lobby.json);
     return;
   }
   if (path.startsWith("/api/chat/")) {
     let lobby = get_lobby(stripPrefix("/api/chat", path));
     if (lobby === null) {
-      await notFound(requestEvent);
+      await not_found(request_event);
       return;
     }
-    if (requestEvent.request.method === "PUT") {
-      const r = await requestEvent.request.json();
+    if (request_event.request.method === "PUT") {
+      const r = await request_event.request.json();
       console.log("PUT " + path + " " + JSON.stringify(r));
       const message: Message | null = Message.from(r);
       if (message === null) {
-        await notFound(requestEvent);
+        await not_found(request_event);
         console.log(" -> 404");
         return;
       }
       lobby.chat.messages.push(message);
       console.log(" -> " + lobby.chat.json);
     }
-    await requestEvent.respondWith(JSONResponse(lobby.chat.json));
+    await request_event.respondWith(json_response(lobby.chat.json));
     return;
   }
-  await notFound(requestEvent);
+  await not_found(request_event);
 }

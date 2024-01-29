@@ -1,6 +1,6 @@
 import {
-  handleAPI,
-  notFound,
+  handle_api,
+  not_found,
   RequestEvent,
   create_lobby,
   get_lobby,
@@ -12,10 +12,10 @@ const server = Deno.listen({ port: 3000 });
 console.log("Backend running on http://localhost:3000/");
 
 for await (const conn of server) {
-  handleHttp(conn).catch(console.error);
+  handle_http(conn).catch(console.error);
 }
 
-function illegalURL(path: string) {
+function illegal_url(path: string) {
   return (
     !path.startsWith("/") ||
     path.includes("..") ||
@@ -29,7 +29,7 @@ function illegalURL(path: string) {
   );
 }
 
-function getContentType(path: string): string {
+function get_content_type(path: string): string {
   if (path === "/index.html") {
     return "text/html";
   }
@@ -45,14 +45,14 @@ function getContentType(path: string): string {
   return "";
 }
 
-async function handleFile(requestEvent: RequestEvent, filepath: string) {
+async function handle_file(request_event: RequestEvent, filepath: string) {
   if (filepath === "/") {
     filepath = "/index.html";
   }
 
-  const contentType: string = getContentType(filepath);
-  if (contentType === "") {
-    await notFound(requestEvent);
+  const content_type: string = get_content_type(filepath);
+  if (content_type === "") {
+    await not_found(request_event);
     return;
   }
 
@@ -62,44 +62,44 @@ async function handleFile(requestEvent: RequestEvent, filepath: string) {
     // @ts-ignore
     file = await Deno.open(`./dist${filepath}`, { read: true });
   } catch {
-    await notFound(requestEvent);
+    await not_found(request_event);
     return;
   }
 
-  const readableStream = file.readable;
-  const headers: HeadersInit = { "content-type": contentType };
-  const response = new Response(readableStream, { headers: headers });
-  await requestEvent.respondWith(response);
+  const readable_stream = file.readable;
+  const headers: HeadersInit = { "content-type": content_type };
+  const response = new Response(readable_stream, { headers: headers });
+  await request_event.respondWith(response);
   return;
 }
 
-async function redirect(requestEvent: RequestEvent, newpath: string) {
+async function redirect(request_event: RequestEvent, newpath: string) {
   const response = new Response("", {
     status: 302,
     headers: { Location: newpath },
   });
-  await requestEvent.respondWith(response);
+  await request_event.respondWith(response);
 }
 
 // @ts-ignore
-async function handleHttp(conn: Deno.Conn) {
+async function handle_http(conn: Deno.Conn) {
   // @ts-ignore
-  const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
-    const url = new URL(requestEvent.request.url);
+  const http_connection = Deno.serveHttp(conn);
+  for await (const request_event of http_connection) {
+    const url = new URL(request_event.request.url);
     let filepath = decodeURIComponent(url.pathname);
 
-    if (illegalURL(filepath)) {
-      await notFound(requestEvent);
+    if (illegal_url(filepath)) {
+      await not_found(request_event);
       continue;
     }
     if (filepath === "/" || filepath === "/index.html") {
       const path = create_lobby();
-      await redirect(requestEvent, path);
+      await redirect(request_event, path);
       continue;
     }
     if (filepath.startsWith("/api/")) {
-      await handleAPI(requestEvent, filepath);
+      await handle_api(request_event, filepath);
       continue;
     }
 
@@ -107,10 +107,10 @@ async function handleHttp(conn: Deno.Conn) {
       if (get_lobby(filepath)) {
         filepath = "/index.html";
       } else {
-        await redirect(requestEvent, "/");
+        await redirect(request_event, "/");
         continue;
       }
     }
-    await handleFile(requestEvent, filepath);
+    await handle_file(request_event, filepath);
   }
 }
