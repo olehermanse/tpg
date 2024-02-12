@@ -32,3 +32,62 @@ export function compileValidator<Type>(schema: Object) {
 export function compileConverter<Type>(schema: Object) {
   return (o: Object) => convert<Type>(o, schema);
 }
+
+interface Property {
+  type: string;
+}
+
+interface Schema {
+  properties: Record<string, Property>;
+}
+
+function _validate(
+  inp: Record<string, any>,
+  target: any,
+  schema: Schema
+): boolean {
+  for (const property in schema.properties) {
+    if (!(property in inp)) {
+      console.log(
+        'Error: missing property "' + property + '" for ' + String(target)
+      );
+      return false;
+    }
+    const prop = schema.properties[property];
+    if (!(prop.type === typeof inp[property])) {
+      console.log(
+        'Error: incorrect type on "' + property + '" for ' + String(target)
+      );
+      return false;
+    }
+  }
+  return true;
+}
+
+export function transform<T>(
+  inp: string | Object,
+  target: T,
+  schema: Schema
+): T | null {
+  if (target === null) {
+    return null;
+  }
+  if (schema === undefined) {
+    return null;
+  }
+  const properties = schema.properties;
+  if (properties === undefined) {
+    return null;
+  }
+  if (typeof inp === "string") {
+    return transform<T>(JSON.parse(inp), target, schema);
+  }
+  if (!_validate(inp, target, schema)) {
+    return null;
+  }
+  for (const property in schema.properties) {
+    //@ts-ignore
+    target[property] = inp[property];
+  }
+  return target;
+}
