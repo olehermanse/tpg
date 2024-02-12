@@ -21,7 +21,7 @@ RUN npm install --include=dev
 RUN npm run tsc
 RUN npm run test
 
-FROM denoland/deno:1.39.4 AS run
+FROM denoland/deno:1.40.2 AS run
 WORKDIR /tpg
 COPY --from=build /tpg/dist/ dist/
 COPY src/ src/
