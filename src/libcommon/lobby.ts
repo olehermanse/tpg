@@ -1,42 +1,50 @@
 import { RedDots } from "../games/red_dots.ts";
+import {
+  compileParser,
+  compileSerializer,
+  compileValidator,
+} from "./schema.ts";
 
-class User {
+export interface IUser {
   userid: string;
   username: string;
+}
+
+class User implements IUser {
+  userid: string;
+  username: string;
+
+  static schema = {
+    properties: {
+      userid: { type: "string" },
+      username: { type: "string" },
+    },
+  };
+  static serialize = compileSerializer<IUser>(User.schema);
+  static parse = compileParser<IUser>(User.schema);
+  static validate = compileValidator<IUser>(User.schema);
+
   constructor(userid: string, username: string) {
     this.userid = userid;
     this.username = username;
   }
-  static copy(user: User): User {
-    return new User(user.userid, user.username);
-  }
-  static from(user: Object | User | string): User | null {
+
+  static from(user: User | Object | string): User | null {
+    if (typeof user === "string") {
+      return User.parse(user) ?? null;
+    }
     if (user instanceof User) {
-      return User.copy(user);
+      return new User(user.userid, user.username);
     }
-    let converted = user instanceof Object ? user : JSON.parse(user);
-    if (
-      "userid" in converted &&
-      "username" in converted &&
-      typeof converted.userid === "string" &&
-      typeof converted.username === "string"
-    ) {
-      const userid: string = converted["userid"];
-      const username: string = converted["username"];
-      return new User(userid, username);
+    if (User.validate(user)) {
+      return User.from(User.serialize(<User>user));
     }
-    console.log("Error: Failed to convert object to User:");
-    console.log(user);
     return null;
   }
+}
 
-  objectify(): Object {
-    return { userid: this.userid, username: this.username };
-  }
-
-  stringify(): string {
-    return JSON.stringify(this.objectify());
-  }
+function user_copy(user: User): User {
+  return { ...user };
 }
 
 class Message {
@@ -45,7 +53,7 @@ class Message {
   timestamp: number;
 
   constructor(user: User, body: string, timestamp: number | null = null) {
-    this.user = User.copy(user);
+    this.user = user_copy(user);
     this.body = body;
     this.timestamp = timestamp ?? Date.now();
   }
@@ -57,16 +65,17 @@ class Message {
     let converted = msg instanceof Object ? msg : JSON.parse(msg);
     if (
       "user" in converted &&
-      converted.user instanceof Object &&
       "body" in converted &&
       typeof converted.body === "string" &&
       "timestamp" in converted &&
       typeof converted.timestamp === "number"
     ) {
-      const user: User | null = User.from(converted["user"]);
-      if (user === null) {
+      if (!User.validate(converted.user)) {
+        console.log("Error: Failed to convert object to Message: ");
+        console.log(msg);
         return null;
       }
+      const user: User = converted.user;
       const body: string = converted["body"];
       const timestamp: number = converted["timestamp"];
       return new Message(user, body, timestamp);
