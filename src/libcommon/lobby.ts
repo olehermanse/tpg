@@ -1,50 +1,22 @@
 import { RedDots } from "../games/red_dots.ts";
-import {
-  compileParser,
-  compileSerializer,
-  compileValidator,
-} from "./schema.ts";
+import { Schema } from "./interfaces.ts";
+import { copy, instantiate } from "./schema.ts";
 
-export interface IUser {
-  userid: string;
-  username: string;
-}
-
-class User implements IUser {
+class User {
   userid: string;
   username: string;
 
-  static schema = {
+  static schema: Schema = {
     properties: {
       userid: { type: "string" },
       username: { type: "string" },
     },
   };
-  static serialize = compileSerializer<IUser>(User.schema);
-  static parse = compileParser<IUser>(User.schema);
-  static validate = compileValidator<IUser>(User.schema);
 
-  constructor(userid: string, username: string) {
-    this.userid = userid;
-    this.username = username;
+  constructor(userid?: string, username?: string) {
+    this.userid = userid ?? "";
+    this.username = username ?? "";
   }
-
-  static from(user: User | Object | string): User | null {
-    if (typeof user === "string") {
-      return User.parse(user) ?? null;
-    }
-    if (user instanceof User) {
-      return new User(user.userid, user.username);
-    }
-    if (User.validate(user)) {
-      return User.from(User.serialize(<User>user));
-    }
-    return null;
-  }
-}
-
-function user_copy(user: User): User {
-  return { ...user };
 }
 
 class Message {
@@ -53,7 +25,7 @@ class Message {
   timestamp: number;
 
   constructor(user: User, body: string, timestamp: number | null = null) {
-    this.user = user_copy(user);
+    this.user = copy(user, new User(), User.schema);
     this.body = body;
     this.timestamp = timestamp ?? Date.now();
   }
@@ -70,12 +42,16 @@ class Message {
       "timestamp" in converted &&
       typeof converted.timestamp === "number"
     ) {
-      if (!User.validate(converted.user)) {
+      const user: User | null = instantiate(
+        converted.user,
+        new User(),
+        User.schema
+      );
+      if (user === null) {
         console.log("Error: Failed to convert object to Message: ");
         console.log(msg);
         return null;
       }
-      const user: User = converted.user;
       const body: string = converted["body"];
       const timestamp: number = converted["timestamp"];
       return new Message(user, body, timestamp);
@@ -129,7 +105,7 @@ class Chat {
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = User.from(m);
+        const converted = instantiate(m, new User(), User.schema);
         if (converted === null) {
           continue;
         }

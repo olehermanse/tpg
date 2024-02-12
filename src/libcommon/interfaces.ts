@@ -30,3 +30,11 @@ export interface Game {
   draw(ctx: any): void;
   mouse_click(x: number, y: number): void;
 }
+
+export interface Property {
+  type: string;
+}
+
+export interface Schema {
+  properties: Record<string, Property>;
+}
