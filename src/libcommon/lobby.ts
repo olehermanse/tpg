@@ -25,7 +25,7 @@ class Message {
   timestamp: number;
 
   constructor(user: User, body: string, timestamp: number | null = null) {
-    this.user = copy(user, new User(), User.schema);
+    this.user = copy(user, User);
     this.body = body;
     this.timestamp = timestamp ?? Date.now();
   }
@@ -42,11 +42,7 @@ class Message {
       "timestamp" in converted &&
       typeof converted.timestamp === "number"
     ) {
-      const user: User | null = instantiate(
-        converted.user,
-        new User(),
-        User.schema
-      );
+      const user: User | null = instantiate(converted.user, User);
       if (user === null) {
         console.log("Error: Failed to convert object to Message: ");
         console.log(msg);
@@ -105,7 +101,7 @@ class Chat {
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = instantiate(m, new User(), User.schema);
+        const converted = instantiate<User>(m, User);
         if (converted === null) {
           continue;
         }

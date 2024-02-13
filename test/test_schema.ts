@@ -23,24 +23,24 @@ class FooBar {
 describe("instantiate", () => {
   test("a valid string", () => {
     let s = '{"foo": "bar"}';
-    let a = instantiate<FooBar>(s, new FooBar(), FooBar.schema);
+    let a = instantiate<FooBar>(s, FooBar);
     expect(a).not.toBe(null);
     expect(a?.foo).toBe("bar");
   });
   test("a valid object", () => {
     let s = { foo: "bar" };
-    let a = instantiate<FooBar>(s, new FooBar(), FooBar.schema);
+    let a = instantiate<FooBar>(s, FooBar);
     expect(a).not.toBe(null);
     expect(a?.foo).toBe("bar");
   });
   test("a wrong type", () => {
     let s = { foo: 123 };
-    let a = instantiate<FooBar>(s, new FooBar(), FooBar.schema);
+    let a = instantiate<FooBar>(s, FooBar);
     expect(a).toBe(null);
   });
   test("a missing field", () => {
     let s = {};
-    let a = instantiate<FooBar>(s, new FooBar(), FooBar.schema);
+    let a = instantiate<FooBar>(s, FooBar);
     expect(a).toBe(null);
   });
 });
