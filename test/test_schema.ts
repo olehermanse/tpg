@@ -55,6 +55,9 @@ describe("type_of", () => {
   test("a number", () => {
     expect(type_of(3)).toBe("number");
   });
+  test("not a number", () => {
+    expect(type_of(0 / 0)).toBe("nan");
+  });
   test("a class", () => {
     expect(type_of(FooBar)).toBe("class FooBar");
   });

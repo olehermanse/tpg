@@ -1,6 +1,6 @@
 import { RedDots } from "../games/red_dots.ts";
 import { Schema } from "./interfaces.ts";
-import { copy, instantiate } from "./schema.ts";
+import { copy, instantiate, validate } from "./schema.ts";
 
 class User {
   userid: string;
@@ -17,6 +17,18 @@ class User {
     this.userid = userid ?? "";
     this.username = username ?? "";
   }
+
+  static instantiate(inp: Record<string, any> | string): User | null {
+    return instantiate<User>(inp, User);
+  }
+
+  static validate(inp: Record<string, any> | string): boolean {
+    return validate(inp, User);
+  }
+
+  objectify() {
+    return { userid: this.userid, username: this.username };
+  }
 }
 
 class Message {
@@ -24,45 +36,34 @@ class Message {
   body: string;
   timestamp: number;
 
-  constructor(user: User, body: string, timestamp: number | null = null) {
-    this.user = copy(user, User);
-    this.body = body;
+  static schema: Schema = {
+    properties: {
+      user: { type: User },
+      body: { type: "string" },
+      timestamp: { type: "number" },
+    },
+  };
+
+  constructor(user?: User, body?: string, timestamp?: number) {
+    this.user = user ? copy(user, User) : new User();
+    this.body = body ?? "";
     this.timestamp = timestamp ?? Date.now();
   }
 
-  static from(msg: Object | Message | string): Message | null {
-    if (msg instanceof Message) {
-      return new Message(msg.user, msg.body, msg.timestamp);
-    }
-    let converted = msg instanceof Object ? msg : JSON.parse(msg);
-    if (
-      "user" in converted &&
-      "body" in converted &&
-      typeof converted.body === "string" &&
-      "timestamp" in converted &&
-      typeof converted.timestamp === "number"
-    ) {
-      const user: User | null = instantiate(converted.user, User);
-      if (user === null) {
-        console.log("Error: Failed to convert object to Message: ");
-        console.log(msg);
-        return null;
-      }
-      const body: string = converted["body"];
-      const timestamp: number = converted["timestamp"];
-      return new Message(user, body, timestamp);
-    }
-    console.log("Error: Failed to convert object to Message: ");
-    console.log(msg);
-    return null;
+  static instantiate(inp: Record<string, any> | string): Message | null {
+    return instantiate<Message>(inp, Message);
   }
 
-  objectify(): Object {
-    return { user: this.user, body: this.body, timestamp: this.timestamp };
+  static validate(inp: Record<string, any> | string): boolean {
+    return validate(inp, Message);
   }
 
-  stringify(): string {
-    return JSON.stringify(this.objectify());
+  objectify() {
+    return {
+      user: this.user.objectify(),
+      body: this.body,
+      timestamp: this.timestamp,
+    };
   }
 }
 
@@ -91,7 +92,7 @@ class Chat {
     this.messages = [];
     if (messages != null) {
       for (let m of messages) {
-        const converted = Message.from(m);
+        const converted = Message.instantiate(m);
         if (converted === null) {
           continue;
         }

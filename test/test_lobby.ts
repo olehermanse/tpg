@@ -14,7 +14,7 @@ describe("Message", () => {
   });
   test("from", () => {
     const source = new Message(new User("82345678901234", "a"), "b");
-    let message: Message = <Message>Message.from(source); // from a Message instance
+    let message: Message = <Message>Message.instantiate(source); // from a Message instance
     expect(message).not.toBe(null);
 
     source.user.username = "c";
@@ -22,14 +22,14 @@ describe("Message", () => {
     expect(message.user.username).toBe("a");
     expect(message.body).toBe("b");
 
-    message = <Message>Message.from(source.stringify()); // from a serialized JSON
+    message = <Message>Message.instantiate(source); // from a serialized JSON
     expect(message).not.toBe(null);
     expect(message.user.username).toBe("c");
     expect(message.body).toBe("d");
 
     source.user.username = "e";
     source.body = "f";
-    message = <Message>Message.from(source.objectify()); // from a key-value object
+    message = <Message>Message.instantiate(source.objectify()); // from a key-value object
     expect(message).not.toBe(null);
     expect(message.user.username).toBe("e");
     expect(message.body).toBe("f");

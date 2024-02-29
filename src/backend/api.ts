@@ -70,7 +70,7 @@ export async function handle_api(request_event: RequestEvent, path: string) {
     if (request_event.request.method === "PUT") {
       const r = await request_event.request.json();
       console.log("PUT " + path + " " + JSON.stringify(r));
-      const message: Message | null = Message.from(r);
+      const message: Message | null = Message.instantiate(r);
       if (message === null) {
         await not_found(request_event);
         console.log(" -> 404");

@@ -29,7 +29,7 @@ export function type_of(a: any): string {
   if (a instanceof Object && a.constructor && a.constructor.name) {
     return "instance " + a.constructor.name;
   }
-  return "Unknown";
+  return ""; // No type info determined
 }
 
 export function is_class(a: any, name?: string): boolean {
@@ -56,7 +56,10 @@ export function is_instance(a: any, name?: string): boolean {
   return t === "instance " + name;
 }
 
-export function validate(inp: Record<string, any>, cls: any): boolean {
+export function validate(inp: Record<string, any> | string, cls: any): boolean {
+  if (typeof inp === "string") {
+    return validate(JSON.parse(inp), cls);
+  }
   const schema = cls.schema;
   for (const property in schema.properties) {
     if (!(property in inp)) {
@@ -66,7 +69,7 @@ export function validate(inp: Record<string, any>, cls: any): boolean {
       return false;
     }
     const prop = schema.properties[property];
-    if (!(prop.type === typeof inp[property])) {
+    if (!(prop.type === type_of(inp[property]))) {
       console.log(
         'Error: incorrect type on "' + property + '" for ' + String(cls.name)
       );
@@ -80,6 +83,12 @@ export function copy<T>(inp: T, cls: any): T {
   const schema = cls.schema;
   let target = new cls();
   for (const property in schema.properties) {
+    const t = schema.properties[property].type;
+    if (is_class(t)) {
+      //@ts-ignore
+      target[property] = instantiate(inp[property], t);
+      continue;
+    }
     //@ts-ignore
     target[property] = inp[property];
   }

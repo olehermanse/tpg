@@ -32,7 +32,7 @@ export interface Game {
 }
 
 export interface Property {
-  type: string;
+  type: string | Object;
 }
 
 export interface Schema {
