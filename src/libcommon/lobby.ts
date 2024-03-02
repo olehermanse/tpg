@@ -6,13 +6,17 @@ class User {
   userid: string;
   username: string;
 
-  static class_name: string = "User";
-  static schema: Schema = {
-    properties: {
-      userid: { type: "string" },
-      username: { type: "string" },
-    },
-  };
+  class_name(): string {
+    return "User";
+  }
+  schema(): Schema {
+    return {
+      properties: {
+        userid: { type: "string" },
+        username: { type: "string" },
+      },
+    };
+  }
 
   constructor(userid?: string, username?: string) {
     this.userid = userid ?? "";
@@ -25,14 +29,18 @@ class Message {
   body: string;
   timestamp: number;
 
-  static class_name: string = "Message";
-  static schema: Schema = {
-    properties: {
-      user: { type: User },
-      body: { type: "string" },
-      timestamp: { type: "number" },
-    },
-  };
+  class_name(): string {
+    return "Message";
+  }
+  schema(): Schema {
+    return {
+      properties: {
+        user: { type: User },
+        body: { type: "string" },
+        timestamp: { type: "number" },
+      },
+    };
+  }
 
   constructor(user?: User, body?: string, timestamp?: number) {
     this.user = user ? sv.copy(user) : new User();
@@ -45,13 +53,17 @@ class Chat {
   messages: Message[];
   users: User[];
 
-  static class_name: string = "Chat";
-  static schema: Schema = {
-    properties: {
-      messages: { type: Message, array: true },
-      users: { type: User, array: true },
-    },
-  };
+  class_name(): string {
+    return "Chat";
+  }
+  schema(): Schema {
+    return {
+      properties: {
+        messages: { type: Message, array: true },
+        users: { type: User, array: true },
+      },
+    };
+  }
 
   add(username: string, userid: string, message: string) {
     const user = new User(userid, username);
@@ -99,14 +111,18 @@ class Lobby {
   chat: Chat;
   games: any[];
 
-  static class_name: string = "Lobby";
-  static schema: Schema = {
-    properties: {
-      path: { type: String },
-      chat: { type: Chat },
-      games: { type: undefined },
-    },
-  };
+  class_name(): string {
+    return "Lobby";
+  }
+  schema(): Schema {
+    return {
+      properties: {
+        path: { type: String },
+        chat: { type: Chat },
+        games: { type: undefined },
+      },
+    };
+  }
 
   constructor(path: string) {
     this.path = path;

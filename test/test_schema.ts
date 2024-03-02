@@ -9,11 +9,13 @@ import { expect, test, describe } from "vitest";
 class FooBar {
   foo: string;
 
-  static schema = {
-    properties: {
-      foo: { type: "string" },
-    },
-  };
+  schema() {
+    return {
+      properties: {
+        foo: { type: "string" },
+      },
+    };
+  }
 
   constructor(foo?: string) {
     this.foo = foo ?? "";

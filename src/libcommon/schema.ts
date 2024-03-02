@@ -74,7 +74,7 @@ export function validate<T>(
     return validate(JSON.parse(inp), new_object);
   }
   // @ts-ignore
-  const schema = new_object.constructor.schema;
+  const schema = new_object.schema();
   for (const property in schema.properties) {
     if (!(property in inp)) {
       console.log(
@@ -173,14 +173,14 @@ function _copy<T>(inp: T, target: any, schema: any, nesting: string) {
 
 export function _copy_with_instance<T>(inp: any, target: T): T {
   // @ts-ignore
-  const schema = target.constructor.schema;
+  const schema = target.schema();
   _copy<T>(inp, target, schema, "class");
   return target;
 }
 
 export function _copy_with_class<T>(inp: T, cls: any): T {
-  const schema = cls.schema;
   let target = new cls();
+  const schema = target.schema();
   _copy<T>(inp, target, schema, "class");
   return target;
 }
@@ -203,7 +203,7 @@ export function convert<T>(inp: string | Object, new_object: T): T | null {
 }
 
 export function objectify(inp: any): Object {
-  const schema = inp.constructor.schema;
+  const schema = inp.schema();
   let target = new Object();
   _copy(inp, target, schema, "object");
   return target;
