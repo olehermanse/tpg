@@ -163,11 +163,17 @@ function _copy<T>(inp: T, target: any, schema: any, nesting: string) {
   }
 }
 
-export function copy<T>(inp: T, cls: any): T {
+export function _copy_with_class<T>(inp: T, cls: any): T {
   const schema = cls.schema;
   let target = new cls();
   _copy<T>(inp, target, schema, "class");
   return target;
+}
+
+export function copy<T>(inp: T): T {
+  //@ts-ignore
+  const cls = inp.constructor;
+  return _copy_with_class(inp, cls);
 }
 
 export function instantiate<T>(inp: string | Object, cls: any): T | null {
@@ -177,7 +183,7 @@ export function instantiate<T>(inp: string | Object, cls: any): T | null {
   if (!validate(inp, cls)) {
     return null;
   }
-  return copy(<T>inp, cls);
+  return _copy_with_class(<T>inp, cls);
 }
 
 export function objectify(inp: any): Object {

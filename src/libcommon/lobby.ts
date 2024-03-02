@@ -51,7 +51,7 @@ class Message {
   };
 
   constructor(user?: User, body?: string, timestamp?: number) {
-    this.user = user ? sv.copy(user, User) : new User();
+    this.user = user ? sv.copy(user) : new User();
     this.body = body ?? "";
     this.timestamp = timestamp ?? Date.now();
   }
