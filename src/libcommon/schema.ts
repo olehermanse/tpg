@@ -1,4 +1,4 @@
-type ClassIsh<T = any> = {
+type Class<T = any> = {
   new (...args: any[]): T;
   name: string;
 };
@@ -6,7 +6,7 @@ type ClassIsh<T = any> = {
 type NestingMode = "class" | "object" | "assign";
 
 export interface Property {
-  type: string | ClassIsh | undefined;
+  type: string | Class | undefined;
   array?: boolean;
 }
 
@@ -77,7 +77,7 @@ export function is_instance(a: any, name?: string): boolean {
   return t === "instance " + name;
 }
 
-function name_lookup_class(cls: ClassIsh<SchemaClass>): string {
+function name_lookup_class(cls: Class<SchemaClass>): string {
   let tmp = new cls();
   return name_lookup(tmp);
 }
@@ -144,7 +144,7 @@ export function validate<T extends SchemaClass>(
       continue;
     }
     if (is_class(schema_type)) {
-      const schema_class = <ClassIsh>schema_type;
+      const schema_class = <Class>schema_type;
       if (actual_type === "instance Object") {
         // Let's try to validate the object according to the class schema:
         const success = validate(inp[property], new schema_class());
@@ -178,12 +178,12 @@ export function validate<T extends SchemaClass>(
 
 function _copy_single_element(
   inp: any,
-  t: string | ClassIsh,
+  t: string | Class,
   nesting: NestingMode
 ): any {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
-    const cls = <ClassIsh>t;
+    const cls = <Class>t;
     return convert(inp, new cls());
   }
   if (nesting === "object" && is_class(t)) {
