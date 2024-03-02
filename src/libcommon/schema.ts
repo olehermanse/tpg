@@ -1,3 +1,12 @@
+export interface Property {
+  type: string | Object | undefined;
+  array?: boolean;
+}
+
+export interface Schema {
+  properties: Record<string, Property>;
+}
+
 export function type_of(a: any): string {
   // Check for known values:
   if (a === true || a === false) {

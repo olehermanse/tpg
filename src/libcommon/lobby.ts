@@ -1,5 +1,5 @@
 import { RedDots } from "../games/red_dots.ts";
-import { Schema } from "./interfaces.ts";
+import { Schema } from "./schema.ts";
 import * as sv from "./schema.ts";
 
 class User {
