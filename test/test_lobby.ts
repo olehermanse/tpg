@@ -108,17 +108,58 @@ describe("Message", () => {
   });
   test("schema", () => {
     // Let's test the schema functions:
-    const message_string =
+    const input_string =
       '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"asd","timestamp":1709400461241}';
 
     // Validate:
-    expect(Message.validate(message_string)).toBe(true);
+    expect(Message.validate(input_string)).toBe(true);
     expect(Message.validate({})).toBe(false);
 
-    //    // Instantiate based on schema:
-    //    const message_instance = Message.instantiate(message_string);
-    //    expect(message_instance).not.toBe(null);
-    //    expect(message_instance?.user?.username).toBe("Alice");
+    // Instantiate based on schema:
+    const message_instance = Message.instantiate(input_string);
+    expect(message_instance).not.toBe(null);
+    expect(message_instance?.user?.username).toBe("Cheetah");
+    expect(message_instance?.user?.userid).toBe("38133501152442");
+    expect(message_instance?.body).toBe("asd");
+    expect(message_instance?.timestamp).toBe(1709400461241);
+
+    // Stringify:
+    const message_string = message_instance?.stringify();
+    expect(message_string).not.toBe(null);
+    expect(message_string).toBeTypeOf("string");
+    expect(message_string).toStrictEqual(input_string);
+    expect(message_string).toContain('"username"');
+    expect(message_string).toContain('"Cheetah"');
+    expect(message_string).toContain('"userid"');
+    expect(message_string).toContain('"38133501152442"');
+    expect(message_string).toContain('"body"');
+    expect(message_string).toContain('"asd"');
+    expect(message_string).toContain('"timestamp"');
+    expect(message_string).toContain("1709400461241");
+
+    // Parse:
+    const message_parsed = <Message>Message.instantiate(<String>message_string);
+    expect(message_parsed).not.toBe(null);
+    expect(message_parsed).toBeInstanceOf(Message);
+    expect(message_parsed?.user.username).toBe("Cheetah");
+    expect(Message.validate(message_parsed)).toBe(true);
+
+    // Copy:
+    const message_copy = sv.copy<Message>(<Message>message_parsed, Message);
+    expect(message_copy).not.toBe(null);
+    expect(message_copy).toBeInstanceOf(Message);
+    expect(message_copy.user.username).toBe("Cheetah");
+    expect(Message.validate(message_copy)).toBe(true);
+
+    // Objectify:
+    const message_object: any = message_copy.objectify();
+    expect(message_object).not.toBe(null);
+    expect(message_object).toBeInstanceOf(Object);
+    expect(message_object?.user?.username).toBe("Cheetah");
+    expect(message_object?.user?.userid).toBe("38133501152442");
+    expect(message_object?.body).toBe("asd");
+    expect(message_object?.timestamp).toBe(1709400461241);
+    expect(Message.validate(message_object)).toBe(true);
   });
 });
 
@@ -134,6 +175,61 @@ describe("Chat", () => {
     expect(chat.messages).toHaveLength(1);
     expect(chat.messages[0].user.username).toBe("Alice");
     expect(chat.messages[0].body).toBe("Hello, world!");
+  });
+  test("schema", () => {
+    // Let's test the schema functions:
+    const input_string =
+      '{"messages":[' +
+      '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"abc","timestamp":1709407691080},' +
+      '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"123","timestamp":1709407691952}],' +
+      '"users":[' +
+      '{"userid":"38133501152442","username":"Cheetah"}]}';
+    const cls = Chat;
+
+    // Validate:
+    expect(cls.validate(input_string)).toBe(true);
+    expect(cls.validate({})).toBe(false);
+
+    // Instantiate based on schema:
+    const data_instance = cls.instantiate(input_string);
+    expect(data_instance).not.toBe(null);
+    expect(data_instance).toBeInstanceOf(cls);
+
+    // Stringify:
+    const data_string = data_instance?.stringify();
+    expect(data_string).not.toBe(null);
+    expect(data_string).toBeTypeOf("string");
+    expect(data_string).toStrictEqual(input_string);
+    expect(data_string).toContain('"Cheetah"');
+
+    // Parse:
+    const data_parsed = cls.instantiate(<String>data_string);
+    expect(data_parsed).not.toBe(null);
+    expect(data_parsed).toBeInstanceOf(cls);
+    // @ts-ignore
+    expect(cls.validate(data_parsed)).toBe(true);
+
+    // Copy:
+    const data_copy = sv.copy(data_parsed, cls);
+    expect(data_copy).not.toBe(null);
+    expect(data_copy).toBeInstanceOf(cls);
+    // @ts-ignore
+    expect(cls.validate(data_copy)).toBe(true);
+
+    // Objectify:
+    const data_object: any = data_copy?.objectify();
+    expect(data_object).not.toBe(null);
+    expect(data_object).toBeInstanceOf(Object);
+    expect(cls.validate(data_object)).toBe(true);
+
+    // Finally, convert back to instance and check data:
+    const data_final = cls.instantiate(input_string);
+    expect(data_final).not.toBe(null);
+    expect(data_final).toBeInstanceOf(cls);
+    expect(data_final?.messages[0].body).toBe("abc");
+    expect(data_final?.messages[1].body).toBe("123");
+    expect(data_final?.messages[0].user.username).toBe("Cheetah");
+    expect(data_final?.users[0].username).toBe("Cheetah");
   });
 });
 
