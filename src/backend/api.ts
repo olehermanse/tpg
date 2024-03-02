@@ -73,7 +73,7 @@ export async function handle_api(request_event: RequestEvent, path: string) {
       console.log("PUT " + path + " " + JSON.stringify(r));
       const message: Message | null = sv.instantiate(
         JSON.stringify(r),
-        Message
+        new Message()
       );
       if (message === null) {
         await not_found(request_event);

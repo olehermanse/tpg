@@ -11,12 +11,12 @@ describe("User", () => {
   });
   test("instantiate", () => {
     // Instantiate a User from an Object:
-    const user = sv.instantiate<User>(
+    const user = sv.instantiate(
       {
         userid: "12345678901234",
         username: "Alice",
       },
-      User
+      new User()
     );
     expect(user).not.toBe(null);
     expect(user).toBeInstanceOf(User);
@@ -29,14 +29,13 @@ describe("User", () => {
       userid: "12345678901234",
       username: "Alice",
     };
-    const cls = User;
 
     // Validate:
-    expect(sv.validate(user_object, cls)).toBe(true);
-    expect(sv.validate({}, cls)).toBe(false);
+    expect(sv.validate(user_object, new User())).toBe(true);
+    expect(sv.validate({}, new User())).toBe(false);
 
     // Instantiate based on schema:
-    const user_instance = sv.instantiate<User>(user_object, cls);
+    const user_instance = sv.instantiate<User>(user_object, new User());
     expect(user_instance).not.toBe(null);
     expect(user_instance?.username).toBe("Alice");
 
@@ -50,13 +49,13 @@ describe("User", () => {
     expect(user_string).toContain('"Alice"');
 
     // Parse:
-    const user_parsed = sv.instantiate<User>(user_string, User);
+    const user_parsed = sv.instantiate<User>(user_string, new User());
     expect(user_parsed).not.toBe(null);
     expect(user_parsed).toBeInstanceOf(User);
     expect(user_parsed?.username).toBe("Alice");
 
     // Copy:
-    const user_copy: User = sv.copy<User>(<User>user_parsed, User);
+    const user_copy: User = sv.copy<User>(<User>user_parsed, new User());
     expect(user_copy).not.toBe(null);
     expect(user_copy).toBeInstanceOf(User);
     expect(user_copy.username).toBe("Alice");
@@ -81,9 +80,14 @@ describe("Message", () => {
     expect(message.user.username).toBe("Some user");
     expect(message.body).toBe("Some message");
   });
+  test("validate", () => {
+    const original = new Message(new User("82345678901234", "a"), "b");
+    const string_message = sv.stringify(original);
+    expect(sv.validate(string_message, new Message())).toBe(true);
+  });
   test("instantiate", () => {
     const original = new Message(new User("82345678901234", "a"), "b");
-    let message = sv.instantiate<Message>(original, Message);
+    let message = sv.instantiate(sv.stringify(original), new Message());
 
     // Check that all values were copied:
     expect(message).not.toBe(null);
@@ -104,7 +108,7 @@ describe("Message", () => {
     expect(message?.body).toBe("b");
 
     // Call instantiate again, which will copy the values:
-    message = sv.instantiate<Messaage>(original, Message);
+    message = sv.instantiate(original, new Message());
     expect(message).not.toBe(null);
     expect(message?.user.username).toBe("c");
     expect(message?.user.userid).toBe("82345678901234");
@@ -116,11 +120,14 @@ describe("Message", () => {
       '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"asd","timestamp":1709400461241}';
 
     // Validate:
-    expect(sv.validate(input_string, Message)).toBe(true);
-    expect(sv.validate({}, Message)).toBe(false);
+    expect(sv.validate(input_string, new Message())).toBe(true);
+    expect(sv.validate({}, new Message())).toBe(false);
 
     // Instantiate based on schema:
-    const message_instance = sv.instantiate<Message>(input_string, Message);
+    const message_instance = sv.instantiate<Message>(
+      input_string,
+      new Message()
+    );
     expect(message_instance).not.toBe(null);
     expect(message_instance?.user?.username).toBe("Cheetah");
     expect(message_instance?.user?.userid).toBe("38133501152442");
@@ -143,19 +150,19 @@ describe("Message", () => {
 
     // Parse:
     const message_parsed = <Message>(
-      sv.instantiate<Message>(message_string, Message)
+      sv.instantiate<Message>(message_string, new Message())
     );
     expect(message_parsed).not.toBe(null);
     expect(message_parsed).toBeInstanceOf(Message);
     expect(message_parsed?.user.username).toBe("Cheetah");
-    expect(sv.validate(message_parsed, Message)).toBe(true);
+    expect(sv.validate(message_parsed, new Message())).toBe(true);
 
     // Copy:
-    const message_copy = sv.copy<Message>(<Message>message_parsed, Message);
+    const message_copy = sv.copy(message_parsed);
     expect(message_copy).not.toBe(null);
     expect(message_copy).toBeInstanceOf(Message);
     expect(message_copy.user.username).toBe("Cheetah");
-    expect(sv.validate(message_copy, Message)).toBe(true);
+    expect(sv.validate(message_copy, new Message())).toBe(true);
 
     // Objectify:
     const message_object: any = sv.objectify(message_copy);
@@ -165,7 +172,7 @@ describe("Message", () => {
     expect(message_object?.user?.userid).toBe("38133501152442");
     expect(message_object?.body).toBe("asd");
     expect(message_object?.timestamp).toBe(1709400461241);
-    expect(sv.validate(message_object, Message)).toBe(true);
+    expect(sv.validate(message_object, new Message())).toBe(true);
   });
 });
 
@@ -182,6 +189,18 @@ describe("Chat", () => {
     expect(chat.messages[0].user.username).toBe("Alice");
     expect(chat.messages[0].body).toBe("Hello, world!");
   });
+  test("validate", () => {
+    // Let's test the schema functions:
+    const input_string =
+      '{"messages":[' +
+      '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"abc","timestamp":1709407691080},' +
+      '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"123","timestamp":1709407691952}],' +
+      '"users":[' +
+      '{"userid":"38133501152442","username":"Cheetah"}]}';
+
+    // Validate:
+    expect(sv.validate(input_string, new Chat())).toBe(true);
+  });
   test("schema", () => {
     // Let's test the schema functions:
     const input_string =
@@ -190,16 +209,15 @@ describe("Chat", () => {
       '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"123","timestamp":1709407691952}],' +
       '"users":[' +
       '{"userid":"38133501152442","username":"Cheetah"}]}';
-    const cls = Chat;
 
     // Validate:
-    expect(sv.validate(input_string, cls)).toBe(true);
-    expect(sv.validate({}, cls)).toBe(false);
+    expect(sv.validate(input_string, new Chat())).toBe(true);
+    expect(sv.validate({}, new Chat())).toBe(false);
 
     // Instantiate based on schema:
-    const data_instance = sv.instantiate(input_string, cls);
+    const data_instance = sv.instantiate(input_string, new Chat());
     expect(data_instance).not.toBe(null);
-    expect(data_instance).toBeInstanceOf(cls);
+    expect(data_instance).toBeInstanceOf(Chat);
 
     // Stringify:
     const data_string = sv.stringify(data_instance);
@@ -209,29 +227,29 @@ describe("Chat", () => {
     expect(data_string).toContain('"Cheetah"');
 
     // Parse:
-    const data_parsed = sv.instantiate(<String>data_string, cls);
+    const data_parsed = sv.instantiate(<String>data_string, new Chat());
     expect(data_parsed).not.toBe(null);
-    expect(data_parsed).toBeInstanceOf(cls);
+    expect(data_parsed).toBeInstanceOf(Chat);
     // @ts-ignore
-    expect(sv.validate(data_parsed, cls)).toBe(true);
+    expect(sv.validate(data_parsed, new Chat())).toBe(true);
 
     // Copy:
-    const data_copy = sv.copy(data_parsed, cls);
+    const data_copy = sv.copy(data_parsed, new Chat());
     expect(data_copy).not.toBe(null);
-    expect(data_copy).toBeInstanceOf(cls);
+    expect(data_copy).toBeInstanceOf(Chat);
     // @ts-ignore
-    expect(sv.validate(data_copy, cls)).toBe(true);
+    expect(sv.validate(data_copy, new Chat())).toBe(true);
 
     // Objectify:
     const data_object: any = sv.objectify(data_copy);
     expect(data_object).not.toBe(null);
     expect(data_object).toBeInstanceOf(Object);
-    expect(sv.validate(data_object, cls)).toBe(true);
+    expect(sv.validate(data_object, new Chat())).toBe(true);
 
     // Finally, convert back to instance and check data:
-    const data_final = sv.instantiate<Chat>(input_string, cls);
+    const data_final = sv.instantiate(input_string, new Chat());
     expect(data_final).not.toBe(null);
-    expect(data_final).toBeInstanceOf(cls);
+    expect(data_final).toBeInstanceOf(Chat);
     expect(data_final?.messages[0].body).toBe("abc");
     expect(data_final?.messages[1].body).toBe("123");
     expect(data_final?.messages[0].user.username).toBe("Cheetah");

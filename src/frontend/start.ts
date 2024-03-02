@@ -57,14 +57,14 @@ function on_chat_send() {
   const user = new User(userid, username);
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    render_chat_log(sv.instantiate<Chat>(data, Chat));
+    render_chat_log(sv.instantiate<Chat>(data, new Chat()));
   });
 }
 
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    render_chat_log(sv.instantiate<Chat>(data, Chat));
+    render_chat_log(sv.instantiate<Chat>(data, new Chat()));
     setTimeout(() => {
       chat_refresh();
     }, 250);

@@ -56,25 +56,33 @@ export function is_instance(a: any, name?: string): boolean {
   return t === "instance " + name;
 }
 
-function name_lookup(cls: any): string {
-  if (cls.class_name === undefined) {
-    return cls.name;
+function name_lookup(new_object: any): string {
+  if (new_object.class_name === undefined) {
+    return new_object.name;
   }
-  if (cls.class_name === cls.name) {
-    return cls.name;
+  if (new_object.class_name === new_object.name) {
+    return new_object.name;
   }
-  return `${cls.name} / ${cls.class_name}`;
+  return `${new_object.name} / ${new_object.class_name}`;
 }
 
-export function validate(inp: Record<string, any> | string, cls: any): boolean {
+export function validate<T>(
+  inp: Record<string, any> | string,
+  new_object: T
+): boolean {
   if (typeof inp === "string") {
-    return validate(JSON.parse(inp), cls);
+    return validate(JSON.parse(inp), new_object);
   }
-  const schema = cls.schema;
+  // @ts-ignore
+  const schema = new_object.constructor.schema;
   for (const property in schema.properties) {
     if (!(property in inp)) {
       console.log(
-        'Error: missing property "' + property + '" for ' + String(cls.name)
+        'Error: missing property "' +
+          property +
+          '" for ' +
+          // @ts-ignore
+          String(new_object.class_name)
       );
       return false;
     }
@@ -86,7 +94,7 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
         return false;
       }
       for (let x of inp[property]) {
-        const success = validate(x, schema_type);
+        const success = validate(x, new schema_type());
         if (!success) {
           return false;
         }
@@ -96,7 +104,7 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
     if (is_class(schema_type)) {
       if (actual_type === "instance Object") {
         // Let's try to validate the object according to the class schema:
-        const success = validate(inp[property], schema_type);
+        const success = validate(inp[property], new schema_type());
         if (!success) {
           return false;
         }
@@ -109,14 +117,14 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
       if (actual_type != "instance " + class_name) {
         console.log(
           `Error: incorrect class type on "${property}" ` +
-            `for ${name_lookup(cls)} ` +
+            `for ${name_lookup(new_object)} ` +
             `(${name_lookup(schema_type)} vs ${actual_type})`
         );
       }
     } else if (!(schema_type === actual_type)) {
       console.log(
         `Error: incorrect simple type on "${property}" ` +
-          `for ${name_lookup(cls)} ` +
+          `for ${name_lookup(new_object)} ` +
           `(${schema_type} vs ${actual_type})`
       );
       return false;
@@ -129,7 +137,7 @@ function _copy_single_element(inp: any, t: any, nesting: string) {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
     //@ts-ignore
-    return instantiate(inp, t);
+    return instantiate(inp, new t());
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
@@ -163,6 +171,13 @@ function _copy<T>(inp: T, target: any, schema: any, nesting: string) {
   }
 }
 
+export function _copy_with_instance<T>(inp: any, target: T): T {
+  // @ts-ignore
+  const schema = target.constructor.schema;
+  _copy<T>(inp, target, schema, "class");
+  return target;
+}
+
 export function _copy_with_class<T>(inp: T, cls: any): T {
   const schema = cls.schema;
   let target = new cls();
@@ -176,14 +191,15 @@ export function copy<T>(inp: T): T {
   return _copy_with_class(inp, cls);
 }
 
-export function instantiate<T>(inp: string | Object, cls: any): T | null {
+// Convert a string or plain Object into class according to schema
+export function instantiate<T>(inp: string | Object, new_object: T): T | null {
   if (typeof inp === "string") {
-    return instantiate<T>(JSON.parse(inp), cls);
+    return instantiate<T>(JSON.parse(inp), new_object);
   }
-  if (!validate(inp, cls)) {
+  if (!validate(inp, new_object)) {
     return null;
   }
-  return _copy_with_class(<T>inp, cls);
+  return _copy_with_instance(<T>inp, new_object);
 }
 
 export function objectify(inp: any): Object {
