@@ -64,6 +64,8 @@ function get_rotation(a: CR, b: CR): number {
   return rot + 2 * Math.PI;
 }
 
+// min and max are both inclusive
+// (use max = length - 1 with arrays)
 function randint(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -228,8 +230,7 @@ function set_cookie(key: string, value: string) {
 
 function get_random_userid(): string {
   const array = new Uint32Array(14);
-  crypto.getRandomValues(array);
-  const digits = array.map((d) => d % 10);
+  const digits = array.map((_) => randint(0, 9));
   return digits.join("");
 }
 
