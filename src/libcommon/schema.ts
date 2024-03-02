@@ -1,10 +1,22 @@
+type ClassIsh<T = any> = {
+  new (...args: any[]): T;
+  name: string;
+};
+
+type NestingMode = "class" | "object" | "assign";
+
 export interface Property {
-  type: string | Object | undefined;
+  type: string | ClassIsh | undefined;
   array?: boolean;
 }
 
 export interface Schema {
   properties: Record<string, Property>;
+}
+
+export interface SchemaClass extends Record<string, any> {
+  schema(): Schema;
+  class_name?(): string;
 }
 
 export function type_of(a: any): string {
@@ -65,24 +77,39 @@ export function is_instance(a: any, name?: string): boolean {
   return t === "instance " + name;
 }
 
-function name_lookup(new_object: any): string {
-  if (new_object.class_name === undefined) {
-    return new_object.name;
-  }
-  if (new_object.class_name === new_object.name) {
-    return new_object.name;
-  }
-  return `${new_object.name} / ${new_object.class_name}`;
+function name_lookup_class(cls: ClassIsh<SchemaClass>): string {
+  let tmp = new cls();
+  return name_lookup(tmp);
 }
 
-export function validate<T>(
+function name_lookup<T extends SchemaClass>(new_object: T): string {
+  let name = undefined;
+  let class_name = undefined;
+  if (new_object.class_name != undefined) {
+    class_name = new_object.class_name();
+  }
+  if (new_object.constructor.name != undefined) {
+    name = new_object.constructor.name;
+  }
+  if (class_name != undefined && name != undefined) {
+    return `${name} / ${class_name}`;
+  }
+  if (name != undefined) {
+    return name;
+  }
+  if (class_name != undefined) {
+    return class_name;
+  }
+  return "<Unknown>";
+}
+
+export function validate<T extends SchemaClass>(
   inp: Record<string, any> | string,
   new_object: T
 ): boolean {
   if (typeof inp === "string") {
     return validate(JSON.parse(inp), new_object);
   }
-  // @ts-ignore
   const schema = new_object.schema();
   for (const property in schema.properties) {
     if (!(property in inp)) {
@@ -90,16 +117,22 @@ export function validate<T>(
         'Error: missing property "' +
           property +
           '" for ' +
-          // @ts-ignore
-          String(new_object.class_name)
+          name_lookup(new_object)
       );
       return false;
     }
     const schema_type = schema.properties[property].type;
+    if (schema_type === undefined) {
+      return true; // Setting type to undefined disables validation
+    }
     const actual_type = type_of(inp[property]);
     if (schema.properties[property].array === true) {
       if (actual_type != "instance Array") {
         console.log(`Error: property "${property}" is not an array`);
+        return false;
+      }
+      if (typeof schema_type === "string") {
+        console.log(`Error: arrays of simple types not supported yet`);
         return false;
       }
       for (let x of inp[property]) {
@@ -111,9 +144,10 @@ export function validate<T>(
       continue;
     }
     if (is_class(schema_type)) {
+      const schema_class = <ClassIsh>schema_type;
       if (actual_type === "instance Object") {
         // Let's try to validate the object according to the class schema:
-        const success = validate(inp[property], new schema_type());
+        const success = validate(inp[property], new schema_class());
         if (!success) {
           return false;
         }
@@ -122,12 +156,12 @@ export function validate<T>(
       // NOTE: We don't do recursive validation when
       // a child is the correct class, assume it was
       // created by a schema-correct function
-      const class_name = schema_type.name;
+      const class_name = schema_class.name;
       if (actual_type != "instance " + class_name) {
         console.log(
           `Error: incorrect class type on "${property}" ` +
             `for ${name_lookup(new_object)} ` +
-            `(${name_lookup(schema_type)} vs ${actual_type})`
+            `(${name_lookup_class(schema_class)} vs ${actual_type})`
         );
       }
     } else if (!(schema_type === actual_type)) {
@@ -142,11 +176,15 @@ export function validate<T>(
   return true;
 }
 
-function _copy_single_element(inp: any, t: any, nesting: string) {
+function _copy_single_element(
+  inp: any,
+  t: string | ClassIsh,
+  nesting: NestingMode
+): any {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
-    //@ts-ignore
-    return convert(inp, new t());
+    const cls = <ClassIsh>t;
+    return convert(inp, new cls());
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
@@ -159,63 +197,54 @@ function _copy_single_element(inp: any, t: any, nesting: string) {
   return inp;
 }
 
-function _copy<T>(inp: T, target: any, schema: any, nesting: string) {
+function _copy<T extends SchemaClass>(
+  inp: T,
+  target: Record<string, any>,
+  schema: Schema,
+  nesting: NestingMode
+): any {
   for (const property in schema.properties) {
     const t = schema.properties[property].type;
     if (t === undefined) {
-      //@ts-ignore
       target[property] = inp[property];
       continue;
     }
     if (schema.properties[property].array === true) {
       target[property] = new Array();
-      //@ts-ignore
       for (let x of inp[property]) {
         target[property].push(_copy_single_element(x, t, nesting));
       }
       continue;
     }
-    //@ts-ignore
     target[property] = _copy_single_element(inp[property], t, nesting);
   }
-}
-
-export function _copy_with_instance<T>(inp: any, target: T): T {
-  // @ts-ignore
-  const schema = target.schema();
-  _copy<T>(inp, target, schema, "class");
   return target;
 }
 
-export function _copy_with_class<T>(inp: T, cls: any): T {
-  let target = new cls();
-  const schema = target.schema();
-  _copy<T>(inp, target, schema, "class");
-  return target;
-}
-
-export function copy<T>(inp: T): T {
+export function copy<T extends SchemaClass>(inp: T): T {
   //@ts-ignore
-  const cls = inp.constructor;
-  return _copy_with_class(inp, cls);
+  const new_object = new inp.constructor();
+  return _copy(inp, new_object, new_object.schema(), "class");
 }
 
 // Convert a string or plain Object into class according to schema
-export function convert<T>(inp: string | Object, new_object: T): T | null {
+export function convert<T extends SchemaClass>(
+  inp: string | Object,
+  new_object: T
+): T | null {
   if (typeof inp === "string") {
     return convert<T>(JSON.parse(inp), new_object);
   }
   if (!validate(inp, new_object)) {
     return null;
   }
-  return _copy_with_instance(<T>inp, new_object);
+  return _copy(<T>inp, new_object, new_object.schema(), "class");
 }
 
-export function objectify(inp: any): Object {
+export function objectify(inp: SchemaClass): Object {
   const schema = inp.schema();
   let target = new Object();
-  _copy(inp, target, schema, "object");
-  return target;
+  return <Object>_copy(inp, target, schema, "object");
 }
 
 export function stringify(inp: any): string {

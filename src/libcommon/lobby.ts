@@ -1,8 +1,8 @@
 import { RedDots } from "../games/red_dots.ts";
-import { Schema } from "./schema.ts";
+import { Schema, SchemaClass } from "./schema.ts";
 import * as sv from "./schema.ts";
 
-class User {
+class User implements SchemaClass {
   userid: string;
   username: string;
 
@@ -24,7 +24,7 @@ class User {
   }
 }
 
-class Message {
+class Message implements SchemaClass {
   user: User;
   body: string;
   timestamp: number;
@@ -49,7 +49,7 @@ class Message {
   }
 }
 
-class Chat {
+class Chat implements SchemaClass {
   messages: Message[];
   users: User[];
 
@@ -106,7 +106,7 @@ class Chat {
   }
 }
 
-class Lobby {
+class Lobby implements SchemaClass {
   path: string;
   chat: Chat;
   games: any[];

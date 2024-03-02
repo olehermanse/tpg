@@ -3,10 +3,11 @@ import {
   is_class,
   is_instance,
   type_of,
+  SchemaClass,
 } from "../src/libcommon/schema";
 import { expect, test, describe } from "vitest";
 
-class FooBar {
+class FooBar implements SchemaClass {
   foo: string;
 
   schema() {
