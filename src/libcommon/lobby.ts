@@ -74,7 +74,7 @@ class Chat {
     this.messages = [];
     if (messages != null) {
       for (let m of messages) {
-        const converted = sv.instantiate<Message>(m, new Message());
+        const converted = sv.convert<Message>(m, new Message());
         if (converted === null) {
           continue;
         }
@@ -84,7 +84,7 @@ class Chat {
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = sv.instantiate<User>(m, new User());
+        const converted = sv.convert<User>(m, new User());
         if (converted === null) {
           continue;
         }

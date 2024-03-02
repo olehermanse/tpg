@@ -71,7 +71,7 @@ export async function handle_api(request_event: RequestEvent, path: string) {
     if (request_event.request.method === "PUT") {
       const r = await request_event.request.json();
       console.log("PUT " + path + " " + JSON.stringify(r));
-      const message: Message | null = sv.instantiate(
+      const message: Message | null = sv.convert(
         JSON.stringify(r),
         new Message()
       );

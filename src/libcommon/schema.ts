@@ -137,7 +137,7 @@ function _copy_single_element(inp: any, t: any, nesting: string) {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
     //@ts-ignore
-    return instantiate(inp, new t());
+    return convert(inp, new t());
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
@@ -192,9 +192,9 @@ export function copy<T>(inp: T): T {
 }
 
 // Convert a string or plain Object into class according to schema
-export function instantiate<T>(inp: string | Object, new_object: T): T | null {
+export function convert<T>(inp: string | Object, new_object: T): T | null {
   if (typeof inp === "string") {
-    return instantiate<T>(JSON.parse(inp), new_object);
+    return convert<T>(JSON.parse(inp), new_object);
   }
   if (!validate(inp, new_object)) {
     return null;

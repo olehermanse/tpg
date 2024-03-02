@@ -1,5 +1,5 @@
 import {
-  instantiate,
+  convert,
   is_class,
   is_instance,
   type_of,
@@ -20,27 +20,27 @@ class FooBar {
   }
 }
 
-describe("instantiate", () => {
+describe("convert", () => {
   test("a valid string", () => {
     let s = '{"foo": "bar"}';
-    let a = instantiate(s, new FooBar());
+    let a = convert(s, new FooBar());
     expect(a).not.toBe(null);
     expect(a?.foo).toBe("bar");
   });
   test("a valid object", () => {
     let s = { foo: "bar" };
-    let a = instantiate(s, new FooBar());
+    let a = convert(s, new FooBar());
     expect(a).not.toBe(null);
     expect(a?.foo).toBe("bar");
   });
   test("a wrong type", () => {
     let s = { foo: 123 };
-    let a = instantiate(s, new FooBar());
+    let a = convert(s, new FooBar());
     expect(a).toBe(null);
   });
   test("a missing field", () => {
     let s = {};
-    let a = instantiate(s, new FooBar());
+    let a = convert(s, new FooBar());
     expect(a).toBe(null);
   });
 });
