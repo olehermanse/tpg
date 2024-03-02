@@ -11,10 +11,13 @@ describe("User", () => {
   });
   test("instantiate", () => {
     // Instantiate a User from an Object:
-    const user = User.instantiate({
-      userid: "12345678901234",
-      username: "Alice",
-    });
+    const user = sv.instantiate<User>(
+      {
+        userid: "12345678901234",
+        username: "Alice",
+      },
+      User
+    );
     expect(user).not.toBe(null);
     expect(user).toBeInstanceOf(User);
     expect(user?.username).toBe("Alice");
@@ -101,7 +104,7 @@ describe("Message", () => {
     expect(message?.body).toBe("b");
 
     // Call instantiate again, which will copy the values:
-    message = Message.instantiate(original);
+    message = sv.instantiate<Messaage>(original, Message);
     expect(message).not.toBe(null);
     expect(message?.user.username).toBe("c");
     expect(message?.user.userid).toBe("82345678901234");
@@ -113,8 +116,8 @@ describe("Message", () => {
       '{"user":{"userid":"38133501152442","username":"Cheetah"},"body":"asd","timestamp":1709400461241}';
 
     // Validate:
-    expect(Message.validate(input_string)).toBe(true);
-    expect(Message.validate({})).toBe(false);
+    expect(sv.validate(input_string, Message)).toBe(true);
+    expect(sv.validate({}, Message)).toBe(false);
 
     // Instantiate based on schema:
     const message_instance = sv.instantiate<Message>(input_string, Message);
@@ -125,7 +128,7 @@ describe("Message", () => {
     expect(message_instance?.timestamp).toBe(1709400461241);
 
     // Stringify:
-    const message_string = <string>message_instance?.stringify();
+    const message_string = sv.stringify(message_instance);
     expect(message_string).not.toBe(null);
     expect(message_string).toBeTypeOf("string");
     expect(message_string).toStrictEqual(input_string);
@@ -155,7 +158,7 @@ describe("Message", () => {
     expect(sv.validate(message_copy, Message)).toBe(true);
 
     // Objectify:
-    const message_object: any = message_copy.objectify();
+    const message_object: any = sv.objectify(message_copy);
     expect(message_object).not.toBe(null);
     expect(message_object).toBeInstanceOf(Object);
     expect(message_object?.user?.username).toBe("Cheetah");

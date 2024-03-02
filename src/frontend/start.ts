@@ -8,6 +8,7 @@ import {
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
 import { Chat, Message, User } from "../libcommon/lobby";
+import * as sv from "../libcommon/schema.ts";
 
 let canvas_manager: Application | null = null;
 
@@ -56,14 +57,14 @@ function on_chat_send() {
   const user = new User(userid, username);
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    render_chat_log(Chat.instantiate(data));
+    render_chat_log(sv.instantiate<Chat>(data, Chat));
   });
 }
 
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    render_chat_log(Chat.instantiate(data));
+    render_chat_log(sv.instantiate<Chat>(data, Chat));
     setTimeout(() => {
       chat_refresh();
     }, 250);

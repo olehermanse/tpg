@@ -1,5 +1,6 @@
 import { Lobby, Message } from "../libcommon/lobby.ts";
 import { randint } from "../libcommon/utils.ts";
+import * as sv from "../libcommon/schema.ts";
 
 interface Request {
   method: string;
@@ -57,8 +58,8 @@ export async function handle_api(request_event: RequestEvent, path: string) {
       console.log(" -> 404");
       return;
     }
-    await request_event.respondWith(json_response(lobby.stringify()));
-    console.log(" -> " + lobby.stringify());
+    await request_event.respondWith(json_response(sv.stringify(lobby)));
+    console.log(" -> " + sv.stringify(lobby));
     return;
   }
   if (path.startsWith("/api/chat/")) {
@@ -70,16 +71,19 @@ export async function handle_api(request_event: RequestEvent, path: string) {
     if (request_event.request.method === "PUT") {
       const r = await request_event.request.json();
       console.log("PUT " + path + " " + JSON.stringify(r));
-      const message: Message | null = Message.instantiate(JSON.stringify(r));
+      const message: Message | null = sv.instantiate(
+        JSON.stringify(r),
+        Message
+      );
       if (message === null) {
         await not_found(request_event);
         console.log(" -> 404");
         return;
       }
       lobby.chat.messages.push(message);
-      console.log(" -> " + lobby.chat.stringify());
+      console.log(" -> " + sv.stringify(lobby.chat));
     }
-    await request_event.respondWith(json_response(lobby.chat.stringify()));
+    await request_event.respondWith(json_response(sv.stringify(lobby.chat)));
     return;
   }
   await not_found(request_event);

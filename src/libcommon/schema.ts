@@ -135,7 +135,7 @@ function _copy_single_element(inp: any, t: any, nesting: string) {
     // We've found a class, and we'd like to do a deep copy
     // but convert to simple Object()
     //@ts-ignore
-    return inp.objectify();
+    return objectify(inp);
   }
   console.assert(!is_class(t) || nesting === "assign");
   //@ts-ignore
@@ -194,5 +194,5 @@ export function objectify(inp: any): Object {
 }
 
 export function stringify(inp: any): string {
-  return JSON.stringify(inp.objectify());
+  return JSON.stringify(objectify(inp));
 }

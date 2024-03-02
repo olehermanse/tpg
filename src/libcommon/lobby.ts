@@ -18,22 +18,6 @@ class User {
     this.userid = userid ?? "";
     this.username = username ?? "";
   }
-
-  static instantiate(inp: Record<string, any> | string): User | null {
-    return sv.instantiate<User>(inp, User);
-  }
-
-  static validate(inp: Record<string, any> | string): boolean {
-    return sv.validate(inp, User);
-  }
-
-  objectify(): Object {
-    return sv.objectify(this);
-  }
-
-  stringify(): string {
-    return sv.stringify(this);
-  }
 }
 
 class Message {
@@ -54,22 +38,6 @@ class Message {
     this.user = user ? sv.copy(user) : new User();
     this.body = body ?? "";
     this.timestamp = timestamp ?? Date.now();
-  }
-
-  static instantiate(inp: Record<string, any> | string): Message | null {
-    return sv.instantiate<Message>(inp, Message);
-  }
-
-  static validate(inp: Record<string, any> | string): boolean {
-    return sv.validate(inp, Message);
-  }
-
-  objectify(): Object {
-    return sv.objectify(this);
-  }
-
-  stringify(): string {
-    return sv.stringify(this);
   }
 }
 
@@ -106,7 +74,7 @@ class Chat {
     this.messages = [];
     if (messages != null) {
       for (let m of messages) {
-        const converted = Message.instantiate(m);
+        const converted = sv.instantiate<Message>(m, Message);
         if (converted === null) {
           continue;
         }
@@ -116,29 +84,13 @@ class Chat {
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = User.instantiate(m);
+        const converted = sv.instantiate<User>(m, User);
         if (converted === null) {
           continue;
         }
         this.users.push(converted);
       }
     }
-  }
-
-  static instantiate(inp: Record<string, any> | string): Chat | null {
-    return sv.instantiate<Chat>(inp, Chat);
-  }
-
-  static validate(inp: Record<string, any> | string): boolean {
-    return sv.validate(inp, Chat);
-  }
-
-  objectify(): Object {
-    return sv.objectify(this);
-  }
-
-  stringify(): string {
-    return sv.stringify(this);
   }
 }
 
@@ -161,22 +113,6 @@ class Lobby {
     this.chat = new Chat();
     this.games = [];
     this.games.push(new RedDots("foo"));
-  }
-
-  static instantiate(inp: Record<string, any> | string): Chat | null {
-    return sv.instantiate<Chat>(inp, Chat);
-  }
-
-  static validate(inp: Record<string, any> | string): boolean {
-    return sv.validate(inp, Chat);
-  }
-
-  objectify(): Object {
-    return sv.objectify(this);
-  }
-
-  stringify(): string {
-    return sv.stringify(this);
   }
 
   find_game(game_id: string): any | null {
