@@ -32,7 +32,8 @@ export interface Game {
 }
 
 export interface Property {
-  type: string | Object;
+  type: string | Object | undefined;
+  array?: boolean;
 }
 
 export interface Schema {

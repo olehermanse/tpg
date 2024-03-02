@@ -68,10 +68,62 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
       );
       return false;
     }
-    const prop = schema.properties[property];
-    if (!(prop.type === type_of(inp[property]))) {
+    const schema_type = schema.properties[property].type;
+    const actual_type = type_of(inp[property]);
+    if (schema.properties[property].array === true) {
+      if (actual_type != "instance Array") {
+        console.log(`Error: property "${property}" is not an array`);
+        return false;
+      }
+      for (let x of inp[property]) {
+        const success = validate(x, schema_type);
+        if (!success) {
+          return false;
+        }
+      }
+      continue;
+    }
+    if (is_class(schema_type)) {
+      if (actual_type === "instance Object") {
+        // Let's try to validate the object according to the class schema:
+        const success = validate(inp[property], schema_type);
+        if (!success) {
+          return false;
+        }
+        continue;
+      }
+      // NOTE: We don't do recursive validation when
+      // a child is the correct class, assume it was
+      // created by a schema-correct function
+      const class_name = schema_type.name;
+      if (actual_type != "instance " + class_name) {
+        console.log(
+          'Error: incorrect class type on "' +
+            property +
+            '" for ' +
+            cls.name +
+            " / " +
+            cls.schema_name +
+            " (" +
+            schema_type.name +
+            " / " +
+            schema_type.schema_name +
+            " vs " +
+            actual_type +
+            ")"
+        );
+      }
+    } else if (!(schema_type === actual_type)) {
       console.log(
-        'Error: incorrect type on "' + property + '" for ' + String(cls.name)
+        'Error: incorrect simple type on "' +
+          property +
+          '" for ' +
+          String(cls.name) +
+          " (" +
+          schema_type +
+          " != " +
+          actual_type +
+          ")"
       );
       return false;
     }
@@ -79,19 +131,48 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
   return true;
 }
 
-export function copy<T>(inp: T, cls: any): T {
-  const schema = cls.schema;
-  let target = new cls();
+function _copy_single_element(inp: any, t: any, nesting: string) {
+  // Deep copying classes with new instances of same class
+  if (nesting === "class" && is_class(t)) {
+    //@ts-ignore
+    return instantiate(inp, t);
+  }
+  if (nesting === "object" && is_class(t)) {
+    // We've found a class, and we'd like to do a deep copy
+    // but convert to simple Object()
+    //@ts-ignore
+    return inp.objectify();
+  }
+  console.assert(!is_class(t) || nesting === "assign");
+  //@ts-ignore
+  return inp;
+}
+
+function _copy<T>(inp: T, target: any, schema: any, nesting: string) {
   for (const property in schema.properties) {
     const t = schema.properties[property].type;
-    if (is_class(t)) {
+    if (t === undefined) {
       //@ts-ignore
-      target[property] = instantiate(inp[property], t);
+      target[property] = inp[property];
+      continue;
+    }
+    if (schema.properties[property].array === true) {
+      target[property] = new Array();
+      //@ts-ignore
+      for (let x of inp[property]) {
+        target[property].push(_copy_single_element(x, t, nesting));
+      }
       continue;
     }
     //@ts-ignore
-    target[property] = inp[property];
+    target[property] = _copy_single_element(inp[property], t, nesting);
   }
+}
+
+export function copy<T>(inp: T, cls: any): T {
+  const schema = cls.schema;
+  let target = new cls();
+  _copy<T>(inp, target, schema, "class");
   return target;
 }
 
@@ -103,4 +184,15 @@ export function instantiate<T>(inp: string | Object, cls: any): T | null {
     return null;
   }
   return copy(<T>inp, cls);
+}
+
+export function objectify(inp: any): Object {
+  const schema = inp.constructor.schema;
+  let target = new Object();
+  _copy(inp, target, schema, "object");
+  return target;
+}
+
+export function stringify(inp: any): string {
+  return JSON.stringify(inp.objectify());
 }

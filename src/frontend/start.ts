@@ -56,14 +56,14 @@ function on_chat_send() {
   const user = new User(userid, username);
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    render_chat_log(Chat.from(data));
+    render_chat_log(Chat.instantiate(data));
   });
 }
 
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    render_chat_log(Chat.from(data));
+    render_chat_log(Chat.instantiate(data));
     setTimeout(() => {
       chat_refresh();
     }, 250);

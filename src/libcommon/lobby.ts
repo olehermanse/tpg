@@ -1,11 +1,12 @@
 import { RedDots } from "../games/red_dots.ts";
 import { Schema } from "./interfaces.ts";
-import { copy, instantiate, validate } from "./schema.ts";
+import * as sv from "./schema.ts";
 
 class User {
   userid: string;
   username: string;
 
+  static schema_name: string = "User";
   static schema: Schema = {
     properties: {
       userid: { type: "string" },
@@ -19,15 +20,19 @@ class User {
   }
 
   static instantiate(inp: Record<string, any> | string): User | null {
-    return instantiate<User>(inp, User);
+    return sv.instantiate<User>(inp, User);
   }
 
   static validate(inp: Record<string, any> | string): boolean {
-    return validate(inp, User);
+    return sv.validate(inp, User);
   }
 
-  objectify() {
-    return { userid: this.userid, username: this.username };
+  objectify(): Object {
+    return sv.objectify(this);
+  }
+
+  stringify(): string {
+    return sv.stringify(this);
   }
 }
 
@@ -36,6 +41,7 @@ class Message {
   body: string;
   timestamp: number;
 
+  static schema_name: string = "Message";
   static schema: Schema = {
     properties: {
       user: { type: User },
@@ -45,31 +51,39 @@ class Message {
   };
 
   constructor(user?: User, body?: string, timestamp?: number) {
-    this.user = user ? copy(user, User) : new User();
+    this.user = user ? sv.copy(user, User) : new User();
     this.body = body ?? "";
     this.timestamp = timestamp ?? Date.now();
   }
 
   static instantiate(inp: Record<string, any> | string): Message | null {
-    return instantiate<Message>(inp, Message);
+    return sv.instantiate<Message>(inp, Message);
   }
 
   static validate(inp: Record<string, any> | string): boolean {
-    return validate(inp, Message);
+    return sv.validate(inp, Message);
   }
 
-  objectify() {
-    return {
-      user: this.user.objectify(),
-      body: this.body,
-      timestamp: this.timestamp,
-    };
+  objectify(): Object {
+    return sv.objectify(this);
+  }
+
+  stringify(): string {
+    return sv.stringify(this);
   }
 }
 
 class Chat {
   messages: Message[];
   users: User[];
+
+  static schema_name: string = "Chat";
+  static schema: Schema = {
+    properties: {
+      messages: { type: Message, array: true },
+      users: { type: User, array: true },
+    },
+  };
 
   add(username: string, userid: string, message: string) {
     const user = new User(userid, username);
@@ -102,7 +116,7 @@ class Chat {
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = instantiate<User>(m, User);
+        const converted = User.instantiate(m);
         if (converted === null) {
           continue;
         }
@@ -111,31 +125,20 @@ class Chat {
     }
   }
 
-  static from(inp: Object | Chat | string): Chat | null {
-    if (inp instanceof Chat) {
-      return new Chat(inp.messages);
-    }
-    const converted = inp instanceof Object ? inp : JSON.parse(inp);
-    if ("messages" in converted && converted.messages instanceof Array) {
-      return new Chat(converted.messages);
-    }
-    console.log("Error: Failed to convert object to Chat:");
-    console.log(inp);
-    return null;
+  static instantiate(inp: Record<string, any> | string): Chat | null {
+    return sv.instantiate<Chat>(inp, Chat);
+  }
+
+  static validate(inp: Record<string, any> | string): boolean {
+    return sv.validate(inp, Chat);
   }
 
   objectify(): Object {
-    let messages = [];
-    for (let message of this.messages) {
-      messages.push(message.objectify());
-    }
-    return {
-      messages: this.messages.map((m) => m.objectify()),
-    };
+    return sv.objectify(this);
   }
 
   stringify(): string {
-    return JSON.stringify(this.objectify());
+    return sv.stringify(this);
   }
 }
 
@@ -143,6 +146,16 @@ class Lobby {
   path: string;
   chat: Chat;
   games: any[];
+
+  static schema_name: string = "Lobby";
+  static schema: Schema = {
+    properties: {
+      path: { type: String },
+      chat: { type: Chat },
+      games: { type: undefined },
+    },
+  };
+
   constructor(path: string) {
     this.path = path;
     this.chat = new Chat();
@@ -150,16 +163,20 @@ class Lobby {
     this.games.push(new RedDots("foo"));
   }
 
+  static instantiate(inp: Record<string, any> | string): Chat | null {
+    return sv.instantiate<Chat>(inp, Chat);
+  }
+
+  static validate(inp: Record<string, any> | string): boolean {
+    return sv.validate(inp, Chat);
+  }
+
   objectify(): Object {
-    return {
-      path: this.path,
-      chat: this.chat.objectify(),
-      games: this.games.map((g) => g.objectify()),
-    };
+    return sv.objectify(this);
   }
 
   stringify(): string {
-    return JSON.stringify(this.objectify());
+    return sv.stringify(this);
   }
 
   find_game(game_id: string): any | null {
