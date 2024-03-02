@@ -56,6 +56,16 @@ export function is_instance(a: any, name?: string): boolean {
   return t === "instance " + name;
 }
 
+function name_lookup(cls: any): string {
+  if (cls.class_name === undefined) {
+    return cls.name;
+  }
+  if (cls.class_name === cls.name) {
+    return cls.name;
+  }
+  return `${cls.name} / ${cls.class_name}`;
+}
+
 export function validate(inp: Record<string, any> | string, cls: any): boolean {
   if (typeof inp === "string") {
     return validate(JSON.parse(inp), cls);
@@ -98,32 +108,16 @@ export function validate(inp: Record<string, any> | string, cls: any): boolean {
       const class_name = schema_type.name;
       if (actual_type != "instance " + class_name) {
         console.log(
-          'Error: incorrect class type on "' +
-            property +
-            '" for ' +
-            cls.name +
-            " / " +
-            cls.schema_name +
-            " (" +
-            schema_type.name +
-            " / " +
-            schema_type.schema_name +
-            " vs " +
-            actual_type +
-            ")"
+          `Error: incorrect class type on "${property}" ` +
+            `for ${name_lookup(cls)} ` +
+            `(${name_lookup(schema_type)} vs ${actual_type})`
         );
       }
     } else if (!(schema_type === actual_type)) {
       console.log(
-        'Error: incorrect simple type on "' +
-          property +
-          '" for ' +
-          String(cls.name) +
-          " (" +
-          schema_type +
-          " != " +
-          actual_type +
-          ")"
+        `Error: incorrect simple type on "${property}" ` +
+          `for ${name_lookup(cls)} ` +
+          `(${schema_type} vs ${actual_type})`
       );
       return false;
     }

@@ -6,7 +6,7 @@ class User {
   userid: string;
   username: string;
 
-  static schema_name: string = "User";
+  static class_name: string = "User";
   static schema: Schema = {
     properties: {
       userid: { type: "string" },
@@ -41,7 +41,7 @@ class Message {
   body: string;
   timestamp: number;
 
-  static schema_name: string = "Message";
+  static class_name: string = "Message";
   static schema: Schema = {
     properties: {
       user: { type: User },
@@ -77,7 +77,7 @@ class Chat {
   messages: Message[];
   users: User[];
 
-  static schema_name: string = "Chat";
+  static class_name: string = "Chat";
   static schema: Schema = {
     properties: {
       messages: { type: Message, array: true },
@@ -147,7 +147,7 @@ class Lobby {
   chat: Chat;
   games: any[];
 
-  static schema_name: string = "Lobby";
+  static class_name: string = "Lobby";
   static schema: Schema = {
     properties: {
       path: { type: String },
