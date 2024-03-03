@@ -153,7 +153,7 @@ function _copy_single_element(
     // We've found a class, and we'd like to do a deep copy
     // but to_class to simple Object()
     //@ts-ignore
-    return objectify(inp);
+    return to_object(inp);
   }
   console.assert(!is_class(t) || nesting === "assign");
   //@ts-ignore
@@ -249,12 +249,12 @@ export function to_class<T extends SchemaClass>(
   return <T | Error>_copy(inp, new_object, new_object.schema(), "class");
 }
 
-export function objectify(inp: SchemaClass): Object {
+export function to_object(inp: SchemaClass): Object {
   const schema = inp.schema();
   let target = new Object();
   return <Object>_copy(inp, target, schema, "object");
 }
 
 export function to_string(inp: any): string {
-  return JSON.stringify(objectify(inp));
+  return JSON.stringify(to_object(inp));
 }

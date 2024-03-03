@@ -67,7 +67,7 @@ describe("User", () => {
     expect(user_copy.username).toBe("Alice");
 
     // Objectify:
-    const user: any = sv.objectify(user_copy);
+    const user: any = sv.to_object(user_copy);
     expect(user).not.toBeInstanceOf(Error);
     expect(user).toBeInstanceOf(Object);
     expect(user.username).toBe("Alice");
@@ -168,7 +168,7 @@ describe("Message", () => {
     expect(sv.is_valid(message_copy, new Message())).toBe(true);
 
     // Objectify:
-    const message_object: any = sv.objectify(message_copy);
+    const message_object: any = sv.to_object(message_copy);
     expect(message_object).not.toBeInstanceOf(Error);
     expect(message_object).toBeInstanceOf(Object);
     expect(message_object?.user?.username).toBe("Cheetah");
@@ -244,7 +244,7 @@ describe("Chat", () => {
     expect(sv.is_valid(data_copy, new Chat())).toBe(true);
 
     // Objectify:
-    const data_object: any = sv.objectify(data_copy);
+    const data_object: any = sv.to_object(data_copy);
     expect(data_object).not.toBeInstanceOf(Error);
     expect(data_object).toBeInstanceOf(Object);
     expect(sv.is_valid(data_object, new Chat())).toBe(true);

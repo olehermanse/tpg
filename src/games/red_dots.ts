@@ -30,7 +30,7 @@ class RedDots {
     }
   }
 
-  objectify() {
+  to_object() {
     return { id: this.id, dots: this.dots };
   }
 }
