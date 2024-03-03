@@ -112,7 +112,7 @@ function name_lookup(new_object: any): string {
 
 export function is_valid<T extends SchemaClass>(
   inp: Record<string, any> | string,
-  new_object: T
+  new_object: T,
 ): boolean {
   let result = null;
   if (typeof inp === "string") {
@@ -142,7 +142,7 @@ export function assertion(condition: boolean, message: string): boolean {
 function _copy_single_element(
   inp: any,
   t: string | Class,
-  nesting: NestingMode
+  nesting: NestingMode,
 ): any {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
@@ -164,12 +164,12 @@ function _copy<T extends SchemaClass>(
   inp: Record<string, any>,
   target: WriteableStringAnyDict,
   schema: Schema,
-  nesting: NestingMode
+  nesting: NestingMode,
 ): T | Object | Error {
   for (const property in schema.properties) {
     if (!(property in inp)) {
       return new Error(
-        `Error: missing property "${property}" for ${name_lookup(target)}`
+        `Error: missing property "${property}" for ${name_lookup(target)}`,
       );
     }
     const schema_type = schema.properties[property].type;
@@ -204,7 +204,7 @@ function _copy<T extends SchemaClass>(
         return new Error(
           `Error: incorrect class type on "${property}" ` +
             `for ${name_lookup(inp)} ` +
-            `(${name_lookup_class(schema_class)} vs ${type_of(actual)})`
+            `(${name_lookup_class(schema_class)} vs ${type_of(actual)})`,
         );
       }
       const new_target = new schema_class();
@@ -219,7 +219,7 @@ function _copy<T extends SchemaClass>(
       return new Error(
         `Error: incorrect simple type on "${property}" ` +
           `for ${name_lookup(inp)} ` +
-          `(${schema_type} vs ${type_of(actual)})`
+          `(${schema_type} vs ${type_of(actual)})`,
       );
     }
     target[property] = inp[property];
@@ -237,7 +237,7 @@ export function copy<T extends SchemaClass>(inp: T): T {
 // Convert a string or plain Object into class according to schema
 export function to_class<T extends SchemaClass>(
   inp: string | Object,
-  new_object: T
+  new_object: T,
 ): T | Error {
   if (typeof inp === "string") {
     return to_class<T>(JSON.parse(inp), new_object);
