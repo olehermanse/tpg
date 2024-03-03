@@ -358,7 +358,7 @@ function healthbar(
   rectangle(ctx, x, y, w * ratio, h, color, null);
 }
 
-const Draw = {
+export const Draw = {
   circle,
   image,
   fill_text,
@@ -371,5 +371,3 @@ const Draw = {
   grid,
   healthbar,
 };
-
-export { Draw };

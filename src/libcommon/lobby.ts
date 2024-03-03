@@ -2,7 +2,7 @@ import { RedDots } from "../games/red_dots.ts";
 import { Schema, SchemaClass } from "./schema.ts";
 import * as sv from "./schema.ts";
 
-class User implements SchemaClass {
+export class User implements SchemaClass {
   userid: string;
   username: string;
 
@@ -24,7 +24,7 @@ class User implements SchemaClass {
   }
 }
 
-class Message implements SchemaClass {
+export class Message implements SchemaClass {
   user: User;
   body: string;
   timestamp: number;
@@ -49,7 +49,7 @@ class Message implements SchemaClass {
   }
 }
 
-class Chat implements SchemaClass {
+export class Chat implements SchemaClass {
   messages: Message[];
   users: User[];
 
@@ -108,7 +108,7 @@ class Chat implements SchemaClass {
   }
 }
 
-class Lobby implements SchemaClass {
+export class Lobby implements SchemaClass {
   path: string;
   chat: Chat;
   games: any[];
@@ -143,7 +143,7 @@ class Lobby implements SchemaClass {
   }
 }
 
-function runtime_tests(): boolean {
+export function runtime_tests(): boolean {
   console.log("Type tests:");
   function wrapper(rep: string, actual: any, expected: string): boolean {
     console.log("sv.type_of(" + rep + ") = " + sv.type_of(actual));
@@ -251,5 +251,3 @@ function runtime_tests(): boolean {
   );
   return success;
 }
-
-export { Lobby, Chat, Message, User, runtime_tests };

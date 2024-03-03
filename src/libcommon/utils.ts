@@ -1,26 +1,26 @@
 import type { XY, CR, FillStroke } from "./interfaces";
 
-function xy(x: number, y: number): XY {
+export function xy(x: number, y: number): XY {
   return { x: x, y: y };
 }
 
-function position(c: number, r: number): CR {
+export function position(c: number, r: number): CR {
   return { c: c, r: r };
 }
 
-function fill_stroke(f: string, s: string): FillStroke {
+export function fill_stroke(f: string, s: string): FillStroke {
   return { fill: f, stroke: s };
 }
 
-function seconds(ms: number): number {
+export function seconds(ms: number): number {
   return ms / 1000;
 }
 
-function dps(dps: number, ms: number): number {
+export function dps(dps: number, ms: number): number {
   return dps * seconds(ms);
 }
 
-function number_string(n: number | string): string {
+export function number_string(n: number | string): string {
   const num = Number(n);
   if (num < 0) {
     return "-" + number_string(-1 * num);
@@ -42,11 +42,11 @@ function number_string(n: number | string): string {
   return result.split("").reverse().join("").trim();
 }
 
-function distance(a: CR, b: CR): number {
+export function distance(a: CR, b: CR): number {
   return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
 }
 
-function limit(min: number, x: number, max: number): number {
+export function limit(min: number, x: number, max: number): number {
   if (x < min) {
     return min;
   }
@@ -56,7 +56,7 @@ function limit(min: number, x: number, max: number): number {
   return x;
 }
 
-function get_rotation(a: CR, b: CR): number {
+export function get_rotation(a: CR, b: CR): number {
   const rot = Math.atan2(a.r - b.r, b.c - a.c);
   if (rot > 0.0) {
     return rot;
@@ -66,13 +66,13 @@ function get_rotation(a: CR, b: CR): number {
 
 // min and max are both inclusive
 // (use max = length - 1 with arrays)
-function randint(min: number, max: number): number {
+export function randint(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function shuffle(array: any[]): any[] {
+export function shuffle(array: any[]): any[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = randint(0, i);
     const temp = array[i];
@@ -82,7 +82,7 @@ function shuffle(array: any[]): any[] {
   return array;
 }
 
-class TextWrapper {
+export class TextWrapper {
   original: string;
   remaining: string;
   word: string;
@@ -182,7 +182,7 @@ class TextWrapper {
   }
 }
 
-function text_wrap(text: any, line_length: any): string {
+export function text_wrap(text: any, line_length: any): string {
   let tw = new TextWrapper(text, line_length);
   return tw.run();
 }
@@ -195,25 +195,25 @@ function text_wrap(text: any, line_length: any): string {
 // and CSS (max-width, CSS grid, etc.).
 // The frontend code can account for this, and translate mouse offsets as well
 // as draw on a canvas object with a different width and height.
-function standard_canvas_width(): number {
+export function standard_canvas_width(): number {
   return 1280;
 }
 
-function standard_canvas_height(): number {
+export function standard_canvas_height(): number {
   return 720;
 }
 
 const USERNAMES = ["Turtle", "Bison", "Cheetah", "Gecko", "Orca", "Camel"];
 
-function random_element<T>(a: Array<T>): T {
+export function random_element<T>(a: Array<T>): T {
   return a[Math.floor(Math.random() * a.length)];
 }
 
-function get_random_username(): string {
+export function get_random_username(): string {
   return random_element(USERNAMES);
 }
 
-function get_cookie(key: string): string | null {
+export function get_cookie(key: string): string | null {
   const value = document.cookie
     .split("; ")
     .find((row) => row.startsWith(`${key}=`))
@@ -224,43 +224,20 @@ function get_cookie(key: string): string | null {
   return value;
 }
 
-function set_cookie(key: string, value: string) {
+export function set_cookie(key: string, value: string) {
   document.cookie = `${key}=${value}; Secure`;
 }
 
-function get_random_userid(): string {
+export function get_random_userid(): string {
   const array = new Uint32Array(14);
   const digits = array.map((_) => randint(0, 9));
   return digits.join("");
 }
 
-function left_pad(s: string | number, n: number, pad: string = " ") {
+export function left_pad(s: string | number, n: number, pad: string = " ") {
   let result = "" + s;
   while (result.length < n) {
     result = pad + result;
   }
   return result;
 }
-
-export {
-  xy,
-  position,
-  fill_stroke,
-  seconds,
-  dps,
-  number_string,
-  distance,
-  limit,
-  left_pad,
-  get_rotation,
-  randint,
-  shuffle,
-  standard_canvas_width,
-  standard_canvas_height,
-  text_wrap,
-  random_element,
-  get_random_username,
-  get_random_userid,
-  get_cookie,
-  set_cookie,
-};
