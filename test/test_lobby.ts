@@ -15,9 +15,9 @@ describe("User", () => {
     expect(user.username).toBe("Alice");
     expect(user.userid).toBe("12345678901234");
   });
-  test("convert", () => {
+  test("to_class", () => {
     // Instantiate a User from an Object:
-    const user = sv.convert(
+    const user = sv.to_class(
       {
         userid: "12345678901234",
         username: "Alice",
@@ -41,7 +41,7 @@ describe("User", () => {
     expect(sv.is_valid({}, new User())).toBe(false);
 
     // Instantiate based on schema:
-    const user_instance = sv.convert<User>(user_object, new User());
+    const user_instance = sv.to_class<User>(user_object, new User());
     expect(user_instance).not.toBeInstanceOf(Error);
     expect(user_instance?.username).toBe("Alice");
 
@@ -55,7 +55,7 @@ describe("User", () => {
     expect(user_string).toContain('"Alice"');
 
     // Parse:
-    const user_parsed = sv.convert<User>(user_string, new User());
+    const user_parsed = sv.to_class<User>(user_string, new User());
     expect(user_parsed).not.toBeInstanceOf(Error);
     expect(user_parsed).toBeInstanceOf(User);
     expect(user_parsed?.username).toBe("Alice");
@@ -91,9 +91,9 @@ describe("Message", () => {
     const string_message = sv.stringify(original);
     expect(sv.is_valid(string_message, new Message())).toBe(true);
   });
-  test("convert", () => {
+  test("to_class", () => {
     const original = new Message(new User("82345678901234", "a"), "b");
-    let message = <Message>sv.convert(sv.stringify(original), new Message());
+    let message = <Message>sv.to_class(sv.stringify(original), new Message());
 
     // Check that all values were copied:
     expect(message).not.toBeInstanceOf(Error);
@@ -113,8 +113,8 @@ describe("Message", () => {
     expect(message?.user.username).toBe("a");
     expect(message?.body).toBe("b");
 
-    // Call convert again, which will copy the values:
-    message = <Message>sv.convert(original, new Message());
+    // Call to_class again, which will copy the values:
+    message = <Message>sv.to_class(original, new Message());
     expect(message).not.toBeInstanceOf(Error);
     expect(message?.user.username).toBe("c");
     expect(message?.user.userid).toBe("82345678901234");
@@ -130,7 +130,7 @@ describe("Message", () => {
     expect(sv.is_valid({}, new Message())).toBe(false);
 
     // Instantiate based on schema:
-    const message_instance = <Message>sv.convert(input_string, new Message());
+    const message_instance = <Message>sv.to_class(input_string, new Message());
     expect(message_instance).not.toBeInstanceOf(Error);
     expect(message_instance?.user?.username).toBe("Cheetah");
     expect(message_instance?.user?.userid).toBe("38133501152442");
@@ -153,7 +153,7 @@ describe("Message", () => {
 
     // Parse:
     const message_parsed = <Message>(
-      sv.convert<Message>(message_string, new Message())
+      sv.to_class<Message>(message_string, new Message())
     );
     expect(message_parsed).not.toBeInstanceOf(Error);
     expect(message_parsed).toBeInstanceOf(Message);
@@ -218,7 +218,7 @@ describe("Chat", () => {
     expect(sv.is_valid({}, new Chat())).toBe(false);
 
     // Instantiate based on schema:
-    const data_instance = sv.convert(input_string, new Chat());
+    const data_instance = sv.to_class(input_string, new Chat());
     expect(data_instance).not.toBeInstanceOf(Error);
     expect(data_instance).toBeInstanceOf(Chat);
 
@@ -230,7 +230,7 @@ describe("Chat", () => {
     expect(data_string).toContain('"Cheetah"');
 
     // Parse:
-    const data_parsed = <Chat>sv.convert(<String>data_string, new Chat());
+    const data_parsed = <Chat>sv.to_class(<String>data_string, new Chat());
     expect(data_parsed).not.toBeInstanceOf(Error);
     expect(data_parsed).toBeInstanceOf(Chat);
     // @ts-ignore
@@ -249,8 +249,8 @@ describe("Chat", () => {
     expect(data_object).toBeInstanceOf(Object);
     expect(sv.is_valid(data_object, new Chat())).toBe(true);
 
-    // Finally, convert back to instance and check data:
-    const data_final = <Chat>sv.convert(input_string, new Chat());
+    // Finally, to_class back to instance and check data:
+    const data_final = <Chat>sv.to_class(input_string, new Chat());
     expect(data_final).not.toBeInstanceOf(Error);
     expect(data_final).toBeInstanceOf(Chat);
     expect(data_final?.messages[0].body).toBe("abc");

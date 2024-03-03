@@ -147,11 +147,11 @@ function _copy_single_element(
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
     const cls = <Class>t;
-    return convert(inp, new cls());
+    return to_class(inp, new cls());
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
-    // but convert to simple Object()
+    // but to_class to simple Object()
     //@ts-ignore
     return objectify(inp);
   }
@@ -239,12 +239,12 @@ export function copy<T extends SchemaClass>(inp: T): T {
 }
 
 // Convert a string or plain Object into class according to schema
-export function convert<T extends SchemaClass>(
+export function to_class<T extends SchemaClass>(
   inp: string | Object,
   new_object: T
 ): T | Error {
   if (typeof inp === "string") {
-    return convert<T>(JSON.parse(inp), new_object);
+    return to_class<T>(JSON.parse(inp), new_object);
   }
   return <T | Error>_copy(inp, new_object, new_object.schema(), "class");
 }

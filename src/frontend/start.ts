@@ -57,7 +57,7 @@ function on_chat_send() {
   const user = new User(userid, username);
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    const chat = sv.convert<Chat>(data, new Chat());
+    const chat = sv.to_class<Chat>(data, new Chat());
     if (chat instanceof Error) {
       console.log(chat);
       return;
@@ -69,7 +69,7 @@ function on_chat_send() {
 function chat_refresh() {
   const lobby = get_lobby_id();
   http_get("/api/chat/" + lobby).then((data) => {
-    const chat = sv.convert<Chat>(data, new Chat());
+    const chat = sv.to_class<Chat>(data, new Chat());
     if (chat instanceof Error) {
       console.log(chat);
       return;

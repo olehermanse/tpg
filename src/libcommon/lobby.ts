@@ -86,23 +86,23 @@ export class Chat implements SchemaClass {
     this.messages = [];
     if (messages != null) {
       for (let m of messages) {
-        const converted = sv.convert<Message>(m, new Message());
-        if (converted instanceof Error) {
-          console.log(converted);
+        const to_classed = sv.to_class<Message>(m, new Message());
+        if (to_classed instanceof Error) {
+          console.log(to_classed);
           continue;
         }
-        this.messages.push(converted);
+        this.messages.push(to_classed);
       }
     }
     this.users = [];
     if (users != null) {
       for (let m of users) {
-        const converted = sv.convert<User>(m, new User());
-        if (converted instanceof Error) {
-          console.log(converted);
+        const to_classed = sv.to_class<User>(m, new User());
+        if (to_classed instanceof Error) {
+          console.log(to_classed);
           continue;
         }
-        this.users.push(converted);
+        this.users.push(to_classed);
       }
     }
   }

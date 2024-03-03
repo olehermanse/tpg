@@ -1,5 +1,5 @@
 import {
-  convert,
+  to_class,
   is_class,
   is_instance,
   type_of,
@@ -23,29 +23,29 @@ class FooBar implements SchemaClass {
   }
 }
 
-describe("convert", () => {
+describe("to_class", () => {
   test("a valid string", () => {
     let s = '{"foo": "bar"}';
-    let a = convert(s, new FooBar());
+    let a = to_class(s, new FooBar());
     expect(a).not.toBe(null);
     expect(a).not.toBeInstanceOf(Error);
     expect(a?.foo).toBe("bar");
   });
   test("a valid object", () => {
     let s = { foo: "bar" };
-    let a = <FooBar>convert(s, new FooBar());
+    let a = <FooBar>to_class(s, new FooBar());
     expect(a).not.toBe(null);
     expect(a).not.toBeInstanceOf(Error);
     expect(a?.foo).toBe("bar");
   });
   test("a wrong type", () => {
     let s = { foo: 123 };
-    let a = convert(s, new FooBar());
+    let a = to_class(s, new FooBar());
     expect(a).toBeInstanceOf(Error);
   });
   test("a missing field", () => {
     let s = {};
-    let a = convert(s, new FooBar());
+    let a = to_class(s, new FooBar());
     expect(a).toBeInstanceOf(Error);
   });
 });
