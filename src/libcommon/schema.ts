@@ -251,6 +251,6 @@ export function to_object(inp: SchemaClass): Object {
   return <Object>_copy(inp, target, schema, "object");
 }
 
-export function to_string(inp: any): string {
+export function to_string(inp: SchemaClass): string {
   return JSON.stringify(to_object(inp));
 }
