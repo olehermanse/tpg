@@ -1,9 +1,9 @@
-type Class<T = any> = {
+export type Class<T = any> = {
   new (...args: any[]): T;
   name: string;
 };
 
-type NestingMode = "class" | "object" | "assign";
+export type NestingMode = "class" | "object" | "assign";
 
 export interface Property {
   type: string | Class | undefined;
