@@ -13,6 +13,17 @@ export interface RequestEvent {
   request: Request;
 }
 
+type HTTPMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "PATCH"
+  | "OPTIONS"
+  | "HEAD"
+  | "CONNECT"
+  | "TRACE";
+
 function stripPrefix(prefix: string, string: string) {
   if (!string.startsWith(prefix)) {
     return string;
