@@ -14,7 +14,7 @@ export interface Schema {
   properties: Record<string, Property>;
 }
 
-export interface SchemaClass extends Record<string, any> {
+export interface SchemaClass {
   schema(): Schema;
   class_name?(): string;
 }
