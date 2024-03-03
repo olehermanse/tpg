@@ -55,7 +55,7 @@ describe("User", () => {
     expect(user_parsed?.username).toBe("Alice");
 
     // Copy:
-    const user_copy: User = sv.copy<User>(<User>user_parsed, new User());
+    const user_copy: User = sv.copy(<User>user_parsed);
     expect(user_copy).not.toBe(null);
     expect(user_copy).toBeInstanceOf(User);
     expect(user_copy.username).toBe("Alice");

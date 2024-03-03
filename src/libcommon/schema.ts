@@ -19,6 +19,10 @@ export interface SchemaClass extends Record<string, any> {
   class_name?(): string;
 }
 
+export interface WriteableStringAnyDict {
+  [index: string]: any;
+}
+
 export function type_of(a: any): string {
   // Check for known values:
   if (a === true || a === false) {
@@ -82,7 +86,7 @@ function name_lookup_class(cls: Class<SchemaClass>): string {
   return name_lookup(tmp);
 }
 
-function name_lookup<T extends SchemaClass>(new_object: T): string {
+function name_lookup(new_object: any): string {
   let name = undefined;
   let class_name = undefined;
   if (new_object.class_name != undefined) {
@@ -92,6 +96,9 @@ function name_lookup<T extends SchemaClass>(new_object: T): string {
     name = new_object.constructor.name;
   }
   if (class_name != undefined && name != undefined) {
+    if (class_name === name) {
+      return `${name}`;
+    }
     return `${name} / ${class_name}`;
   }
   if (name != undefined) {
@@ -103,7 +110,7 @@ function name_lookup<T extends SchemaClass>(new_object: T): string {
   return "<Unknown>";
 }
 
-export function validate<T extends SchemaClass>(
+export function old_validate<T extends SchemaClass>(
   inp: Record<string, any> | string,
   new_object: T
 ): boolean {
@@ -176,6 +183,27 @@ export function validate<T extends SchemaClass>(
   return true;
 }
 
+export function validate<T extends SchemaClass>(
+  inp: Record<string, any> | string,
+  new_object: T
+): boolean {
+  let result = null;
+  if (typeof inp === "string") {
+    const parsed = JSON.parse(inp);
+    if (type_of(parsed) != "instance Object") {
+      return false;
+    }
+    result = _copy(parsed, new_object, new_object.schema(), "class");
+  } else {
+    result = _copy(inp, new_object, new_object.schema(), "class");
+  }
+
+  if (result === null) {
+    return false;
+  }
+  return true;
+}
+
 function _copy_single_element(
   inp: any,
   t: string | Class,
@@ -198,25 +226,79 @@ function _copy_single_element(
 }
 
 function _copy<T extends SchemaClass>(
-  inp: T,
-  target: Record<string, any>,
+  inp: Record<string, any>,
+  target: WriteableStringAnyDict,
   schema: Schema,
   nesting: NestingMode
-): any {
+): T | Object | null {
   for (const property in schema.properties) {
-    const t = schema.properties[property].type;
-    if (t === undefined) {
-      target[property] = inp[property];
-      continue;
+    if (!(property in inp)) {
+      console.log(
+        'Error: missing property "' + property + '" for ' + name_lookup(target)
+      );
+      return null;
     }
+    const schema_type = schema.properties[property].type;
+    if (schema_type === undefined) {
+      target[property] = inp[property];
+      continue; // Setting type to undefined disables validation and copying
+    }
+    const actual = inp[property];
+    const actual_type = type_of(actual);
+    // Handle arrays first:
     if (schema.properties[property].array === true) {
+      if (actual_type != "instance Array") {
+        console.log(`Error: property "${property}" is not an array`);
+        return null;
+      }
+      if (typeof schema_type === "string") {
+        console.log(`Error: arrays of simple types not supported yet`);
+        return null;
+      }
       target[property] = new Array();
-      for (let x of inp[property]) {
-        target[property].push(_copy_single_element(x, t, nesting));
+      for (let x of actual) {
+        const y = _copy_single_element(x, schema_type, nesting);
+        if (y === null) {
+          return null;
+        }
+        target[property].push(y);
       }
       continue;
     }
-    target[property] = _copy_single_element(inp[property], t, nesting);
+    // Here we handle a class, which has its own schema:
+    if (is_class(schema_type)) {
+      const schema_class = <Class>schema_type;
+      const class_name = schema_class.name;
+      if (
+        actual_type != "instance Object" &&
+        actual_type != "instance " + class_name
+      ) {
+        console.log(
+          `Error: incorrect class type on "${property}" ` +
+            `for ${name_lookup(inp)} ` +
+            `(${name_lookup_class(schema_class)} vs ${actual_type})`
+        );
+        return null;
+      }
+      const new_target = new schema_class();
+      const result = _copy(actual, new_target, new_target.schema(), nesting);
+      if (result === null) {
+        return null;
+      }
+      target[property] = result;
+      continue;
+    }
+    // Simple types:
+    if (!(schema_type === actual_type)) {
+      console.log(
+        `Error: incorrect simple type on "${property}" ` +
+          `for ${name_lookup(inp)} ` +
+          `(${schema_type} vs ${actual_type})`
+      );
+      return null;
+    }
+    target[property] = inp[property];
+    // Continue to next property of schema.properties
   }
   return target;
 }
@@ -224,7 +306,7 @@ function _copy<T extends SchemaClass>(
 export function copy<T extends SchemaClass>(inp: T): T {
   //@ts-ignore
   const new_object = new inp.constructor();
-  return _copy(inp, new_object, new_object.schema(), "class");
+  return <T>_copy(inp, new_object, new_object.schema(), "class");
 }
 
 // Convert a string or plain Object into class according to schema
@@ -235,10 +317,7 @@ export function convert<T extends SchemaClass>(
   if (typeof inp === "string") {
     return convert<T>(JSON.parse(inp), new_object);
   }
-  if (!validate(inp, new_object)) {
-    return null;
-  }
-  return _copy(<T>inp, new_object, new_object.schema(), "class");
+  return <T | null>_copy(inp, new_object, new_object.schema(), "class");
 }
 
 export function objectify(inp: SchemaClass): Object {
