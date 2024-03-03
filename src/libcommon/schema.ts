@@ -110,7 +110,7 @@ function name_lookup(new_object: any): string {
   return "<Unknown>";
 }
 
-export function validate<T extends SchemaClass>(
+export function is_valid<T extends SchemaClass>(
   inp: Record<string, any> | string,
   new_object: T
 ): boolean {

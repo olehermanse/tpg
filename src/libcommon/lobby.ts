@@ -186,20 +186,20 @@ export function runtime_tests(): boolean {
   }
 
   const b = '{"username": "Alice"}';
-  console.log(`validate('${b}', new User()) -> ` + sv.validate(b, new User()));
+  console.log(`is_valid('${b}', new User()) -> ` + sv.is_valid(b, new User()));
   success &&= sv.assertion(
-    sv.validate(b, new User()) === false,
-    "validate should stop missing fields"
+    sv.is_valid(b, new User()) === false,
+    "is_valid should stop missing fields"
   );
   if (success != true) {
     return false;
   }
 
   const c = '{"userid": "12345678901234", "username": "Alice"}';
-  console.log(`validate('${c}', new User()) -> ` + sv.validate(c, new User()));
+  console.log(`is_valid('${c}', new User()) -> ` + sv.is_valid(c, new User()));
   success &&= sv.assertion(
-    sv.validate(c, new User()) === true,
-    "validate should accept a well-formed User"
+    sv.is_valid(c, new User()) === true,
+    "is_valid should accept a well-formed User"
   );
   if (success != true) {
     return false;
@@ -221,12 +221,12 @@ export function runtime_tests(): boolean {
     return false;
   }
   console.log(
-    `validate('${sv.stringify(d)}', new Message()) -> ` +
-      sv.validate(sv.stringify(d), new Message())
+    `is_valid('${sv.stringify(d)}', new Message()) -> ` +
+      sv.is_valid(sv.stringify(d), new Message())
   );
   success &&= sv.assertion(
-    sv.validate(d, new Message()) === true,
-    "validate should accept a well-formed Message"
+    sv.is_valid(d, new Message()) === true,
+    "is_valid should accept a well-formed Message"
   );
   if (success != true) {
     return false;
@@ -242,12 +242,12 @@ export function runtime_tests(): boolean {
     return false;
   }
   console.log(
-    `validate('${sv.stringify(e)}', new Chat()) -> ` +
-      sv.validate(sv.stringify(e), new Chat())
+    `is_valid('${sv.stringify(e)}', new Chat()) -> ` +
+      sv.is_valid(sv.stringify(e), new Chat())
   );
   success &&= sv.assertion(
-    sv.validate(e, new Chat()) === true,
-    "validate should accept a well-formed Chat"
+    sv.is_valid(e, new Chat()) === true,
+    "is_valid should accept a well-formed Chat"
   );
   return success;
 }
