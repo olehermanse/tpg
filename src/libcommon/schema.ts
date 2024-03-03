@@ -178,10 +178,9 @@ function _copy<T extends SchemaClass>(
       continue; // Setting type to undefined disables validation and copying
     }
     const actual = inp[property];
-    const actual_type = type_of(actual);
     // Handle arrays first:
     if (schema.properties[property].array === true) {
-      if (actual_type != "instance Array") {
+      if (!is_instance(actual, "Array")) {
         return new Error(`Error: property "${property}" is not an array`);
       }
       if (typeof schema_type === "string") {
@@ -201,14 +200,11 @@ function _copy<T extends SchemaClass>(
     if (is_class(schema_type)) {
       const schema_class = <Class>schema_type;
       const class_name = schema_class.name;
-      if (
-        actual_type != "instance Object" &&
-        actual_type != "instance " + class_name
-      ) {
+      if (!is_instance(actual, "Object") && !is_instance(actual, class_name)) {
         return new Error(
           `Error: incorrect class type on "${property}" ` +
             `for ${name_lookup(inp)} ` +
-            `(${name_lookup_class(schema_class)} vs ${actual_type})`
+            `(${name_lookup_class(schema_class)} vs ${type_of(actual)})`
         );
       }
       const new_target = new schema_class();
@@ -219,11 +215,11 @@ function _copy<T extends SchemaClass>(
       continue;
     }
     // Simple types:
-    if (!(schema_type === actual_type)) {
+    if (!(schema_type === type_of(actual))) {
       return new Error(
         `Error: incorrect simple type on "${property}" ` +
           `for ${name_lookup(inp)} ` +
-          `(${schema_type} vs ${actual_type})`
+          `(${schema_type} vs ${type_of(actual)})`
       );
     }
     target[property] = inp[property];
