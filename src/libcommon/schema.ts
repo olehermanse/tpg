@@ -255,6 +255,6 @@ export function objectify(inp: SchemaClass): Object {
   return <Object>_copy(inp, target, schema, "object");
 }
 
-export function stringify(inp: any): string {
+export function to_string(inp: any): string {
   return JSON.stringify(objectify(inp));
 }

@@ -46,7 +46,7 @@ describe("User", () => {
     expect(user_instance?.username).toBe("Alice");
 
     // Stringify:
-    const user_string = sv.stringify(user_instance);
+    const user_string = sv.to_string(user_instance);
     expect(user_string).not.toBeInstanceOf(Error);
     expect(user_string).toBeTypeOf("string");
     expect(user_string).toContain('"username"');
@@ -88,12 +88,12 @@ describe("Message", () => {
   });
   test("is_valid", () => {
     const original = new Message(new User("82345678901234", "a"), "b");
-    const string_message = sv.stringify(original);
+    const string_message = sv.to_string(original);
     expect(sv.is_valid(string_message, new Message())).toBe(true);
   });
   test("to_class", () => {
     const original = new Message(new User("82345678901234", "a"), "b");
-    let message = <Message>sv.to_class(sv.stringify(original), new Message());
+    let message = <Message>sv.to_class(sv.to_string(original), new Message());
 
     // Check that all values were copied:
     expect(message).not.toBeInstanceOf(Error);
@@ -138,7 +138,7 @@ describe("Message", () => {
     expect(message_instance?.timestamp).toBe(1709400461241);
 
     // Stringify:
-    const message_string = sv.stringify(message_instance);
+    const message_string = sv.to_string(message_instance);
     expect(message_string).not.toBeInstanceOf(Error);
     expect(message_string).toBeTypeOf("string");
     expect(message_string).toStrictEqual(input_string);
@@ -223,7 +223,7 @@ describe("Chat", () => {
     expect(data_instance).toBeInstanceOf(Chat);
 
     // Stringify:
-    const data_string = sv.stringify(data_instance);
+    const data_string = sv.to_string(data_instance);
     expect(data_string).not.toBeInstanceOf(Error);
     expect(data_string).toBeTypeOf("string");
     expect(data_string).toStrictEqual(input_string);

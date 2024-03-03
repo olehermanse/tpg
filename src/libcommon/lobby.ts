@@ -176,10 +176,10 @@ export function runtime_tests(): boolean {
   console.log("Schema tests:");
 
   const a = new User("12345678901234", "Alice");
-  console.log('new User("12345678901234", "Alice") -> ' + sv.stringify(a));
+  console.log('new User("12345678901234", "Alice") -> ' + sv.to_string(a));
   success &&= sv.assertion(
-    sv.stringify(a) === '{"userid":"12345678901234","username":"Alice"}',
-    "stringify should have predictable output"
+    sv.to_string(a) === '{"userid":"12345678901234","username":"Alice"}',
+    "to_string should have predictable output"
   );
   if (success != true) {
     return false;
@@ -211,18 +211,18 @@ export function runtime_tests(): boolean {
     "Message timestamp should be after this test was written"
   );
   d.timestamp = 1709436801425;
-  console.log("new Message() -> " + sv.stringify(d));
+  console.log("new Message() -> " + sv.to_string(d));
   success &&= sv.assertion(
-    sv.stringify(d) ===
+    sv.to_string(d) ===
       '{"user":{"userid":"","username":""},"body":"","timestamp":1709436801425}',
-    "stringify should have predictable output for Message"
+    "to_string should have predictable output for Message"
   );
   if (success != true) {
     return false;
   }
   console.log(
-    `is_valid('${sv.stringify(d)}', new Message()) -> ` +
-      sv.is_valid(sv.stringify(d), new Message())
+    `is_valid('${sv.to_string(d)}', new Message()) -> ` +
+      sv.is_valid(sv.to_string(d), new Message())
   );
   success &&= sv.assertion(
     sv.is_valid(d, new Message()) === true,
@@ -233,17 +233,17 @@ export function runtime_tests(): boolean {
   }
 
   const e = new Chat();
-  console.log("new Chat() -> " + sv.stringify(e));
+  console.log("new Chat() -> " + sv.to_string(e));
   success &&= sv.assertion(
-    sv.stringify(e) === '{"messages":[],"users":[]}',
-    "stringify should have predictable output for Chat"
+    sv.to_string(e) === '{"messages":[],"users":[]}',
+    "to_string should have predictable output for Chat"
   );
   if (success != true) {
     return false;
   }
   console.log(
-    `is_valid('${sv.stringify(e)}', new Chat()) -> ` +
-      sv.is_valid(sv.stringify(e), new Chat())
+    `is_valid('${sv.to_string(e)}', new Chat()) -> ` +
+      sv.is_valid(sv.to_string(e), new Chat())
   );
   success &&= sv.assertion(
     sv.is_valid(e, new Chat()) === true,
