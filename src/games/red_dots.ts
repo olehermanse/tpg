@@ -6,7 +6,7 @@ import {
 import type { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw.ts";
 
-class RedDots {
+export class RedDots {
   id: string;
   name: string;
   width: number;
@@ -34,5 +34,3 @@ class RedDots {
     return { id: this.id, dots: this.dots };
   }
 }
-
-export { RedDots };
