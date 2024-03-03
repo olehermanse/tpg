@@ -7,7 +7,7 @@ import {
   left_pad,
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
-import { Chat, Message, User } from "../libcommon/lobby";
+import { Chat, Message, User, runtime_tests } from "../libcommon/lobby";
 import * as sv from "../libcommon/schema.ts";
 
 let canvas_manager: Application | null = null;
@@ -132,6 +132,7 @@ function start() {
   user_init();
   chat_init();
   canvas_init();
+  runtime_tests();
 }
 
 export { start };

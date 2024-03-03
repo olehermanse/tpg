@@ -131,6 +131,14 @@ export function validate<T extends SchemaClass>(
   return true;
 }
 
+export function assertion(condition: boolean, message: string): boolean {
+  console.assert(condition, message);
+  if (condition === true) {
+    return true;
+  }
+  return false;
+}
+
 function _copy_single_element(
   inp: any,
   t: string | Class,

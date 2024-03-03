@@ -1,4 +1,10 @@
-import { User, Message, Chat, Lobby } from "../src/libcommon/lobby";
+import {
+  User,
+  Message,
+  Chat,
+  Lobby,
+  runtime_tests,
+} from "../src/libcommon/lobby";
 import { expect, test, describe } from "vitest";
 import * as sv from "../src/libcommon/schema.ts";
 
@@ -269,5 +275,11 @@ describe("Lobby", () => {
     expect(lobby.games[0].id).toBe("foo");
     expect(lobby.find_game("foo")).toBe(lobby.games[0]);
     expect(lobby.find_game("bar")).toBe(null);
+  });
+});
+
+describe("runtime_tests", () => {
+  test("runs without error", () => {
+    expect(runtime_tests()).toBe(true);
   });
 });

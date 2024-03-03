@@ -143,4 +143,113 @@ class Lobby implements SchemaClass {
   }
 }
 
-export { Lobby, Chat, Message, User };
+function runtime_tests(): boolean {
+  console.log("Type tests:");
+  function wrapper(rep: string, actual: any, expected: string): boolean {
+    console.log("sv.type_of(" + rep + ") = " + sv.type_of(actual));
+    return sv.assertion(
+      sv.type_of(actual) === expected,
+      `type_of(${rep}) === ${expected}`
+    );
+  }
+
+  let success = true;
+
+  success &&= wrapper("3", 3, "number");
+  success &&= wrapper("'foo'", "foo", "string");
+  success &&= wrapper("true", true, "boolean");
+  success &&= wrapper("false", false, "boolean");
+  success &&= wrapper("undefined", undefined, "undefined");
+  success &&= wrapper("null", null, "null");
+  success &&= wrapper("[]", [], "instance Array");
+  success &&= wrapper("{}", {}, "instance Object");
+  success &&= wrapper("wrapper", wrapper, "function");
+  success &&= wrapper("User", User, "class " + User.name);
+  success &&= wrapper("Object", Object, "class Object");
+  success &&= wrapper("Array", Array, "class Array");
+  success &&= wrapper("new User()", new User(), "instance " + User.name);
+
+  if (success != true) {
+    return false;
+  }
+
+  console.log("Schema tests:");
+
+  const a = new User("12345678901234", "Alice");
+  console.log('new User("12345678901234", "Alice") -> ' + sv.stringify(a));
+  success &&= sv.assertion(
+    sv.stringify(a) === '{"userid":"12345678901234","username":"Alice"}',
+    "stringify should have predictable output"
+  );
+  if (success != true) {
+    return false;
+  }
+
+  const b = '{"username": "Alice"}';
+  console.log(`validate('${b}', new User()) -> ` + sv.validate(b, new User()));
+  success &&= sv.assertion(
+    sv.validate(b, new User()) === false,
+    "validate should stop missing fields"
+  );
+  if (success != true) {
+    return false;
+  }
+
+  const c = '{"userid": "12345678901234", "username": "Alice"}';
+  console.log(`validate('${c}', new User()) -> ` + sv.validate(c, new User()));
+  success &&= sv.assertion(
+    sv.validate(c, new User()) === true,
+    "validate should accept a well-formed User"
+  );
+  if (success != true) {
+    return false;
+  }
+
+  const d = new Message();
+  success &&= sv.assertion(
+    d.timestamp > 1709436801425,
+    "Message timestamp should be after this test was written"
+  );
+  d.timestamp = 1709436801425;
+  console.log("new Message() -> " + sv.stringify(d));
+  success &&= sv.assertion(
+    sv.stringify(d) ===
+      '{"user":{"userid":"","username":""},"body":"","timestamp":1709436801425}',
+    "stringify should have predictable output for Message"
+  );
+  if (success != true) {
+    return false;
+  }
+  console.log(
+    `validate('${sv.stringify(d)}', new Message()) -> ` +
+      sv.validate(sv.stringify(d), new Message())
+  );
+  success &&= sv.assertion(
+    sv.validate(d, new Message()) === true,
+    "validate should accept a well-formed Message"
+  );
+  if (success != true) {
+    return false;
+  }
+
+  const e = new Chat();
+  console.log("new Chat() -> " + sv.stringify(e));
+  success &&= sv.assertion(
+    sv.stringify(e) === '{"messages":[],"users":[]}',
+    "stringify should have predictable output for Chat"
+  );
+  if (success != true) {
+    return false;
+  }
+  console.log(
+    `validate('${sv.stringify(e)}', new Chat()) -> ` +
+      sv.validate(sv.stringify(e), new Chat())
+  );
+  success &&= sv.assertion(
+    sv.validate(e, new Chat()) === true,
+    "validate should accept a well-formed Chat"
+  );
+  return success;
+}
+
+export { Lobby, Chat, Message, User, runtime_tests };

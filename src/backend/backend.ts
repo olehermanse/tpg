@@ -5,6 +5,16 @@ import {
   create_lobby,
   get_lobby,
 } from "./api.ts";
+import { runtime_tests } from "../libcommon/lobby.ts";
+
+const success = runtime_tests();
+if (success === true) {
+  console.log("Runtime tests succeeded");
+} else {
+  console.log("Error: Runtime tests failed");
+  // @ts-ignore
+  Deno.exit(1);
+}
 
 // Start listening on port 3000 of localhost.
 // @ts-ignore
