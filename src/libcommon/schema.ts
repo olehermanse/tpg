@@ -110,79 +110,6 @@ function name_lookup(new_object: any): string {
   return "<Unknown>";
 }
 
-export function old_validate<T extends SchemaClass>(
-  inp: Record<string, any> | string,
-  new_object: T
-): boolean {
-  if (typeof inp === "string") {
-    return validate(JSON.parse(inp), new_object);
-  }
-  const schema = new_object.schema();
-  for (const property in schema.properties) {
-    if (!(property in inp)) {
-      console.log(
-        'Error: missing property "' +
-          property +
-          '" for ' +
-          name_lookup(new_object)
-      );
-      return false;
-    }
-    const schema_type = schema.properties[property].type;
-    if (schema_type === undefined) {
-      return true; // Setting type to undefined disables validation
-    }
-    const actual_type = type_of(inp[property]);
-    if (schema.properties[property].array === true) {
-      if (actual_type != "instance Array") {
-        console.log(`Error: property "${property}" is not an array`);
-        return false;
-      }
-      if (typeof schema_type === "string") {
-        console.log(`Error: arrays of simple types not supported yet`);
-        return false;
-      }
-      for (let x of inp[property]) {
-        const success = validate(x, new schema_type());
-        if (!success) {
-          return false;
-        }
-      }
-      continue;
-    }
-    if (is_class(schema_type)) {
-      const schema_class = <Class>schema_type;
-      if (actual_type === "instance Object") {
-        // Let's try to validate the object according to the class schema:
-        const success = validate(inp[property], new schema_class());
-        if (!success) {
-          return false;
-        }
-        continue;
-      }
-      // NOTE: We don't do recursive validation when
-      // a child is the correct class, assume it was
-      // created by a schema-correct function
-      const class_name = schema_class.name;
-      if (actual_type != "instance " + class_name) {
-        console.log(
-          `Error: incorrect class type on "${property}" ` +
-            `for ${name_lookup(new_object)} ` +
-            `(${name_lookup_class(schema_class)} vs ${actual_type})`
-        );
-      }
-    } else if (!(schema_type === actual_type)) {
-      console.log(
-        `Error: incorrect simple type on "${property}" ` +
-          `for ${name_lookup(new_object)} ` +
-          `(${schema_type} vs ${actual_type})`
-      );
-      return false;
-    }
-  }
-  return true;
-}
-
 export function validate<T extends SchemaClass>(
   inp: Record<string, any> | string,
   new_object: T
@@ -198,7 +125,7 @@ export function validate<T extends SchemaClass>(
     result = _copy(inp, new_object, new_object.schema(), "class");
   }
 
-  if (result === null) {
+  if (result instanceof Error) {
     return false;
   }
   return true;
@@ -230,13 +157,12 @@ function _copy<T extends SchemaClass>(
   target: WriteableStringAnyDict,
   schema: Schema,
   nesting: NestingMode
-): T | Object | null {
+): T | Object | Error {
   for (const property in schema.properties) {
     if (!(property in inp)) {
-      console.log(
-        'Error: missing property "' + property + '" for ' + name_lookup(target)
+      return new Error(
+        `Error: missing property "${property}" for ${name_lookup(target)}`
       );
-      return null;
     }
     const schema_type = schema.properties[property].type;
     if (schema_type === undefined) {
@@ -248,18 +174,16 @@ function _copy<T extends SchemaClass>(
     // Handle arrays first:
     if (schema.properties[property].array === true) {
       if (actual_type != "instance Array") {
-        console.log(`Error: property "${property}" is not an array`);
-        return null;
+        return new Error(`Error: property "${property}" is not an array`);
       }
       if (typeof schema_type === "string") {
-        console.log(`Error: arrays of simple types not supported yet`);
-        return null;
+        return new Error(`Error: arrays of simple types not supported yet`);
       }
       target[property] = new Array();
       for (let x of actual) {
         const y = _copy_single_element(x, schema_type, nesting);
-        if (y === null) {
-          return null;
+        if (y instanceof Error) {
+          return y;
         }
         target[property].push(y);
       }
@@ -273,29 +197,26 @@ function _copy<T extends SchemaClass>(
         actual_type != "instance Object" &&
         actual_type != "instance " + class_name
       ) {
-        console.log(
+        return new Error(
           `Error: incorrect class type on "${property}" ` +
             `for ${name_lookup(inp)} ` +
             `(${name_lookup_class(schema_class)} vs ${actual_type})`
         );
-        return null;
       }
       const new_target = new schema_class();
       const result = _copy(actual, new_target, new_target.schema(), nesting);
       if (result === null) {
-        return null;
       }
       target[property] = result;
       continue;
     }
     // Simple types:
     if (!(schema_type === actual_type)) {
-      console.log(
+      return new Error(
         `Error: incorrect simple type on "${property}" ` +
           `for ${name_lookup(inp)} ` +
           `(${schema_type} vs ${actual_type})`
       );
-      return null;
     }
     target[property] = inp[property];
     // Continue to next property of schema.properties
@@ -313,11 +234,11 @@ export function copy<T extends SchemaClass>(inp: T): T {
 export function convert<T extends SchemaClass>(
   inp: string | Object,
   new_object: T
-): T | null {
+): T | Error {
   if (typeof inp === "string") {
     return convert<T>(JSON.parse(inp), new_object);
   }
-  return <T | null>_copy(inp, new_object, new_object.schema(), "class");
+  return <T | Error>_copy(inp, new_object, new_object.schema(), "class");
 }
 
 export function objectify(inp: SchemaClass): Object {

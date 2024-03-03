@@ -87,7 +87,8 @@ class Chat implements SchemaClass {
     if (messages != null) {
       for (let m of messages) {
         const converted = sv.convert<Message>(m, new Message());
-        if (converted === null) {
+        if (converted instanceof Error) {
+          console.log(converted);
           continue;
         }
         this.messages.push(converted);
@@ -97,7 +98,8 @@ class Chat implements SchemaClass {
     if (users != null) {
       for (let m of users) {
         const converted = sv.convert<User>(m, new User());
-        if (converted === null) {
+        if (converted instanceof Error) {
+          console.log(converted);
           continue;
         }
         this.users.push(converted);

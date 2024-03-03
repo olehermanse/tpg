@@ -28,23 +28,25 @@ describe("convert", () => {
     let s = '{"foo": "bar"}';
     let a = convert(s, new FooBar());
     expect(a).not.toBe(null);
+    expect(a).not.toBeInstanceOf(Error);
     expect(a?.foo).toBe("bar");
   });
   test("a valid object", () => {
     let s = { foo: "bar" };
-    let a = convert(s, new FooBar());
+    let a = <FooBar>convert(s, new FooBar());
     expect(a).not.toBe(null);
+    expect(a).not.toBeInstanceOf(Error);
     expect(a?.foo).toBe("bar");
   });
   test("a wrong type", () => {
     let s = { foo: 123 };
     let a = convert(s, new FooBar());
-    expect(a).toBe(null);
+    expect(a).toBeInstanceOf(Error);
   });
   test("a missing field", () => {
     let s = {};
     let a = convert(s, new FooBar());
-    expect(a).toBe(null);
+    expect(a).toBeInstanceOf(Error);
   });
 });
 
