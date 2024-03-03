@@ -49,7 +49,7 @@ export function create_lobby(): string {
   return path;
 }
 
-export async function not_found(request_event: RequestEvent) {
+export async function not_found(request_event: any) {
   const response = new Response("404 Not Found", { status: 404 });
   await request_event.respondWith(response);
 }
