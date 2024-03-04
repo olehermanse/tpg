@@ -1,3 +1,4 @@
+import "./deno_types.ts";
 import { handle_api, not_found, create_lobby, get_lobby } from "./api.ts";
 import { runtime_tests } from "../libcommon/lobby.ts";
 
@@ -6,7 +7,6 @@ if (success === true) {
   console.log("Runtime tests succeeded");
 } else {
   console.log("Error: Runtime tests failed");
-  // @ts-ignore
   Deno.exit(1);
 }
 
@@ -55,7 +55,6 @@ async function handle_file(
 
   try {
     const headers: HeadersInit = { "content-type": content_type };
-    // @ts-ignore
     const file = await Deno.readTextFile(`./dist${filepath}`);
     const response = new Response(file, { headers: headers });
     return response;
@@ -98,5 +97,4 @@ const handler = (request: Request): Response | Promise<Response> => {
 
 const port = 3000;
 console.log("Backend running on http://localhost:3000/");
-// @ts-ignore
 Deno.serve({ port }, handler);
