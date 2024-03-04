@@ -4,7 +4,7 @@ import {
   SchemaClass,
   to_class,
   type_of,
-} from "../src/libcommon/schema";
+} from "../src/libcommon/schema.ts";
 import { describe, expect, test } from "vitest";
 
 class FooBar implements SchemaClass {

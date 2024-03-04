@@ -7,5 +7,9 @@
       "include": [],
       "exclude": ["no-explicit-any"]
     }
+  },
+  "fmt": {
+    "include": ["src/", "test"],
+    "exclude": ["src/testdata/", "data/fixtures/**/*.ts"]
   }
 }

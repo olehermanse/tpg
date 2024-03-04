@@ -3,7 +3,7 @@ import {
   standard_canvas_width,
   xy,
 } from "../libcommon/utils";
-import type { Game, XY } from "../libcommon/interfaces";
+import type { Game, XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 

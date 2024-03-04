@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { RedDots } from "../src/games/red_dots";
+import { RedDots } from "../src/games/red_dots.ts";
 
 describe("RedDots game", () => {
   test("can be created with ID", () => {

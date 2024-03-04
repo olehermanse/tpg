@@ -1,4 +1,4 @@
-import type { CR, FillStroke, XY } from "./interfaces";
+import type { CR, FillStroke, XY } from "./interfaces.ts";
 
 export function xy(x: number, y: number): XY {
   return { x: x, y: y };

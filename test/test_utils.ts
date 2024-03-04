@@ -1,4 +1,4 @@
-import { get_random_userid, text_wrap } from "../src/libcommon/utils";
+import { get_random_userid, text_wrap } from "../src/libcommon/utils.ts";
 import { describe, expect, test } from "vitest";
 
 describe("get_random_userid", () => {
