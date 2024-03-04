@@ -6,7 +6,7 @@ type HTTPMethod = "GET" | "PUT" | "UNKNOWN";
 
 function http_method(s: string): HTTPMethod {
   if (["GET", "PUT"].includes(s)) {
-    return <HTTPMethod>s;
+    return <HTTPMethod> s;
   }
   return "UNKNOWN";
 }

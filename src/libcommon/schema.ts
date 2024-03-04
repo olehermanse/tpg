@@ -147,13 +147,13 @@ function _copy_single_element(
 ): any {
   // Deep copying classes with new instances of same class
   if (nesting === "class" && is_class(t)) {
-    const cls = <Class>t;
+    const cls = <Class> t;
     return to_class(inp, new cls());
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
     // but convert to simple Object() instead of class instance
-    const instance = <SchemaClass>inp;
+    const instance = <SchemaClass> inp;
     return to_object(instance);
   }
   console.assert(!is_class(t) || nesting === "assign");
@@ -198,7 +198,7 @@ function _copy<T extends SchemaClass>(
     }
     // Here we handle a class, which has its own schema:
     if (is_class(schema_type)) {
-      const schema_class = <Class>schema_type;
+      const schema_class = <Class> schema_type;
       const class_name = schema_class.name;
       if (!is_instance(actual, "Object") && !is_instance(actual, class_name)) {
         return new Error(
@@ -230,7 +230,7 @@ function _copy<T extends SchemaClass>(
 }
 
 export function copy<T extends SchemaClass>(inp: T, new_object: T): T {
-  return <T>_copy(inp, new_object, new_object.schema(), "class");
+  return <T> _copy(inp, new_object, new_object.schema(), "class");
 }
 
 // Convert a string or plain Object into class according to schema
@@ -241,13 +241,13 @@ export function to_class<T extends SchemaClass>(
   if (typeof inp === "string") {
     return to_class<T>(JSON.parse(inp), new_object);
   }
-  return <T | Error>_copy(inp, new_object, new_object.schema(), "class");
+  return <T | Error> _copy(inp, new_object, new_object.schema(), "class");
 }
 
 export function to_object(inp: SchemaClass): object {
   const schema = inp.schema();
   const target = new Object();
-  return <object>_copy(inp, target, schema, "object");
+  return <object> _copy(inp, target, schema, "object");
 }
 
 export function to_string(inp: SchemaClass): string {

@@ -1,5 +1,5 @@
 import "./deno_types.ts";
-import { handle_api, not_found, create_lobby, get_lobby } from "./api.ts";
+import { create_lobby, get_lobby, handle_api, not_found } from "./api.ts";
 import { runtime_tests } from "../libcommon/lobby.ts";
 
 const success = runtime_tests();

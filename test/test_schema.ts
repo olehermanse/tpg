@@ -1,11 +1,11 @@
 import {
-  to_class,
   is_class,
   is_instance,
-  type_of,
   SchemaClass,
+  to_class,
+  type_of,
 } from "../src/libcommon/schema";
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 
 class FooBar implements SchemaClass {
   foo: string;
@@ -33,7 +33,7 @@ describe("to_class", () => {
   });
   test("a valid object", () => {
     let s = { foo: "bar" };
-    let a = <FooBar>to_class(s, new FooBar());
+    let a = <FooBar> to_class(s, new FooBar());
     expect(a).not.toBe(null);
     expect(a).not.toBeInstanceOf(Error);
     expect(a?.foo).toBe("bar");

@@ -1,4 +1,4 @@
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 import { RedDots } from "../src/games/red_dots";
 
 describe("RedDots game", () => {

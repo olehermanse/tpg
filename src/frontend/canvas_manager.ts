@@ -1,9 +1,9 @@
 import {
-  xy,
-  standard_canvas_width,
   standard_canvas_height,
+  standard_canvas_width,
+  xy,
 } from "../libcommon/utils";
-import type { XY, Game } from "../libcommon/interfaces";
+import type { Game, XY } from "../libcommon/interfaces";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 
@@ -21,7 +21,7 @@ class Application {
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
-    scale: number
+    scale: number,
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -48,7 +48,7 @@ class Application {
       0,
       this.canvas_width,
       this.canvas_height,
-      "#000000"
+      "#000000",
     );
     this.game.draw(this.ctx);
   }
@@ -100,7 +100,7 @@ class Application {
         }
         this.key_down(event.key);
       },
-      false
+      false,
     );
 
     document.addEventListener(
@@ -108,7 +108,7 @@ class Application {
       (event) => {
         this.key_up(event.key);
       },
-      false
+      false,
     );
   }
 

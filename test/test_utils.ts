@@ -1,5 +1,5 @@
 import { get_random_userid, text_wrap } from "../src/libcommon/utils";
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe("get_random_userid", () => {
   test("type", () => {
@@ -53,7 +53,7 @@ describe("text_wrap", () => {
     expect(text_wrap("abc", 3)).toBe("abc");
     expect(text_wrap("abcd", 3)).toBe("ab-\ncd");
     expect(text_wrap("abcdefghijklmnopqrstuv", 4)).toBe(
-      "abc-\ndef-\nghi-\njkl-\nmno-\npqr-\nstu-\nv"
+      "abc-\ndef-\nghi-\njkl-\nmno-\npqr-\nstu-\nv",
     );
     expect(text_wrap("A brown fox.", 7)).toBe("A brown\nfox.");
     expect(text_wrap("A brown fox.", 5)).toBe("A\nbrown\nfox.");

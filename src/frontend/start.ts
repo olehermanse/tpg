@@ -1,13 +1,13 @@
 import { Application } from "./canvas_manager";
 import {
-  get_random_username,
-  get_random_userid,
   get_cookie,
-  set_cookie,
+  get_random_userid,
+  get_random_username,
   left_pad,
+  set_cookie,
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
-import { Chat, Message, User, runtime_tests } from "../libcommon/lobby";
+import { Chat, Message, runtime_tests, User } from "../libcommon/lobby";
 import * as sv from "../libcommon/schema.ts";
 
 let canvas_manager: Application | null = null;
@@ -44,7 +44,7 @@ function render_chat_log(chat_log: Chat | null) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement>(
+  const input: HTMLInputElement = <HTMLInputElement> (
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;

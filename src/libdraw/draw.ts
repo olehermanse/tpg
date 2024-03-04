@@ -39,7 +39,7 @@ function sxywh(x: number, y: number, w: number, h: number): XYWH {
 function _setLineWidth(
   ctx: CanvasRenderingContext2D,
   r: number,
-  lineWidth: number | null
+  lineWidth: number | null,
 ) {
   if (lineWidth === null) {
     ctx.lineWidth = Math.round(r * LINE_RATIO);
@@ -55,7 +55,7 @@ function _line(
   x2: number,
   y2: number,
   strokeStyle: string,
-  lineWidth: number
+  lineWidth: number,
 ) {
   ctx.strokeStyle = strokeStyle;
   ctx.lineWidth = lineWidth;
@@ -72,7 +72,7 @@ function line(
   x2: number,
   y2: number,
   strokeStyle: string,
-  lineWidth: number
+  lineWidth: number,
 ) {
   const a = sxy(x1, y1);
   const b = sxy(x2, y2);
@@ -86,7 +86,7 @@ function _circle(
   r: number,
   fill: string | null = null,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   _setLineWidth(ctx, r, lineWidth);
   ctx.beginPath();
@@ -108,7 +108,7 @@ function circle(
   r: number,
   fill: string | null = null,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   const c = sxyr(x, y, r);
   _circle(ctx, c.x, c.y, c.r, fill, stroke, lineWidth);
@@ -122,7 +122,7 @@ function _triangle(
   angle: number,
   fill: string,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   _setLineWidth(ctx, r, lineWidth);
 
@@ -157,7 +157,7 @@ function triangle(
   angle: number,
   fill: string,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   const t = sxyr(x, y, r);
   _triangle(ctx, t.x, t.y, t.r, angle, fill, stroke, lineWidth);
@@ -171,7 +171,7 @@ function _rectangle(
   h: number,
   fill: string | null = null,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   _setLineWidth(ctx, w / 2, lineWidth);
 
@@ -193,7 +193,7 @@ function rectangle(
   h: number,
   fill: string | null = null,
   stroke: string | null = null,
-  lineWidth: number | null = null
+  lineWidth: number | null = null,
 ) {
   const r = sxywh(x, y, w, h);
   _rectangle(ctx, r.x, r.y, r.w, r.h, fill, stroke, lineWidth);
@@ -205,7 +205,7 @@ function _image(
   x: number,
   y: number,
   w: number,
-  h: number
+  h: number,
 ) {
   ctx.drawImage(img, x, y, w, h);
 }
@@ -216,7 +216,7 @@ function image(
   x: number,
   y: number,
   w: number,
-  h: number
+  h: number,
 ) {
   const i = sxywh(x, y, w, h);
   _image(ctx, img, i.x, i.y, i.w, i.h);
@@ -252,7 +252,7 @@ function text(
   y: number,
   string: string,
   c: string,
-  size: number
+  size: number,
 ) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -266,7 +266,7 @@ function text_bottom_right(
   y: number,
   string: string,
   c: string,
-  size: number
+  size: number,
 ) {
   ctx.textAlign = "right";
   ctx.textBaseline = "bottom";
@@ -280,7 +280,7 @@ function text_top_left(
   y: number,
   string: string,
   c: string,
-  size: number
+  size: number,
 ) {
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
@@ -296,7 +296,7 @@ function fill_text(
   c: string,
   font: number,
   textAlign: string,
-  textBaseline: string
+  textBaseline: string,
 ) {
   x = x * SCALE();
   y = y * SCALE();
@@ -315,7 +315,7 @@ function grid(
   x0: number,
   y0: number,
   width: number,
-  height: number
+  height: number,
 ) {
   for (let x = size; x < width; x += size) {
     line(ctx, x, y0, x, y0 + height, GRID_COLOR, size / 25);
@@ -339,7 +339,7 @@ function healthbar(
   w: number,
   h: number,
   current: number,
-  max: number
+  max: number,
 ) {
   const ratio = current / max;
   x -= w / 2;
