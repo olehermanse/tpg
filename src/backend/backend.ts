@@ -1,10 +1,4 @@
-import {
-  handle_api,
-  not_found,
-  RequestEvent,
-  create_lobby,
-  get_lobby,
-} from "./api.ts";
+import { handle_api, not_found, create_lobby, get_lobby } from "./api.ts";
 import { runtime_tests } from "../libcommon/lobby.ts";
 
 const success = runtime_tests();
@@ -55,7 +49,7 @@ function get_content_type(path: string): string {
   return "";
 }
 
-async function handle_file(request_event: RequestEvent, filepath: string) {
+async function handle_file(request_event: any, filepath: string) {
   if (filepath === "/") {
     filepath = "/index.html";
   }
@@ -83,7 +77,7 @@ async function handle_file(request_event: RequestEvent, filepath: string) {
   return;
 }
 
-async function redirect(request_event: RequestEvent, newpath: string) {
+async function redirect(request_event: any, newpath: string) {
   const response = new Response("", {
     status: 302,
     headers: { Location: newpath },
