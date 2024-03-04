@@ -84,7 +84,7 @@ class Application {
       this.mouse_move(x, y);
     });
 
-    window.addEventListener("mouseup", (e) => {
+    addEventListener("mouseup", (e) => {
       const x = this.offset_to_canvas(e.offsetX, canvas);
       const y = this.offset_to_canvas(e.offsetY, canvas);
       this.mouse_release(x, y);

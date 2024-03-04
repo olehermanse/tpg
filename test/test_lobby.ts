@@ -41,7 +41,7 @@ describe("User", () => {
     expect(sv.is_valid({}, new User())).toBe(false);
 
     // Instantiate based on schema:
-    const user_instance = sv.to_class<User>(user_object, new User());
+    const user_instance = <User>sv.to_class(user_object, new User());
     expect(user_instance).not.toBeInstanceOf(Error);
     expect(user_instance?.username).toBe("Alice");
 
@@ -55,13 +55,13 @@ describe("User", () => {
     expect(user_string).toContain('"Alice"');
 
     // Parse:
-    const user_parsed = sv.to_class<User>(user_string, new User());
+    const user_parsed = <User>sv.to_class(user_string, new User());
     expect(user_parsed).not.toBeInstanceOf(Error);
     expect(user_parsed).toBeInstanceOf(User);
     expect(user_parsed?.username).toBe("Alice");
 
     // Copy:
-    const user_copy: User = sv.copy(<User>user_parsed);
+    const user_copy: User = sv.copy(user_parsed, new User());
     expect(user_copy).not.toBeInstanceOf(Error);
     expect(user_copy).toBeInstanceOf(User);
     expect(user_copy.username).toBe("Alice");
@@ -161,7 +161,7 @@ describe("Message", () => {
     expect(sv.is_valid(message_parsed, new Message())).toBe(true);
 
     // Copy:
-    const message_copy = sv.copy(message_parsed);
+    const message_copy = sv.copy(message_parsed, new Message());
     expect(message_copy).not.toBeInstanceOf(Error);
     expect(message_copy).toBeInstanceOf(Message);
     expect(message_copy.user.username).toBe("Cheetah");
@@ -218,7 +218,7 @@ describe("Chat", () => {
     expect(sv.is_valid({}, new Chat())).toBe(false);
 
     // Instantiate based on schema:
-    const data_instance = sv.to_class(input_string, new Chat());
+    const data_instance = <Chat>sv.to_class(input_string, new Chat());
     expect(data_instance).not.toBeInstanceOf(Error);
     expect(data_instance).toBeInstanceOf(Chat);
 
@@ -237,7 +237,7 @@ describe("Chat", () => {
     expect(sv.is_valid(data_parsed, new Chat())).toBe(true);
 
     // Copy:
-    const data_copy = sv.copy(data_parsed);
+    const data_copy = sv.copy(data_parsed, new Chat());
     expect(data_copy).not.toBeInstanceOf(Error);
     expect(data_copy).toBeInstanceOf(Chat);
     // @ts-ignore

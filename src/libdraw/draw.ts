@@ -228,11 +228,11 @@ function _text(
   y: number,
   string: string,
   c: string,
-  size: number
+  size: number,
 ) {
   if (string.includes("\n")) {
     const strings = string.split("\n");
-    for (let s of strings) {
+    for (const s of strings) {
       _text(ctx, x, y, s, c, size);
       y += size * 1.2;
     }

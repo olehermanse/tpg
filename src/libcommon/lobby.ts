@@ -43,7 +43,7 @@ export class Message implements SchemaClass {
   }
 
   constructor(user?: User, body?: string, timestamp?: number) {
-    this.user = user ? sv.copy(user) : new User();
+    this.user = user ? sv.copy(user, new User()) : new User();
     this.body = body ?? "";
     this.timestamp = timestamp ?? Date.now();
   }
@@ -71,7 +71,7 @@ export class Chat implements SchemaClass {
   }
 
   get_username(userid: string): string | null {
-    for (let user of this.users) {
+    for (const user of this.users) {
       if (user.userid === userid) {
         return user.username;
       }
@@ -80,12 +80,12 @@ export class Chat implements SchemaClass {
   }
 
   constructor(
-    messages: null | Message[] | Object[] = null,
-    users: null | User[] | Object[] = null
+    messages: null | Message[] | object[] = null,
+    users: null | User[] | object[] = null,
   ) {
     this.messages = [];
     if (messages != null) {
-      for (let m of messages) {
+      for (const m of messages) {
         const to_classed = sv.to_class<Message>(m, new Message());
         if (to_classed instanceof Error) {
           console.log(to_classed);
@@ -96,7 +96,7 @@ export class Chat implements SchemaClass {
     }
     this.users = [];
     if (users != null) {
-      for (let m of users) {
+      for (const m of users) {
         const to_classed = sv.to_class<User>(m, new User());
         if (to_classed instanceof Error) {
           console.log(to_classed);
@@ -134,7 +134,7 @@ export class Lobby implements SchemaClass {
   }
 
   find_game(game_id: string): any | null {
-    for (let x of this.games) {
+    for (const x of this.games) {
       if (x.id === game_id) {
         return x;
       }
@@ -149,7 +149,7 @@ export function runtime_tests(): boolean {
     console.log("sv.type_of(" + rep + ") = " + sv.type_of(actual));
     return sv.assertion(
       sv.type_of(actual) === expected,
-      `type_of(${rep}) === ${expected}`
+      `type_of(${rep}) === ${expected}`,
     );
   }
 

@@ -18,7 +18,7 @@ function stripPrefix(prefix: string, string: string) {
   return string.slice(prefix.length);
 }
 
-let lobbies: { [key: string]: Lobby } = {};
+const lobbies: { [key: string]: Lobby } = {};
 
 export function get_lobby(path: string): Lobby | null {
   if (path in lobbies) {
@@ -51,7 +51,7 @@ function api_lobbies(method: HTTPMethod, path: string, request: any): Response {
     return not_found(request);
   }
   console.log("GET " + path);
-  let lobby = get_lobby(stripPrefix("/api/lobbies", path));
+  const lobby = get_lobby(stripPrefix("/api/lobbies", path));
   if (lobby === null) {
     console.log(" -> 404");
     return not_found(request);
@@ -61,7 +61,7 @@ function api_lobbies(method: HTTPMethod, path: string, request: any): Response {
 }
 
 async function api_chat(method: HTTPMethod, path: string, request: Request) {
-  let lobby = get_lobby(stripPrefix("/api/chat", path));
+  const lobby = get_lobby(stripPrefix("/api/chat", path));
   if (lobby === null) {
     return not_found(request);
   }

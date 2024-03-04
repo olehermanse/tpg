@@ -38,7 +38,7 @@ function render_chat_log(chat_log: Chat | null) {
         v.user.username +
         ":</b> " +
         v.body +
-        "<br>"
+        "<br>",
     )
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
@@ -52,8 +52,8 @@ function on_chat_send() {
     return;
   }
   input.value = "";
-  let userid = get_cookie("userid") ?? "";
-  let username = get_cookie("username") ?? "Unknown";
+  const userid = get_cookie("userid") ?? "";
+  const username = get_cookie("username") ?? "Unknown";
   const user = new User(userid, username);
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
@@ -100,7 +100,7 @@ function user_init() {
 
 function chat_init() {
   chat_refresh();
-  let form = document.getElementById("chat-input-form");
+  const form = document.getElementById("chat-input-form");
   if (form === null) {
     return;
   }
@@ -111,8 +111,8 @@ function chat_init() {
 }
 
 function canvas_init() {
-  let canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
-  let scale = window.devicePixelRatio;
+  const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
+  const scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     return;
@@ -121,7 +121,7 @@ function canvas_init() {
   // canvas.style.width = `${canvas_manager.width}px`;
   // canvas.style.height = `${canvas_manager.height}px`;
 
-  window.setInterval(() => {
+  setInterval(() => {
     if (canvas_manager != null) {
       canvas_manager.tick(10);
     }

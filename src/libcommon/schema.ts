@@ -14,9 +14,10 @@ export interface Schema {
   properties: Record<string, Property>;
 }
 
-export interface SchemaClass {
-  schema(): Schema;
-  class_name?(): string;
+export abstract class SchemaClass {
+  abstract schema(): Schema;
+  abstract class_name?(): string;
+  constructor() {}
 }
 
 export interface WriteableStringAnyDict {
@@ -82,7 +83,7 @@ export function is_instance(a: any, name?: string): boolean {
 }
 
 function name_lookup_class(cls: Class<SchemaClass>): string {
-  let tmp = new cls();
+  const tmp = new cls();
   return name_lookup(tmp);
 }
 
@@ -151,12 +152,11 @@ function _copy_single_element(
   }
   if (nesting === "object" && is_class(t)) {
     // We've found a class, and we'd like to do a deep copy
-    // but to_class to simple Object()
-    //@ts-ignore
-    return to_object(inp);
+    // but convert to simple Object() instead of class instance
+    const instance = <SchemaClass>inp;
+    return to_object(instance);
   }
   console.assert(!is_class(t) || nesting === "assign");
-  //@ts-ignore
   return inp;
 }
 
@@ -165,7 +165,7 @@ function _copy<T extends SchemaClass>(
   target: WriteableStringAnyDict,
   schema: Schema,
   nesting: NestingMode,
-): T | Object | Error {
+): T | object | Error {
   for (const property in schema.properties) {
     if (!(property in inp)) {
       return new Error(
@@ -186,8 +186,8 @@ function _copy<T extends SchemaClass>(
       if (typeof schema_type === "string") {
         return new Error(`Error: arrays of simple types not supported yet`);
       }
-      target[property] = new Array();
-      for (let x of actual) {
+      target[property] = [];
+      for (const x of actual) {
         const y = _copy_single_element(x, schema_type, nesting);
         if (y instanceof Error) {
           return y;
@@ -209,7 +209,8 @@ function _copy<T extends SchemaClass>(
       }
       const new_target = new schema_class();
       const result = _copy(actual, new_target, new_target.schema(), nesting);
-      if (result === null) {
+      if (result instanceof Error) {
+        return result;
       }
       target[property] = result;
       continue;
@@ -228,15 +229,13 @@ function _copy<T extends SchemaClass>(
   return target;
 }
 
-export function copy<T extends SchemaClass>(inp: T): T {
-  //@ts-ignore
-  const new_object = new inp.constructor();
+export function copy<T extends SchemaClass>(inp: T, new_object: T): T {
   return <T>_copy(inp, new_object, new_object.schema(), "class");
 }
 
 // Convert a string or plain Object into class according to schema
 export function to_class<T extends SchemaClass>(
-  inp: string | Object,
+  inp: string | object,
   new_object: T,
 ): T | Error {
   if (typeof inp === "string") {
@@ -245,10 +244,10 @@ export function to_class<T extends SchemaClass>(
   return <T | Error>_copy(inp, new_object, new_object.schema(), "class");
 }
 
-export function to_object(inp: SchemaClass): Object {
+export function to_object(inp: SchemaClass): object {
   const schema = inp.schema();
-  let target = new Object();
-  return <Object>_copy(inp, target, schema, "object");
+  const target = new Object();
+  return <object>_copy(inp, target, schema, "object");
 }
 
 export function to_string(inp: SchemaClass): string {

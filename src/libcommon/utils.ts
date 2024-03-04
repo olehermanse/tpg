@@ -32,7 +32,7 @@ export function number_string(n: number | string): string {
 
   let result = "";
   let length = 0;
-  for (let c of s.split("").reverse()) {
+  for (const c of s.split("").reverse()) {
     result += c;
     length += 1;
     if (length % 3 === 0) {
@@ -129,9 +129,9 @@ export class TextWrapper {
   }
 
   get_fragments(word: string): string[] {
-    let fragments = [];
+    const fragments = [];
     if (word.includes("-")) {
-      for (let fragment of word.split("-")) {
+      for (const fragment of word.split("-")) {
         if (fragment.length > this.fragment_length) {
           fragments.push(...this.get_fragments(fragment));
         } else {
@@ -141,7 +141,7 @@ export class TextWrapper {
       return fragments;
     }
     while (word.length > 0) {
-      let fragment = word.slice(0, this.fragment_length);
+      const fragment = word.slice(0, this.fragment_length);
       fragments.push(fragment);
       word = word.slice(this.fragment_length);
     }
@@ -150,7 +150,7 @@ export class TextWrapper {
 
   fragment_word() {
     const fragments = this.get_fragments(this.word).join("-\n").split("\n");
-    for (let fragment of fragments) {
+    for (const fragment of fragments) {
       this.word = fragment;
       this.push_word();
     }
@@ -159,7 +159,7 @@ export class TextWrapper {
   }
 
   main_loop() {
-    for (let c of this.remaining) {
+    for (const c of this.remaining) {
       if (c === " ") {
         this.push_word();
       } else {
@@ -183,7 +183,7 @@ export class TextWrapper {
 }
 
 export function text_wrap(text: any, line_length: any): string {
-  let tw = new TextWrapper(text, line_length);
+  const tw = new TextWrapper(text, line_length);
   return tw.run();
 }
 
@@ -234,7 +234,7 @@ export function get_random_userid(): string {
   return digits.join("");
 }
 
-export function left_pad(s: string | number, n: number, pad: string = " ") {
+export function left_pad(s: string | number, n: number, pad = " ") {
   let result = "" + s;
   while (result.length < n) {
     result = pad + result;
