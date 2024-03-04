@@ -10,15 +10,6 @@ if (success === true) {
   Deno.exit(1);
 }
 
-// Start listening on port 3000 of localhost.
-// @ts-ignore
-const server = Deno.listen({ port: 3000 });
-console.log("Backend running on http://localhost:3000/");
-
-for await (const conn of server) {
-  handle_http(conn).catch(console.error);
-}
-
 function illegal_url(path: string) {
   return (
     !path.startsWith("/") ||
@@ -49,72 +40,63 @@ function get_content_type(path: string): string {
   return "";
 }
 
-async function handle_file(request_event: any, filepath: string) {
+async function handle_file(
+  request: Request,
+  filepath: string,
+): Promise<Response> {
   if (filepath === "/") {
     filepath = "/index.html";
   }
 
   const content_type: string = get_content_type(filepath);
   if (content_type === "") {
-    await not_found(request_event);
-    return;
+    return not_found(request);
   }
 
-  // Try opening the file
-  let file;
   try {
+    const headers: HeadersInit = { "content-type": content_type };
     // @ts-ignore
-    file = await Deno.open(`./dist${filepath}`, { read: true });
+    const file = await Deno.readTextFile(`./dist${filepath}`);
+    const response = new Response(file, { headers: headers });
+    return response;
   } catch {
-    await not_found(request_event);
-    return;
+    return not_found(request);
   }
-
-  const readable_stream = file.readable;
-  const headers: HeadersInit = { "content-type": content_type };
-  const response = new Response(readable_stream, { headers: headers });
-  await request_event.respondWith(response);
-  return;
 }
 
-async function redirect(request_event: any, newpath: string) {
-  const response = new Response("", {
+function redirect(newpath: string): Response {
+  return new Response("", {
     status: 302,
     headers: { Location: newpath },
   });
-  await request_event.respondWith(response);
 }
 
-// @ts-ignore
-async function handle_http(conn: Deno.Conn) {
-  // @ts-ignore
-  const http_connection = Deno.serveHttp(conn);
-  for await (const request_event of http_connection) {
-    const url = new URL(request_event.request.url);
-    let filepath = decodeURIComponent(url.pathname);
-
-    if (illegal_url(filepath)) {
-      await not_found(request_event);
-      continue;
-    }
-    if (filepath === "/" || filepath === "/index.html") {
-      const path = create_lobby();
-      await redirect(request_event, path);
-      continue;
-    }
-    if (filepath.startsWith("/api/")) {
-      await handle_api(request_event, filepath);
-      continue;
-    }
-
-    if (/^\/[0-9]{5}$/.test(filepath)) {
-      if (get_lobby(filepath)) {
-        filepath = "/index.html";
-      } else {
-        await redirect(request_event, "/");
-        continue;
-      }
-    }
-    await handle_file(request_event, filepath);
+// Start listening on port 3000 of localhost.
+const handler = (request: Request): Response | Promise<Response> => {
+  const url = new URL(request.url);
+  let filepath = decodeURIComponent(url.pathname);
+  if (illegal_url(filepath)) {
+    return not_found(request);
   }
-}
+  if (filepath === "/" || filepath === "/index.html") {
+    const path = create_lobby();
+    return redirect(path);
+  }
+  if (filepath.startsWith("/api/")) {
+    return handle_api(request, filepath);
+  }
+
+  if (/^\/[0-9]{5}$/.test(filepath)) {
+    if (get_lobby(filepath)) {
+      filepath = "/index.html";
+    } else {
+      return redirect("/");
+    }
+  }
+  return handle_file(request, filepath);
+};
+
+const port = 3000;
+console.log("Backend running on http://localhost:3000/");
+// @ts-ignore
+Deno.serve({ port }, handler);

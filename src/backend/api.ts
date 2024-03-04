@@ -2,16 +2,14 @@ import { Lobby, Message } from "../libcommon/lobby.ts";
 import { randint } from "../libcommon/utils.ts";
 import * as sv from "../libcommon/schema.ts";
 
-type HTTPMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  | "PATCH"
-  | "OPTIONS"
-  | "HEAD"
-  | "CONNECT"
-  | "TRACE";
+type HTTPMethod = "GET" | "PUT" | "UNKNOWN";
+
+function http_method(s: string): HTTPMethod {
+  if (["GET", "PUT"].includes(s)) {
+    return <HTTPMethod>s;
+  }
+  return "UNKNOWN";
+}
 
 function stripPrefix(prefix: string, string: string) {
   if (!string.startsWith(prefix)) {
@@ -38,9 +36,8 @@ export function create_lobby(): string {
   return path;
 }
 
-export async function not_found(request_event: any) {
-  const response = new Response("404 Not Found", { status: 404 });
-  await request_event.respondWith(response);
+export function not_found(_request: Request) {
+  return new Response("404 Not Found", { status: 404 });
 }
 
 function json_response(json: string): Response {
@@ -49,60 +46,47 @@ function json_response(json: string): Response {
   return response;
 }
 
-async function api_lobbies(
-  method: HTTPMethod,
-  path: string,
-  request_event: any,
-) {
+function api_lobbies(method: HTTPMethod, path: string, request: any): Response {
   if (method != "GET") {
-    await not_found(request_event);
-    return;
+    return not_found(request);
   }
   console.log("GET " + path);
   let lobby = get_lobby(stripPrefix("/api/lobbies", path));
   if (lobby === null) {
-    await not_found(request_event);
     console.log(" -> 404");
-    return;
+    return not_found(request);
   }
-  await request_event.respondWith(json_response(sv.to_string(lobby)));
   console.log(" -> " + sv.to_string(lobby));
+  return json_response(sv.to_string(lobby));
 }
 
-async function api_chat(method: HTTPMethod, path: string, request_event: any) {
-  if (!["GET", "PUT"].includes(method)) {
-    await not_found(request_event);
-    return;
-  }
+async function api_chat(method: HTTPMethod, path: string, request: Request) {
   let lobby = get_lobby(stripPrefix("/api/chat", path));
   if (lobby === null) {
-    await not_found(request_event);
-    return;
+    return not_found(request);
   }
   if (method === "PUT") {
-    const body = await request_event.request.json();
+    const body = await request.json();
     console.log("PUT " + path + " " + JSON.stringify(body));
     const message = sv.to_class(body, new Message());
     if (message instanceof Error) {
-      await not_found(request_event);
       console.log(` -> 404 (${message.message})`);
-      return;
+      return not_found(request);
     }
     lobby.chat.messages.push(message);
     console.log(" -> " + sv.to_string(lobby.chat));
+    return json_response(sv.to_string(lobby.chat));
   }
-  await request_event.respondWith(json_response(sv.to_string(lobby.chat)));
+  return not_found(request);
 }
 
-export async function handle_api(request_event: any, path: string) {
-  const method = request_event.request.method;
+export function handle_api(request: Request, path: string) {
+  const method = http_method(request.method);
   if (path.startsWith("/api/lobbies/")) {
-    api_lobbies(method, path, request_event);
-    return;
+    return api_lobbies(method, path, request);
   }
   if (path.startsWith("/api/chat/")) {
-    api_chat(method, path, request_event);
-    return;
+    return api_chat(method, path, request);
   }
-  await not_found(request_event);
+  return not_found(request);
 }
