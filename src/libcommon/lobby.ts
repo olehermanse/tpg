@@ -1,7 +1,9 @@
 import { RedDots } from "../games/red_dots.ts";
 import { User } from "./user.ts";
-import { Schema, SchemaClass } from "./schema.ts";
+import { Class, Schema, SchemaClass } from "./schema.ts";
 import * as sv from "./schema.ts";
+import { BaseGame } from "./game.ts";
+import { TicTacToe } from "../games/tic_tac_toe.ts";
 
 export class Message implements SchemaClass {
   user: User;
@@ -97,6 +99,16 @@ export class Chat implements SchemaClass {
   }
 }
 
+function game_selector(data: any): Class<BaseGame> | null {
+  if (data.name === "RedDots") {
+    return RedDots;
+  }
+  if (data.name === "TicTacToe") {
+    return TicTacToe;
+  }
+  return null;
+}
+
 export class Lobby implements SchemaClass {
   path: string;
   chat: Chat;
@@ -110,16 +122,16 @@ export class Lobby implements SchemaClass {
       properties: {
         path: { type: "string" },
         chat: { type: Chat },
-        games: { type: undefined },
+        games: { type: game_selector, array: true },
       },
     };
   }
 
-  constructor(path: string) {
-    this.path = path;
+  constructor(path?: string) {
+    this.path = path ?? "";
     this.chat = new Chat();
     this.games = [];
-    this.games.push(new RedDots("foo"));
+    this.games.push(new RedDots());
   }
 
   find_game(game_id: string): any | null {

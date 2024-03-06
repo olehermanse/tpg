@@ -5,9 +5,14 @@ export type Class<T = any> = {
 
 export type NestingMode = "class" | "object" | "assign";
 
+export interface Selector {
+  (data: Record<string, any>): Class<SchemaClass> | null;
+}
+
 export interface Property {
-  type: string | Class | undefined;
+  type: string | Class | Selector | undefined;
   array?: boolean;
+  // selector?: Selector;
 }
 
 export interface Schema {
@@ -80,6 +85,14 @@ export function is_instance(a: any, name?: string): boolean {
   }
   // Match name:
   return t === "instance " + name;
+}
+
+export function is_function(a: any) {
+  return type_of(a) === "function";
+}
+
+export function is_simple(a: any): boolean {
+  return !(is_class(a) || is_instance(a) || is_function(a));
 }
 
 function name_lookup_class(cls: Class<SchemaClass>): string {
@@ -175,7 +188,7 @@ function _copy<T extends SchemaClass>(
     const schema_type = schema.properties[property].type;
     if (schema_type === undefined) {
       target[property] = inp[property];
-      continue; // Setting type to undefined disables validation and copying
+      continue; // Disabled validation, simple assignment
     }
     const actual = inp[property];
     // Handle arrays first:
@@ -184,16 +197,61 @@ function _copy<T extends SchemaClass>(
         return new Error(`Error: property "${property}" is not an array`);
       }
       if (typeof schema_type === "string") {
-        return new Error(`Error: arrays of simple types not supported yet`);
+        // schema_type = 'string', 'number', 'null', 'boolean', 'undefined'...
+        target[property] = [];
+        for (const x of actual) {
+          if (type_of(x) != schema_type) {
+            return new Error(
+              `Error: Found invalid type in simple array for ${property} (${
+                type_of(
+                  x,
+                )
+              } vs ${schema_type})`,
+            );
+          }
+          target[property].push(x);
+        }
       }
       target[property] = [];
       for (const x of actual) {
-        const y = _copy_single_element(x, schema_type, nesting);
+        let element_type: any = schema_type;
+        if (type_of(element_type) === "function") {
+          element_type = (<Selector> element_type)(x);
+        }
+        if (element_type === null) {
+          return new Error(
+            `Error: unable to select the type for element of array '${property}'`,
+          );
+        }
+        const y = _copy_single_element(x, element_type, nesting);
         if (y instanceof Error) {
           return y;
         }
         target[property].push(y);
       }
+      continue;
+    }
+    // Here we handle a function selector:
+    if (type_of(schema_type) === "function") {
+      const selector = <Selector> schema_type;
+      const schema_class = selector(actual);
+      if (schema_class === null) {
+        return new Error(`Error: unrecognized type for "${property}" `);
+      }
+      const class_name = schema_class.name;
+      if (!is_instance(actual, "Object") && !is_instance(actual, class_name)) {
+        return new Error(
+          `Error: incorrect class type on "${property}" ` +
+            `for ${name_lookup(inp)} ` +
+            `(${name_lookup_class(schema_class)} vs ${type_of(actual)})`,
+        );
+      }
+      const new_target = new schema_class();
+      const result = _copy(actual, new_target, new_target.schema(), nesting);
+      if (result instanceof Error) {
+        return result;
+      }
+      target[property] = result;
       continue;
     }
     // Here we handle a class, which has its own schema:
@@ -247,7 +305,12 @@ export function to_class<T extends SchemaClass>(
 export function to_object(inp: SchemaClass): object {
   const schema = inp.schema();
   const target = new Object();
-  return <object> _copy(inp, target, schema, "object");
+  const object = <object> _copy(inp, target, schema, "object");
+  if (object instanceof Error) {
+    console.log("Unexpected error in to_object:");
+    console.log(object);
+  }
+  return <object> object;
 }
 
 export function to_string(inp: SchemaClass): string {

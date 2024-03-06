@@ -75,7 +75,7 @@ function on_chat_command(command: string) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement>(
+  const input: HTMLInputElement = <HTMLInputElement> (
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;

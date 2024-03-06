@@ -1,12 +1,6 @@
-import {
-  get_random_userid,
-  standard_canvas_height,
-  standard_canvas_width,
-} from "../libcommon/utils.ts";
-import { FrontendGame } from "../libcommon/game.ts";
+import { BaseGame } from "../libcommon/game.ts";
 import { Draw } from "../libdraw/draw.ts";
 import { Schema } from "../libcommon/schema.ts";
-import { User } from "../libcommon/user.ts";
 
 class XY {
   x: number;
@@ -25,32 +19,21 @@ class XY {
   }
 }
 
-export class RedDots implements FrontendGame {
-  id: string;
-  name: string;
-  width: number;
-  height: number;
+export class RedDots extends BaseGame {
   dots: XY[];
-  players: User[];
-  constructor(id?: string) {
-    this.id = id ?? get_random_userid();
-    this.name = "RedDots";
-    this.width = standard_canvas_width();
-    this.height = standard_canvas_height();
+  constructor() {
+    super();
     this.dots = [];
-    this.players = [];
+  }
+
+  class_name(): string {
+    return "RedDots";
   }
 
   schema(): Schema {
-    return {
-      properties: {
-        id: { type: "string" },
-        name: { type: "string" },
-        width: { type: "number" },
-        height: { type: "number" },
-        dots: { type: XY, array: true },
-      },
-    };
+    const schema = super.base_schema();
+    schema["properties"]["dots"] = { type: XY, array: true };
+    return schema;
   }
 
   mouse_click(x: number, y: number) {

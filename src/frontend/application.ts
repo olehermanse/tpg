@@ -4,9 +4,9 @@ import {
   xy,
 } from "../libcommon/utils";
 import { XY } from "../libcommon/interfaces.ts";
-import { FrontendGame } from "../libcommon/game.ts";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
+import { BaseGame } from "../libcommon/game.ts";
 
 class CanvasGame {
   canvas: HTMLCanvasElement;
@@ -17,13 +17,13 @@ class CanvasGame {
   real_canvas_width: number;
   real_canvas_height: number;
   mouse: XY;
-  game: FrontendGame;
+  game: BaseGame;
 
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
-    game: FrontendGame,
+    game: BaseGame,
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -39,7 +39,7 @@ class CanvasGame {
     this.setup_events(canvas);
   }
 
-  set_game(game: FrontendGame) {
+  set_game(game: BaseGame) {
     this.game = game;
   }
 
@@ -121,7 +121,7 @@ class CanvasGame {
 
 class Application {
   _active_game: number;
-  games: FrontendGame[];
+  games: BaseGame[];
   canvas_game: CanvasGame;
 
   constructor(
@@ -134,7 +134,7 @@ class Application {
     this.canvas_game = new CanvasGame(canvas, ctx, scale, this.games[0]);
   }
 
-  get active_game(): FrontendGame {
+  get active_game(): BaseGame {
     return this.games[this._active_game];
   }
 

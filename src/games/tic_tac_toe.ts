@@ -1,33 +1,22 @@
-import {
-  standard_canvas_height,
-  standard_canvas_width,
-} from "../libcommon/utils.ts";
-import { FrontendGame } from "../libcommon/game.ts";
-import { User } from "../libcommon/user.ts";
+import { BaseGame } from "../libcommon/game.ts";
 import { Schema } from "../libcommon/schema.ts";
 
-export class TicTacToe implements FrontendGame {
-  id: string = "";
-  name: string = "TicTacToe";
-  players: User[] = [];
-  width = standard_canvas_width();
-  height = standard_canvas_height();
-  board: string[] = new Array(9).fill(" ");
+export class TicTacToe extends BaseGame {
+  board: string[];
 
-  constructor(id?: string) {
-    this.id = id ?? "";
+  constructor() {
+    super();
+    this.board = new Array(9).fill(" ");
+  }
+
+  class_name(): string {
+    return "TicTacToe";
   }
 
   schema(): Schema {
-    return {
-      properties: {
-        id: { type: "string" },
-        name: { type: "string" },
-        width: { type: "number" },
-        height: { type: "number" },
-        board: { type: "string", array: true },
-      },
-    };
+    const schema = super.base_schema();
+    schema["properties"]["board"] = { type: "string", array: true };
+    return schema;
   }
 
   mouse_click(_x: number, _y: number) {

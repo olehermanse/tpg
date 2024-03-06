@@ -66,8 +66,8 @@ async function api_chat(method: HTTPMethod, path: string, request: Request) {
     return not_found(request);
   }
   if (method === "GET") {
-    console.log("GET " + path);
-    console.log(" -> " + sv.to_string(lobby.chat));
+    // console.log("GET " + path);
+    // console.log(" -> " + sv.to_string(lobby.chat));
     return json_response(sv.to_string(lobby.chat));
   }
   if (method === "PUT") {

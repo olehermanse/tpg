@@ -2,6 +2,9 @@ import { Chat, Lobby, Message, runtime_tests } from "../src/libcommon/lobby.ts";
 import { User } from "../src/libcommon/user.ts";
 import { describe, expect, test } from "vitest";
 import * as sv from "../src/libcommon/schema.ts";
+import { BaseGame } from "../src/libcommon/game.ts";
+import { RedDots } from "../src/games/red_dots.ts";
+import { TicTacToe } from "../src/games/tic_tac_toe.ts";
 
 describe("User", () => {
   test("constructor", () => {
@@ -266,12 +269,52 @@ describe("Lobby", () => {
     expect(lobby.games).toHaveLength(1);
   });
   test("find_game", () => {
-    const lobby = new Lobby("5678");
+    const lobby = new Lobby();
     expect(lobby).toBeInstanceOf(Object);
     expect(lobby.games).toHaveLength(1);
-    expect(lobby.games[0].id).toBe("foo");
-    expect(lobby.find_game("foo")).toBe(lobby.games[0]);
-    expect(lobby.find_game("bar")).toBe(null);
+    const id = lobby.games[0].id;
+    expect(lobby.find_game(id)).toBe(lobby.games[0]);
+    expect(lobby.find_game("foobar")).toBe(null);
+  });
+  test("schema", () => {
+    const lobby = new Lobby();
+    lobby.path = "1234";
+    lobby.games[0].id = "84594780818949";
+    const string =
+      '{"path":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"RedDots","players":[],"dots":[]}]}';
+    expect(sv.to_string(lobby)).toBe(string);
+
+    const object: any = sv.to_object(lobby);
+    expect(object).toBeInstanceOf(Object);
+    expect(object.games[0]).toBeInstanceOf(Object);
+    expect(object.games[0]).not.toBeInstanceOf(BaseGame);
+    expect(object.games[0]).not.toBeInstanceOf(RedDots);
+    const new_lobby: any = sv.to_class(object, new Lobby());
+    expect(new_lobby).toBeInstanceOf(Lobby);
+    expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
+    expect(new_lobby.games[0]).toBeInstanceOf(RedDots);
+    expect(new_lobby.path).toBe("1234");
+    expect(sv.to_string(new_lobby)).toBe(string);
+  });
+  test("multiple games", () => {
+    const lobby = new Lobby();
+    lobby.games[0].id = "84594780818949";
+    lobby.games.push(new TicTacToe());
+    lobby.games[1].id = "84594780818948";
+
+    const string = '{"path":"","chat":{"messages":[],"users":[]},"games":[' +
+      '{"id":"84594780818949","name":"RedDots","players":[],"dots":[]},' +
+      '{"id":"84594780818948","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
+    expect(sv.to_string(lobby)).toBe(string);
+
+    const new_lobby: any = sv.to_class(string, new Lobby());
+    expect(new_lobby).toBeInstanceOf(Lobby);
+    expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
+    expect(new_lobby.games[0]).toBeInstanceOf(RedDots);
+    expect(new_lobby.games[0]).not.toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[1]).toBeInstanceOf(BaseGame);
+    expect(new_lobby.games[1]).not.toBeInstanceOf(RedDots);
+    expect(new_lobby.games[1]).toBeInstanceOf(TicTacToe);
   });
 });
 
