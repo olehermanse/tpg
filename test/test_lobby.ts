@@ -187,7 +187,11 @@ describe("Chat", () => {
   });
   test("add", () => {
     const chat = new Chat();
-    chat.add("Alice", "12345678901234", "Hello, world!");
+    const message = new Message(
+      new User("12345678901234", "Alice"),
+      "Hello, world!",
+    );
+    chat.add(message);
     expect(chat.messages).toHaveLength(1);
     expect(chat.messages[0].user.username).toBe("Alice");
     expect(chat.messages[0].body).toBe("Hello, world!");

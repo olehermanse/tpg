@@ -65,18 +65,28 @@ export class Chat implements SchemaClass {
     };
   }
 
-  add(username: string, userid: string, message: string) {
-    const user = new User(userid, username);
-    this.messages.push(new Message(user, message));
-  }
-
-  get_username(userid: string): string | null {
+  lookup_user(userid: string): User | null {
     for (const user of this.users) {
       if (user.userid === userid) {
-        return user.username;
+        return user;
       }
     }
     return null;
+  }
+
+  add(message: Message) {
+    let user = this.lookup_user(message.user.userid);
+    if (user === null) {
+      user = sv.copy(message.user, new User());
+      this.users.push(user);
+    } else if (user.userid != message.user.userid) {
+      user.username = message.user.username;
+    }
+    this.messages.push(message);
+  }
+
+  get_username(userid: string): string | null {
+    return this.lookup_user(userid)?.username ?? null;
   }
 
   constructor(
@@ -119,7 +129,7 @@ export class Lobby implements SchemaClass {
   schema(): Schema {
     return {
       properties: {
-        path: { type: String },
+        path: { type: "string" },
         chat: { type: Chat },
         games: { type: undefined },
       },

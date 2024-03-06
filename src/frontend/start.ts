@@ -43,6 +43,36 @@ function render_chat_log(chat_log: Chat | null) {
     .reduce((accumulator, currentValue) => accumulator + currentValue, "");
 }
 
+function get_current_user(): User {
+  const userid = get_cookie("userid") ?? "";
+  const username = get_cookie("username") ?? "Unknown";
+  return new User(userid, username);
+}
+
+function set_current_user(user: User) {
+  set_cookie("userid", user.userid);
+  set_cookie("username", user.username);
+}
+
+function on_chat_command(command: string) {
+  if (command.startsWith("/username ")) {
+    const user = get_current_user();
+    const new_username = command.slice(10);
+    const message = new Message(user, "Setting username to " + new_username);
+    http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
+      const chat = sv.to_class<Chat>(data, new Chat());
+      if (chat instanceof Error) {
+        console.log(chat);
+        return;
+      }
+      render_chat_log(chat);
+      user.username = new_username;
+      set_current_user(user);
+    });
+  }
+  console.log("Uknown command: " + command);
+}
+
 function on_chat_send() {
   const input: HTMLInputElement = <HTMLInputElement> (
     document.getElementById("chat-input-text")
@@ -51,10 +81,13 @@ function on_chat_send() {
   if (body === "") {
     return;
   }
+  if (body[0] === "/") {
+    on_chat_command(body);
+    input.value = "";
+    return;
+  }
   input.value = "";
-  const userid = get_cookie("userid") ?? "";
-  const username = get_cookie("username") ?? "Unknown";
-  const user = new User(userid, username);
+  const user = get_current_user();
   const message = new Message(user, body);
   http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
     const chat = sv.to_class<Chat>(data, new Chat());

@@ -96,7 +96,7 @@ class Application {
       (event) => {
         if (event.key === " ") {
           // Prevent spacebar from scrolling page
-          event.preventDefault();
+          // event.preventDefault();
         }
         this.key_down(event.key);
       },

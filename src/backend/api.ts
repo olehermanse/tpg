@@ -65,6 +65,11 @@ async function api_chat(method: HTTPMethod, path: string, request: Request) {
   if (lobby === null) {
     return not_found(request);
   }
+  if (method === "GET") {
+    console.log("GET " + path);
+    console.log(" -> " + sv.to_string(lobby.chat));
+    return json_response(sv.to_string(lobby.chat));
+  }
   if (method === "PUT") {
     const body = await request.json();
     console.log("PUT " + path + " " + JSON.stringify(body));
@@ -73,7 +78,7 @@ async function api_chat(method: HTTPMethod, path: string, request: Request) {
       console.log(` -> 404 (${message.message})`);
       return not_found(request);
     }
-    lobby.chat.messages.push(message);
+    lobby.chat.add(message);
     console.log(" -> " + sv.to_string(lobby.chat));
     return json_response(sv.to_string(lobby.chat));
   }
