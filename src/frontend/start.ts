@@ -1,4 +1,4 @@
-import { Application } from "./canvas_manager";
+import { Application } from "./application.ts";
 import {
   get_cookie,
   get_random_userid,
@@ -11,7 +11,7 @@ import { Chat, Message, runtime_tests } from "../libcommon/lobby";
 import { User } from "../libcommon/user.ts";
 import * as sv from "../libcommon/schema.ts";
 
-let canvas_manager: Application | null = null;
+let application: Application | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -75,7 +75,7 @@ function on_chat_command(command: string) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement> (
+  const input: HTMLInputElement = <HTMLInputElement>(
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;
@@ -151,13 +151,13 @@ function canvas_init() {
   if (ctx === null) {
     return;
   }
-  canvas_manager = new Application(canvas, ctx, scale);
-  // canvas.style.width = `${canvas_manager.width}px`;
-  // canvas.style.height = `${canvas_manager.height}px`;
+  application = new Application(canvas, ctx, scale);
+  // canvas.style.width = `${application.width}px`;
+  // canvas.style.height = `${application.height}px`;
 
   setInterval(() => {
-    if (canvas_manager != null) {
-      canvas_manager.tick(10);
+    if (application != null) {
+      application.tick(10);
     }
   }, 10);
 }

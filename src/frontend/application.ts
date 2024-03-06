@@ -8,7 +8,7 @@ import { FrontendGame } from "../libcommon/game.ts";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 
-class Application {
+class CanvasGame {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   scale: number;
@@ -23,6 +23,7 @@ class Application {
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
+    game: FrontendGame,
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -34,8 +35,12 @@ class Application {
     canvas.width = this.real_canvas_width;
     canvas.height = this.real_canvas_height;
     this.mouse = xy(0, 0);
-    this.game = new RedDots("foo");
+    this.game = game;
     this.setup_events(canvas);
+  }
+
+  set_game(game: FrontendGame) {
+    this.game = game;
   }
 
   offset_to_canvas(p: number, canvas: HTMLCanvasElement) {
@@ -58,18 +63,6 @@ class Application {
     this.mouse = xy(x, y);
     this.game.mouse_click(this.mouse.x, this.mouse.y);
   }
-
-  mouse_move(x: number, y: number) {
-    this.mouse = xy(x, y);
-  }
-
-  mouse_release(x: number, y: number) {
-    this.mouse = xy(x, y);
-  }
-
-  key_down(_key: string) {}
-
-  key_up(_key: string) {}
 
   setup_events(canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
@@ -113,8 +106,40 @@ class Application {
     );
   }
 
+  mouse_move(x: number, y: number) {
+    this.mouse = xy(x, y);
+  }
+
+  mouse_release(x: number, y: number) {
+    this.mouse = xy(x, y);
+  }
+
+  key_down(_key: string) {}
+
+  key_up(_key: string) {}
+}
+
+class Application {
+  _active_game: number;
+  games: FrontendGame[];
+  canvas_game: CanvasGame;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    scale: number,
+  ) {
+    this._active_game = 0;
+    this.games = [new RedDots()];
+    this.canvas_game = new CanvasGame(canvas, ctx, scale, this.games[0]);
+  }
+
+  get active_game(): FrontendGame {
+    return this.games[this._active_game];
+  }
+
   tick(_ms: number) {
-    this.draw();
+    this.canvas_game.draw();
   }
 }
 

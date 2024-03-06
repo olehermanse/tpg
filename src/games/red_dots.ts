@@ -1,4 +1,5 @@
 import {
+  get_random_userid,
   standard_canvas_height,
   standard_canvas_width,
 } from "../libcommon/utils.ts";
@@ -31,8 +32,8 @@ export class RedDots implements FrontendGame {
   height: number;
   dots: XY[];
   players: User[];
-  constructor(id: string) {
-    this.id = id;
+  constructor(id?: string) {
+    this.id = id ?? get_random_userid();
     this.name = "RedDots";
     this.width = standard_canvas_width();
     this.height = standard_canvas_height();
