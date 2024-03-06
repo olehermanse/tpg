@@ -7,7 +7,8 @@ import {
   set_cookie,
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http";
-import { Chat, Message, runtime_tests, User } from "../libcommon/lobby";
+import { Chat, Message, runtime_tests } from "../libcommon/lobby";
+import { User } from "../libcommon/user.ts";
 import * as sv from "../libcommon/schema.ts";
 
 let canvas_manager: Application | null = null;

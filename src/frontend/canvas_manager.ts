@@ -3,7 +3,8 @@ import {
   standard_canvas_width,
   xy,
 } from "../libcommon/utils";
-import type { Game, XY } from "../libcommon/interfaces.ts";
+import { XY } from "../libcommon/interfaces.ts";
+import { FrontendGame } from "../libcommon/game.ts";
 import { Draw } from "../libdraw/draw";
 import { RedDots } from "../games/red_dots";
 
@@ -16,7 +17,7 @@ class Application {
   real_canvas_width: number;
   real_canvas_height: number;
   mouse: XY;
-  game: Game;
+  game: FrontendGame;
 
   constructor(
     canvas: HTMLCanvasElement,

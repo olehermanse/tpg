@@ -1,10 +1,5 @@
-import {
-  Chat,
-  Lobby,
-  Message,
-  runtime_tests,
-  User,
-} from "../src/libcommon/lobby";
+import { Chat, Lobby, Message, runtime_tests } from "../src/libcommon/lobby.ts";
+import { User } from "../src/libcommon/user.ts";
 import { describe, expect, test } from "vitest";
 import * as sv from "../src/libcommon/schema.ts";
 
