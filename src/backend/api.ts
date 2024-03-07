@@ -73,15 +73,12 @@ function json_response(json: string): Response {
 
 async function put_lobbies(path: string, request: any) {
   const body = await request.json();
-  console.log("PUT game " + path + " " + JSON.stringify(body));
   if (!path.endsWith("/games")) {
-    console.log("-> 404 Path does not end in /games");
     return not_found(request);
   }
   const lobby_id = strip_both("/api/lobbies", path, "/games");
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {
-    console.log("-> 404 Lobby not found: " + lobby_id);
     return not_found(request);
   }
   let cls: sv.Class<BaseGame> | null = null;
@@ -93,19 +90,16 @@ async function put_lobbies(path: string, request: any) {
     }
   }
   if (cls === null) {
-    console.log("-> 404 Class not found " + lobby_id);
     return not_found(request);
   }
   const game = sv.to_class(body, new cls());
   if (game instanceof Error) {
-    console.log(` -> 404 (${game.message})`);
     return not_found(request);
   }
   lobby.games.push(game);
   lobby.chat.messages.push(
     new Message(new User("0", "System"), `Created new ${game.name} game`),
   );
-  console.log(" -> " + sv.to_string(lobby));
   return json_response(sv.to_string(lobby));
 }
 
@@ -116,13 +110,10 @@ function api_lobbies(method: HTTPMethod, path: string, request: any): Response {
   if (method != "GET") {
     return not_found(request);
   }
-  console.log("GET " + path);
   const lobby = get_lobby(strip_prefix("/api/lobbies", path));
   if (lobby === null) {
-    console.log(" -> 404");
     return not_found(request);
   }
-  console.log(" -> " + sv.to_string(lobby));
   return json_response(sv.to_string(lobby, true));
 }
 
@@ -132,20 +123,15 @@ async function api_chat(method: HTTPMethod, path: string, request: Request) {
     return not_found(request);
   }
   if (method === "GET") {
-    // console.log("GET " + path);
-    // console.log(" -> " + sv.to_string(lobby.chat));
     return json_response(sv.to_string(lobby.chat));
   }
   if (method === "PUT") {
     const body = await request.json();
-    console.log("PUT chat " + path + " " + JSON.stringify(body));
     const message = sv.to_class(body, new Message());
     if (message instanceof Error) {
-      console.log(` -> 404 (${message.message})`);
       return not_found(request);
     }
     lobby.chat.add(message);
-    console.log(" -> " + sv.to_string(lobby.chat));
     return json_response(sv.to_string(lobby.chat));
   }
   return not_found(request);

@@ -70,8 +70,7 @@ function redirect(newpath: string): Response {
   });
 }
 
-// Start listening on port 3000 of localhost.
-const handler = (request: Request): Response | Promise<Response> => {
+function _handle_request(request: Request): Response | Promise<Response> {
   const url = new URL(request.url);
   let filepath = decodeURIComponent(url.pathname);
   if (illegal_url(filepath)) {
@@ -93,6 +92,60 @@ const handler = (request: Request): Response | Promise<Response> => {
     }
   }
   return handle_file(request, filepath);
+}
+
+function should_log(request: Request): boolean {
+  if (request.method != "GET") {
+    return true;
+  }
+  const url = new URL(request.url);
+  let filepath = decodeURIComponent(url.pathname);
+  if (filepath.startsWith("/api/chat")) {
+    return false;
+  }
+  return true;
+}
+
+async function log_response(
+  request: Request,
+  response: Response | Promise<Response>,
+): Promise<Response> {
+  if (should_log(request) === false) {
+    return response;
+  }
+  const url = new URL(request.url);
+  let filepath = decodeURIComponent(url.pathname);
+  if (response instanceof Promise) {
+    let body = filepath;
+    const r = await response;
+    const location = r.headers.get("Location");
+    if (r.status === 302 && location != null) {
+      body = location;
+    } else if (filepath.startsWith("/api")) {
+      body = await r.text();
+    }
+    console.log(`${request.method} ${filepath}`);
+    console.log(` -> ${r.status} ${body}`);
+    return response;
+  }
+  let body = filepath;
+  const location = response.headers.get("Location");
+  if (response.status === 302 && location != null) {
+    body = location;
+  } else if (filepath.startsWith("/api")) {
+    body = await response.text();
+    body = JSON.stringify(JSON.parse(body));
+  }
+  console.log(`${request.method} ${filepath}`);
+  console.log(` -> ${response.status} ${body}`);
+  return response;
+}
+
+// Start listening on port 3000 of localhost.
+const handler = (request: Request): Response | Promise<Response> => {
+  let response = _handle_request(request);
+  response = log_response(request, response);
+  return response;
 };
 
 const port = 3000;
