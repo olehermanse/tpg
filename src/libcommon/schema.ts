@@ -313,6 +313,9 @@ export function to_object(inp: SchemaClass): object {
   return <object> object;
 }
 
-export function to_string(inp: SchemaClass): string {
+export function to_string(inp: SchemaClass, pretty?: boolean): string {
+  if (pretty === true) {
+    return JSON.stringify(to_object(inp), null, 2);
+  }
   return JSON.stringify(to_object(inp));
 }

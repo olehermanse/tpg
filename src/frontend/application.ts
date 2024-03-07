@@ -5,8 +5,8 @@ import {
 } from "../libcommon/utils";
 import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
-import { RedDots } from "../games/red_dots";
 import { BaseGame } from "../libcommon/game.ts";
+import { Lobby } from "../libcommon/lobby.ts";
 
 class CanvasGame {
   canvas: HTMLCanvasElement;
@@ -37,10 +37,6 @@ class CanvasGame {
     this.mouse = xy(0, 0);
     this.game = game;
     this.setup_events(canvas);
-  }
-
-  set_game(game: BaseGame) {
-    this.game = game;
   }
 
   offset_to_canvas(p: number, canvas: HTMLCanvasElement) {
@@ -121,21 +117,36 @@ class CanvasGame {
 
 class Application {
   _active_game: number;
-  games: BaseGame[];
   canvas_game: CanvasGame;
+  lobby: Lobby;
 
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
+    lobby: Lobby,
   ) {
+    this.lobby = lobby;
     this._active_game = 0;
-    this.games = [new RedDots()];
-    this.canvas_game = new CanvasGame(canvas, ctx, scale, this.games[0]);
+    this.canvas_game = new CanvasGame(
+      canvas,
+      ctx,
+      scale,
+      this.get_active_game(),
+    );
   }
 
-  get active_game(): BaseGame {
-    return this.games[this._active_game];
+  get_active_game(): BaseGame {
+    return this.lobby.games[this._active_game];
+  }
+
+  set_active_game(index: number) {
+    this._active_game = index;
+    this.canvas_game.game = this.get_active_game();
+  }
+
+  update_lobby(lobby: Lobby) {
+    this.lobby = lobby;
   }
 
   tick(_ms: number) {

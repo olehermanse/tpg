@@ -6,10 +6,12 @@ import {
   left_pad,
   set_cookie,
 } from "../libcommon/utils";
-import { http_get, http_put } from "./http";
-import { Chat, Message, runtime_tests } from "../libcommon/lobby";
+import { http_get, http_put } from "./http.ts";
+import { Chat, Lobby, Message, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "../libcommon/schema.ts";
+import { TicTacToe } from "../games/tic_tac_toe.ts";
+import { RedDots } from "../games/red_dots.ts";
 
 let application: Application | null = null;
 
@@ -56,10 +58,44 @@ function set_current_user(user: User) {
 }
 
 function on_chat_command(command: string) {
+  if (command === "/tictactoe") {
+    const data = new TicTacToe();
+    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Creating a new Tic Tac Toe game failed:");
+        console.log(lobby);
+        return;
+      }
+      if (application === null) {
+        console.log("Error: No application to update");
+        return;
+      }
+      application.update_lobby(lobby);
+    });
+    return;
+  }
+  if (command === "/reddots") {
+    const data = new RedDots();
+    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Creating a new RedDots game failed:");
+        console.log(lobby);
+        return;
+      }
+      if (application === null) {
+        console.log("Error: No application to update");
+        return;
+      }
+      application.update_lobby(lobby);
+    });
+    return;
+  }
   if (command.startsWith("/username ")) {
     const user = get_current_user();
     const new_username = command.slice(10);
-    const message = new Message(user, "Setting username to " + new_username);
+    const message = new Message(user, "Changing username to " + new_username);
     http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
       const chat = sv.to_class<Chat>(data, new Chat());
       if (chat instanceof Error) {
@@ -70,6 +106,7 @@ function on_chat_command(command: string) {
       user.username = new_username;
       set_current_user(user);
     });
+    return;
   }
   console.log("Uknown command: " + command);
 }
@@ -151,15 +188,24 @@ function canvas_init() {
   if (ctx === null) {
     return;
   }
-  application = new Application(canvas, ctx, scale);
-  // canvas.style.width = `${application.width}px`;
-  // canvas.style.height = `${application.height}px`;
+  const lobby = get_lobby_id();
 
-  setInterval(() => {
-    if (application != null) {
-      application.tick(10);
+  http_get("/api/lobbies/" + lobby).then((data) => {
+    const lobby = sv.to_class<Lobby>(data, new Lobby());
+    if (lobby instanceof Error) {
+      console.log(lobby);
+      return;
     }
-  }, 10);
+    application = new Application(canvas, ctx, scale, lobby);
+    // canvas.style.width = `${application.width}px`;
+    // canvas.style.height = `${application.height}px`;
+
+    setInterval(() => {
+      if (application != null) {
+        application.tick(10);
+      }
+    }, 10);
+  });
 }
 
 function start() {
