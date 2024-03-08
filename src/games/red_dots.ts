@@ -38,6 +38,19 @@ export class RedDots extends BaseGame {
 
   mouse_click(x: number, y: number) {
     this.dots.push(new XY(x, y));
+    this.schedule_sync();
+  }
+
+  receive(game: BaseGame) {
+    console.assert(game.name === this.name);
+    console.assert(game instanceof RedDots);
+    if (!(game instanceof RedDots)) {
+      return;
+    }
+    const source: RedDots = game;
+    if (source.dots.length > this.dots.length) {
+      this.dots = source.dots;
+    }
   }
 
   draw(ctx: any) {

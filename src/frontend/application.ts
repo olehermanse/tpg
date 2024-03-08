@@ -6,7 +6,13 @@ import {
 import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { BaseGame } from "../libcommon/game.ts";
-import { Lobby } from "../libcommon/lobby.ts";
+import { game_selector, Lobby } from "../libcommon/lobby.ts";
+import { http_get, http_put } from "./http.ts";
+import * as sv from "../libcommon/schema.ts";
+
+function get_lobby_id() {
+  return window.location.pathname.slice(1);
+}
 
 class CanvasGame {
   canvas: HTMLCanvasElement;
@@ -60,12 +66,60 @@ class CanvasGame {
     this.game.mouse_click(this.mouse.x, this.mouse.y);
   }
 
+  refresh() {
+    const lobby_id = get_lobby_id();
+    const game_id = this.game.id;
+    http_get("/api/lobbies/" + lobby_id + "/games/" + game_id).then((data) => {
+      const game = sv.to_class_selector(data, game_selector);
+      if (game instanceof Error) {
+        console.log("Creating a new Tic Tac Toe game failed:");
+        console.log(game);
+        return;
+      }
+      if (game === null) {
+        console.log("Error: No game to update");
+        return;
+      }
+      if (game instanceof BaseGame) {
+        this.game.receive(game);
+      }
+    });
+  }
+
+  push() {
+    if (this.game.needs_sync) {
+      this.game.needs_sync = false;
+      const lobby_id = get_lobby_id();
+      const game_id = this.game.id;
+      const data = sv.to_object(this.game);
+      http_put("/api/lobbies/" + lobby_id + "/games/" + game_id, data).then(
+        (data) => {
+          const game = sv.to_class_selector(data, game_selector);
+          if (game instanceof Error) {
+            console.log("Creating a new Tic Tac Toe game failed:");
+            console.log(game);
+            return;
+          }
+          if (game === null) {
+            console.log("Error: No game to update");
+            return;
+          }
+          if (game instanceof BaseGame) {
+            this.game.receive(game);
+          }
+          //this.update_game(game);
+        },
+      );
+    }
+  }
+
   setup_events(canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
       const x = this.offset_to_canvas(e.offsetX, canvas);
       const y = this.offset_to_canvas(e.offsetY, canvas);
       this.mouse_click(x, y);
       this.mouse_move(x, y);
+      this.push();
     });
 
     canvas.addEventListener("mousemove", (e) => {
@@ -79,6 +133,7 @@ class CanvasGame {
       const y = this.offset_to_canvas(e.offsetY, canvas);
       this.mouse_release(x, y);
       this.mouse_move(x, y);
+      this.push();
     });
 
     document.addEventListener(

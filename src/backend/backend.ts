@@ -103,6 +103,9 @@ function should_log(request: Request): boolean {
   if (filepath.startsWith("/api/chat")) {
     return false;
   }
+  if (filepath.startsWith("/api/lobbies") && filepath.includes("/games/")) {
+    return false;
+  }
   return true;
 }
 
@@ -128,7 +131,9 @@ async function log_response(
     body = "redirect to " + location;
   } else if (filepath.startsWith("/api")) {
     body = await response.text();
-    body = JSON.stringify(JSON.parse(body));
+    try {
+      body = JSON.stringify(JSON.parse(body));
+    } catch {}
   }
   console.log(`${request.method} ${filepath}`);
   console.log(` -> ${response.status} ${body}`);

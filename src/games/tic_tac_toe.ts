@@ -9,6 +9,18 @@ export class TicTacToe extends BaseGame {
     this.board = new Array(9).fill(" ");
   }
 
+  receive(game: BaseGame) {
+    console.assert(game.name === this.name);
+    console.assert(game instanceof TicTacToe);
+    if (!(game instanceof TicTacToe)) {
+      return;
+    }
+    const source: TicTacToe = game;
+    if (source.board != this.board) {
+      this.board = source.board;
+    }
+  }
+
   class_name(): string {
     return "TicTacToe";
   }

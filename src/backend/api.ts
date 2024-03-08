@@ -71,16 +71,8 @@ function json_response(json: string): Response {
   return response;
 }
 
-async function put_lobbies(path: string, request: any) {
+async function game_from_request(request) {
   const body = await request.json();
-  if (!path.endsWith("/games")) {
-    return not_found(request);
-  }
-  const lobby_id = strip_both("/api/lobbies", path, "/games");
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return not_found(request);
-  }
   let cls: sv.Class<BaseGame> | null = null;
   if (body instanceof Object) {
     if (body.name === "RedDots") {
@@ -90,10 +82,26 @@ async function put_lobbies(path: string, request: any) {
     }
   }
   if (cls === null) {
-    return not_found(request);
+    return null;
   }
   const game = sv.to_class(body, new cls());
   if (game instanceof Error) {
+    return null;
+  }
+  return game;
+}
+
+async function put_lobbies_new_game(path: string, request: any) {
+  if (!path.endsWith("/games")) {
+    return not_found(request);
+  }
+  const lobby_id = strip_both("/api/lobbies", path, "/games");
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return not_found(request);
+  }
+  const game = await game_from_request(request);
+  if (game === null) {
     return not_found(request);
   }
   lobby.games.push(game);
@@ -103,18 +111,54 @@ async function put_lobbies(path: string, request: any) {
   return json_response(sv.to_string(lobby));
 }
 
-function api_lobbies(method: HTTPMethod, path: string, request: any): Response {
-  if (method === "PUT") {
-    return put_lobbies(path, request);
-  }
-  if (method != "GET") {
+async function api_lobbies(method: HTTPMethod, path: string, request: any) {
+  if (!["GET", "PUT"].includes(method)) {
     return not_found(request);
   }
-  const lobby = get_lobby(strip_prefix("/api/lobbies", path));
+  // "/api/lobbies/18348/games/00989218426364"
+  const segments = path.split("/").filter((x) => x.length > 0);
+  if (segments.length < 3 || segments.length > 5) {
+    return not_found(request);
+  }
+  if (segments[0] != "api" || segments[1] != "lobbies") {
+    return not_found(request);
+  }
+  const lobby_id = "/" + segments[2];
+  const lobby = get_lobby(lobby_id);
   if (lobby === null) {
     return not_found(request);
   }
-  return json_response(sv.to_string(lobby, true));
+  if (method === "GET" && segments.length === 3) {
+    return json_response(sv.to_string(lobby, true));
+  }
+  if (segments[3] != "games") {
+    return not_found(request);
+  }
+  if (segments.length === 4) {
+    if (method === "PUT") {
+      return put_lobbies_new_game(path, request);
+    }
+    return not_found(request);
+  }
+  if (segments.length === 5) {
+    const game_id = segments[4];
+    const game = lobby.find_game(game_id);
+    if (game === null) {
+      return not_found(request);
+    }
+    if (method === "GET") {
+      return json_response(sv.to_string(game, true));
+    }
+    const received = await game_from_request(request);
+    if (received === null) {
+      return not_found(request);
+    }
+    if (method === "PUT") {
+      game.receive(received);
+    }
+    return json_response(sv.to_string(game, true));
+  }
+  return not_found(request);
 }
 
 async function api_chat(method: HTTPMethod, path: string, request: Request) {

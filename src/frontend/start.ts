@@ -181,6 +181,13 @@ function chat_init() {
   });
 }
 
+function network_refresh(application: Application) {
+  application.canvas_game.refresh();
+  setTimeout(() => {
+    network_refresh(application);
+  }, 500);
+}
+
 function canvas_init() {
   const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
   const scale = window.devicePixelRatio;
@@ -205,6 +212,7 @@ function canvas_init() {
         application.tick(10);
       }
     }, 10);
+    network_refresh(application);
   });
 }
 

@@ -99,7 +99,7 @@ export class Chat implements SchemaClass {
   }
 }
 
-function game_selector(data: any): Class<BaseGame> | null {
+export function game_selector(data: any): Class<BaseGame> | null {
   if (data.name === "RedDots") {
     return RedDots;
   }

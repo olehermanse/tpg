@@ -302,6 +302,21 @@ export function to_class<T extends SchemaClass>(
   return <T | Error> _copy(inp, new_object, new_object.schema(), "class");
 }
 
+export function to_class_selector<T extends SchemaClass>(
+  inp: string | object,
+  selector: Selector,
+) {
+  if (typeof inp === "string") {
+    return to_class_selector<T>(JSON.parse(inp), selector);
+  }
+  const constructor = selector(inp);
+  if (constructor === null) {
+    return Error("Unable to select class");
+  }
+  const new_object = new constructor();
+  return <T | Error> _copy(inp, new_object, new_object.schema(), "class");
+}
+
 export function to_object(inp: SchemaClass): object {
   const schema = inp.schema();
   const target = new Object();
