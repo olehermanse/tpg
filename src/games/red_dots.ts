@@ -20,7 +20,23 @@ class XY {
   }
 }
 
+function equal_dots(a: XY[], b: XY[]): boolean {
+  if (a.length != b.length) {
+    return false;
+  }
+  const n = a.length;
+  for (let i = n - 1; i >= 0; i--) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function merge_dots(a: XY[], b: XY[]): XY[] {
+  if (equal_dots(a, b)) {
+    return a;
+  }
   const all = [...a, ...b];
   const strings = all.map((d) => {
     return sv.to_string(d);
