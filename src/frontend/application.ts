@@ -45,8 +45,16 @@ class CanvasGame {
     this.setup_events(canvas);
   }
 
-  offset_to_canvas(p: number, canvas: HTMLCanvasElement) {
-    return (p / canvas.getBoundingClientRect().width) * this.canvas_width;
+  x_to_canvas(x: number) {
+    return Math.round(
+      (x / this.canvas.getBoundingClientRect().width) * this.canvas_width,
+    );
+  }
+
+  y_to_canvas(y: number) {
+    return Math.round(
+      (y / this.canvas.getBoundingClientRect().height) * this.canvas_height,
+    );
   }
 
   draw() {
@@ -115,22 +123,22 @@ class CanvasGame {
 
   setup_events(canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
-      const x = this.offset_to_canvas(e.offsetX, canvas);
-      const y = this.offset_to_canvas(e.offsetY, canvas);
+      const x = this.x_to_canvas(e.offsetX);
+      const y = this.y_to_canvas(e.offsetY);
       this.mouse_click(x, y);
       this.mouse_move(x, y);
       this.push();
     });
 
     canvas.addEventListener("mousemove", (e) => {
-      const x = this.offset_to_canvas(e.offsetX, canvas);
-      const y = this.offset_to_canvas(e.offsetY, canvas);
+      const x = this.x_to_canvas(e.offsetX);
+      const y = this.y_to_canvas(e.offsetY);
       this.mouse_move(x, y);
     });
 
     addEventListener("mouseup", (e) => {
-      const x = this.offset_to_canvas(e.offsetX, canvas);
-      const y = this.offset_to_canvas(e.offsetY, canvas);
+      const x = this.x_to_canvas(e.offsetX);
+      const y = this.y_to_canvas(e.offsetY);
       this.mouse_release(x, y);
       this.mouse_move(x, y);
       this.push();
