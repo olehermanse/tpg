@@ -1,4 +1,4 @@
-async function http_get(url: string): Promise<object> {
+export async function http_get(url: string): Promise<object> {
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -8,7 +8,17 @@ async function http_get(url: string): Promise<object> {
   return response.json();
 }
 
-async function http_put(url: string, data: object): Promise<object> {
+export async function http_delete(url: string): Promise<object> {
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+}
+
+export async function http_put(url: string, data: object): Promise<object> {
   const response = await fetch(url, {
     method: "PUT",
     headers: {
@@ -19,7 +29,7 @@ async function http_put(url: string, data: object): Promise<object> {
   return response.json();
 }
 
-async function http_post(url: string, data: object): Promise<object> {
+export async function http_post(url: string, data: object): Promise<object> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -29,5 +39,3 @@ async function http_post(url: string, data: object): Promise<object> {
   });
   return response.json();
 }
-
-export { http_get, http_post, http_put };

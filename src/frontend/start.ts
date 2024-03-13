@@ -72,6 +72,7 @@ function on_chat_command(command: string) {
         return;
       }
       application.update_lobby(lobby);
+      application.switch_game();
     });
     return;
   }
@@ -89,6 +90,7 @@ function on_chat_command(command: string) {
         return;
       }
       application.update_lobby(lobby);
+      application.switch_game();
     });
     return;
   }

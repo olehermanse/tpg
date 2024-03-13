@@ -6,10 +6,10 @@ import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
 import { BaseGame } from "../libcommon/game.ts";
 
-type HTTPMethod = "GET" | "PUT" | "UNKNOWN";
+type HTTPMethod = "GET" | "PUT" | "DELETE" | "POST" | "UNKNOWN";
 
 function http_method(s: string): HTTPMethod {
-  if (["GET", "PUT"].includes(s)) {
+  if (["GET", "PUT", "DELETE", "POST"].includes(s)) {
     return <HTTPMethod> s;
   }
   return "UNKNOWN";
@@ -112,7 +112,7 @@ async function put_lobbies_new_game(path: string, request: any) {
 }
 
 async function api_lobbies(method: HTTPMethod, path: string, request: any) {
-  if (!["GET", "PUT"].includes(method)) {
+  if (!["GET", "PUT", "DELETE"].includes(method)) {
     return not_found(request);
   }
   // "/api/lobbies/18348/games/00989218426364"
@@ -145,6 +145,11 @@ async function api_lobbies(method: HTTPMethod, path: string, request: any) {
     const game = lobby.find_game(game_id);
     if (game === null) {
       return not_found(request);
+    }
+    if (method === "DELETE") {
+      console.log("Deleting game");
+      lobby.games = lobby.games.filter((game) => game.id !== game_id);
+      return json_response("{}");
     }
     if (method === "GET") {
       return json_response(sv.to_string(game, true));

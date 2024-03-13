@@ -7,7 +7,7 @@ import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { BaseGame } from "../libcommon/game.ts";
 import { game_selector, Lobby } from "../libcommon/lobby.ts";
-import { http_get, http_put } from "./http.ts";
+import { http_delete, http_get, http_put } from "./http.ts";
 import * as sv from "../libcommon/schema.ts";
 
 function get_lobby_id() {
@@ -214,6 +214,34 @@ class Application {
 
   tick(_ms: number) {
     this.canvas_game.draw();
+  }
+
+  get_lobby() {
+    http_get("/api/lobbies" + this.lobby.path).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Received invalid lobby:");
+        console.log(lobby);
+        return;
+      }
+      this.update_lobby(lobby);
+    });
+  }
+
+  switch_game() {
+    if (this === null) {
+      return;
+    }
+    if (this.lobby.games.length <= 1) {
+      return;
+    }
+    const game_id = this.lobby.games[0].id;
+    http_delete("/api/lobbies" + this.lobby.path + "/games/" + game_id).then(
+      (_data: any) => {
+        console.log("Deleted first game");
+        this.get_lobby();
+      },
+    );
   }
 }
 
