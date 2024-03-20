@@ -264,7 +264,7 @@ describe("Lobby", () => {
   test("constructor", () => {
     const lobby = new Lobby("1234");
     expect(lobby).toBeInstanceOf(Lobby);
-    expect(lobby.path).toBe("1234");
+    expect(lobby.id).toBe("1234");
     expect(lobby.chat).toBeInstanceOf(Chat);
     expect(lobby.games).toHaveLength(1);
   });
@@ -278,10 +278,10 @@ describe("Lobby", () => {
   });
   test("schema", () => {
     const lobby = new Lobby();
-    lobby.path = "1234";
+    lobby.id = "1234";
     lobby.games[0].id = "84594780818949";
     const string =
-      '{"path":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"RedDots","players":[],"dots":[]}]}';
+      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"RedDots","players":[],"dots":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
     const object: any = sv.to_object(lobby);
@@ -293,7 +293,7 @@ describe("Lobby", () => {
     expect(new_lobby).toBeInstanceOf(Lobby);
     expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
     expect(new_lobby.games[0]).toBeInstanceOf(RedDots);
-    expect(new_lobby.path).toBe("1234");
+    expect(new_lobby.id).toBe("1234");
     expect(sv.to_string(new_lobby)).toBe(string);
   });
   test("multiple games", () => {
@@ -302,7 +302,7 @@ describe("Lobby", () => {
     lobby.games.push(new TicTacToe());
     lobby.games[1].id = "84594780818948";
 
-    const string = '{"path":"","chat":{"messages":[],"users":[]},"games":[' +
+    const string = '{"id":"","chat":{"messages":[],"users":[]},"games":[' +
       '{"id":"84594780818949","name":"RedDots","players":[],"dots":[]},' +
       '{"id":"84594780818948","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
     expect(sv.to_string(lobby)).toBe(string);

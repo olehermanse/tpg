@@ -210,6 +210,7 @@ class Application {
 
   update_lobby(lobby: Lobby) {
     this.lobby = lobby;
+    this.set_active_game(0);
   }
 
   tick(_ms: number) {
@@ -217,7 +218,7 @@ class Application {
   }
 
   get_lobby() {
-    http_get("/api/lobbies" + this.lobby.path).then((data) => {
+    http_get("/api/lobbies/" + this.lobby.id).then((data) => {
       const lobby = sv.to_class<Lobby>(data, new Lobby());
       if (lobby instanceof Error) {
         console.log("Received invalid lobby:");
@@ -236,7 +237,7 @@ class Application {
       return;
     }
     const game_id = this.lobby.games[0].id;
-    http_delete("/api/lobbies" + this.lobby.path + "/games/" + game_id).then(
+    http_delete("/api/lobbies/" + this.lobby.id + "/games/" + game_id).then(
       (_data: any) => {
         console.log("Deleted first game");
         this.get_lobby();

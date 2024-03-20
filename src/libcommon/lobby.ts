@@ -110,7 +110,7 @@ export function game_selector(data: any): Class<BaseGame> | null {
 }
 
 export class Lobby implements SchemaClass {
-  path: string;
+  id: string;
   chat: Chat;
   games: any[];
 
@@ -120,7 +120,7 @@ export class Lobby implements SchemaClass {
   schema(): Schema {
     return {
       properties: {
-        path: { type: "string" },
+        id: { type: "string" },
         chat: { type: Chat },
         games: { type: game_selector, array: true },
       },
@@ -128,7 +128,7 @@ export class Lobby implements SchemaClass {
   }
 
   constructor(path?: string) {
-    this.path = path ?? "";
+    this.id = path ?? "";
     this.chat = new Chat();
     this.games = [];
     this.games.push(new RedDots());

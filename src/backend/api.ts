@@ -35,19 +35,27 @@ function strip_prefix(prefix: string, string: string) {
 
 const lobbies: { [key: string]: Lobby } = {};
 
-export function get_lobby(path: string): Lobby | null {
-  if (path in lobbies) {
-    return lobbies[path];
+export function get_lobby(lobby_id: string): Lobby | null {
+  if (lobby_id in lobbies) {
+    return lobbies[lobby_id];
   }
   return null;
 }
 
-export function create_lobby(): string {
-  let path = "/" + randint(10_000, 99_999);
-  while (get_lobby(path) != null) {
-    path = "/" + randint(10_000, 99_999);
+export function get_game(lobby_id: string, game_id: string) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
   }
-  const lobby = new Lobby(path);
+  return lobby.find_game(game_id);
+}
+
+export function create_lobby(): string {
+  let lobby_id = "" + randint(10_000, 99_999);
+  while (get_lobby(lobby_id) != null) {
+    lobby_id = "" + randint(10_000, 99_999);
+  }
+  const lobby = new Lobby(lobby_id);
   lobby.chat.messages.push(
     new Message(new User("0", "System"), "New lobby created"),
   );
@@ -57,8 +65,8 @@ export function create_lobby(): string {
       `New ${lobby.games[0].class_name()} game created`,
     ),
   );
-  lobbies[path] = lobby;
-  return path;
+  lobbies[lobby_id] = lobby;
+  return lobby_id;
 }
 
 export function not_found(_request: Request) {
@@ -71,13 +79,15 @@ function json_response(json: string): Response {
   return response;
 }
 
-async function game_from_request(request) {
-  const body = await request.json();
+function game_from_request(body) {
   let cls: sv.Class<BaseGame> | null = null;
   if (body instanceof Object) {
+    console.log("Object");
     if (body.name === "RedDots") {
+      console.log("RedDots");
       cls = RedDots;
     } else if (body.name === "TicTacToe") {
+      console.log("TicTacToe");
       cls = TicTacToe;
     }
   }
@@ -86,6 +96,7 @@ async function game_from_request(request) {
   }
   const game = sv.to_class(body, new cls());
   if (game instanceof Error) {
+    console.log("Error in to class");
     return null;
   }
   return game;
@@ -100,7 +111,7 @@ async function put_lobbies_new_game(path: string, request: any) {
   if (lobby === null) {
     return not_found(request);
   }
-  const game = await game_from_request(request);
+  const game = game_from_request(request);
   if (game === null) {
     return not_found(request);
   }
@@ -154,7 +165,7 @@ async function api_lobbies(method: HTTPMethod, path: string, request: any) {
     if (method === "GET") {
       return json_response(sv.to_string(game, true));
     }
-    const received = await game_from_request(request);
+    const received = game_from_request(request);
     if (received === null) {
       return not_found(request);
     }
@@ -195,4 +206,87 @@ export function handle_api(request: Request, path: string) {
     return api_chat(method, path, request);
   }
   return not_found(request);
+}
+
+export function api_put_new_game(lobby_id, body) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  const game = game_from_request(body);
+  if (game === null) {
+    return null;
+  }
+
+  lobby.games.push(game);
+  lobby.chat.messages.push(
+    new Message(new User("0", "System"), `Created new ${game.name} game`),
+  );
+  return sv.to_object(lobby);
+}
+
+export function api_put_game(lobby_id, game_id, body) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  const game = lobby.find_game(game_id);
+  if (game === null) {
+    return null;
+  }
+  const received = game_from_request(body);
+  if (received === null) {
+    return null;
+  }
+  game.receive(received);
+  return sv.to_object(game);
+}
+
+export function api_delete_game(lobby_id, game_id) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  console.log("Deleting game");
+  lobby.games = lobby.games.filter((game) => game.id !== game_id);
+  return sv.to_object(lobby);
+}
+
+export function api_get_game(lobby_id: string, game_id: string) {
+  const game = get_game(lobby_id, game_id);
+  if (game === null) {
+    return null;
+  }
+  return sv.to_object(game);
+}
+
+export function api_get_lobby(lobby_id: string): Object | null {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  return sv.to_object(lobby);
+}
+
+export function api_get_chat(lobby_id: string) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  return sv.to_object(lobby.chat);
+}
+
+export function api_put_chat(lobby_id: string, body: any) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    console.log("Error: Could not find lobby - " + lobby_id);
+    return null;
+  }
+  const message = sv.to_class(body, new Message());
+  if (message instanceof Error) {
+    console.log("Error: Could not convert message - " + body);
+    return null;
+  }
+  lobby.chat.add(message);
+  return sv.to_object(lobby.chat);
 }
