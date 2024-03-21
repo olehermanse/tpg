@@ -241,3 +241,21 @@ export function left_pad(s: string | number, n: number, pad = " ") {
   }
   return result;
 }
+
+export function strip_suffix(string: string, suffix: string) {
+  if (!string.endsWith(suffix)) {
+    return string;
+  }
+  return string.slice(0, string.length - suffix.length);
+}
+
+export function strip_both(prefix: string, string: string, suffix: string) {
+  return strip_prefix(prefix, strip_suffix(string, suffix));
+}
+
+export function strip_prefix(prefix: string, string: string) {
+  if (!string.startsWith(prefix)) {
+    return string;
+  }
+  return string.slice(prefix.length);
+}
