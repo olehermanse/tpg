@@ -27,7 +27,7 @@ function should_log(request: Request): boolean {
   return true;
 }
 
-async function log_response(ctx) {
+function log_response(ctx) {
   const request = ctx.request;
   const response = ctx.response;
   if (should_log(request) === false) {
@@ -46,11 +46,15 @@ async function log_response(ctx) {
     if (body instanceof Object) {
       try {
         body = JSON.stringify(body);
-      } catch {}
+      } catch {
+        // Could not stringify, default to body
+      }
     } else {
       try {
         body = JSON.stringify(JSON.parse(body));
-      } catch {}
+      } catch {
+        // Could not parse, default to body
+      }
     }
   }
   console.log(`${request.method} ${filepath}`);

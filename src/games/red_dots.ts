@@ -41,8 +41,8 @@ function merge_dots(a: XY[], b: XY[]): XY[] {
   const strings = all.map((d) => {
     return sv.to_string(d);
   });
-  let unique_strings = [...new Set(strings)];
-  let dots = unique_strings.map((d) => {
+  const unique_strings = [...new Set(strings)];
+  const dots = unique_strings.map((d) => {
     return sv.to_class(d, new XY());
   });
   return <XY[]> dots;

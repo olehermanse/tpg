@@ -117,7 +117,7 @@ export function api_get_game(lobby_id: string, game_id: string) {
   return sv.to_object(game);
 }
 
-export function api_get_lobby(lobby_id: string): Object | null {
+export function api_get_lobby(lobby_id: string): object | null {
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {
     return null;
