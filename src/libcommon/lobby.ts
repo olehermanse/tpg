@@ -131,7 +131,7 @@ export class Lobby implements SchemaClass {
     this.id = path ?? "";
     this.chat = new Chat();
     this.games = [];
-    this.games.push(new RedDots());
+    this.games.push(new TicTacToe());
   }
 
   find_game(game_id: string): any | null {

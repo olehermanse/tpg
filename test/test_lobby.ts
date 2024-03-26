@@ -281,7 +281,7 @@ describe("Lobby", () => {
     lobby.id = "1234";
     lobby.games[0].id = "84594780818949";
     const string =
-      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"RedDots","players":[],"dots":[]}]}';
+      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
     const object: any = sv.to_object(lobby);
@@ -292,29 +292,29 @@ describe("Lobby", () => {
     const new_lobby: any = sv.to_class(object, new Lobby());
     expect(new_lobby).toBeInstanceOf(Lobby);
     expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
-    expect(new_lobby.games[0]).toBeInstanceOf(RedDots);
+    expect(new_lobby.games[0]).toBeInstanceOf(TicTacToe);
     expect(new_lobby.id).toBe("1234");
     expect(sv.to_string(new_lobby)).toBe(string);
   });
   test("multiple games", () => {
     const lobby = new Lobby();
     lobby.games[0].id = "84594780818949";
-    lobby.games.push(new TicTacToe());
+    lobby.games.push(new RedDots());
     lobby.games[1].id = "84594780818948";
 
     const string = '{"id":"","chat":{"messages":[],"users":[]},"games":[' +
-      '{"id":"84594780818949","name":"RedDots","players":[],"dots":[]},' +
-      '{"id":"84594780818948","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
+      '{"id":"84594780818949","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]},' +
+      '{"id":"84594780818948","name":"RedDots","players":[],"dots":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
     const new_lobby: any = sv.to_class(string, new Lobby());
     expect(new_lobby).toBeInstanceOf(Lobby);
     expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
-    expect(new_lobby.games[0]).toBeInstanceOf(RedDots);
-    expect(new_lobby.games[0]).not.toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[0]).not.toBeInstanceOf(RedDots);
+    expect(new_lobby.games[0]).toBeInstanceOf(TicTacToe);
     expect(new_lobby.games[1]).toBeInstanceOf(BaseGame);
-    expect(new_lobby.games[1]).not.toBeInstanceOf(RedDots);
-    expect(new_lobby.games[1]).toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[1]).toBeInstanceOf(RedDots);
+    expect(new_lobby.games[1]).not.toBeInstanceOf(TicTacToe);
   });
 });
 
