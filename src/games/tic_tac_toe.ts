@@ -34,7 +34,7 @@ export class TicTacToe extends BaseGame {
   constructor() {
     super();
     this.board = new Array(9).fill(" ");
-    this.rects = new Array();
+    this.rects = [];
     const size = (this.height * 2) / 3;
     const half = size / 2;
     const w = size / 3;
@@ -53,15 +53,15 @@ export class TicTacToe extends BaseGame {
   }
 
   set_square_i(i: number, symbol: TicTacToeSymbol) {
-    const r = <TicTacToeNumber>limit(0, Math.floor(i / 3), 2);
-    const c = <TicTacToeNumber>limit(0, Math.floor(i % 3), 2);
+    const r = <TicTacToeNumber> limit(0, Math.floor(i / 3), 2);
+    const c = <TicTacToeNumber> limit(0, Math.floor(i % 3), 2);
     this.set_square(r, c, symbol);
   }
 
   set_square(
     row: TicTacToeNumber,
     column: TicTacToeNumber,
-    symbol: TicTacToeSymbol
+    symbol: TicTacToeSymbol,
   ) {
     const i = row * 3 + column;
     this.board[i] = symbol;
@@ -131,7 +131,7 @@ export class TicTacToe extends BaseGame {
           rect.x + 0.8 * rect.w,
           rect.y + 0.8 * rect.h,
           "white",
-          8
+          8,
         );
         Draw.line(
           ctx,
@@ -140,7 +140,7 @@ export class TicTacToe extends BaseGame {
           rect.x + 0.2 * rect.w,
           rect.y + 0.8 * rect.h,
           "white",
-          8
+          8,
         );
       }
       if (rect.symbol === "O") {
