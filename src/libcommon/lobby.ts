@@ -4,6 +4,7 @@ import { Class, Schema, SchemaClass } from "./schema.ts";
 import * as sv from "./schema.ts";
 import { BaseGame } from "./game.ts";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
+import { Fives } from "../games/fives.ts";
 
 export class Message implements SchemaClass {
   user: User;
@@ -106,6 +107,9 @@ export function game_selector(data: any): Class<BaseGame> | null {
   if (data.name === "TicTacToe") {
     return TicTacToe;
   }
+  if (data.name === "Fives") {
+    return Fives;
+  }
   return null;
 }
 
@@ -131,7 +135,7 @@ export class Lobby implements SchemaClass {
     this.id = path ?? "";
     this.chat = new Chat();
     this.games = [];
-    this.games.push(new TicTacToe());
+    this.games.push(new Fives());
   }
 
   find_game(game_id: string): any | null {

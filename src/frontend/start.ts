@@ -12,6 +12,7 @@ import { User } from "../libcommon/user.ts";
 import * as sv from "../libcommon/schema.ts";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
+import { Fives } from "../games/fives.ts";
 
 let application: Application | null = null;
 
@@ -64,6 +65,24 @@ function on_chat_command(command: string) {
       const lobby = sv.to_class<Lobby>(data, new Lobby());
       if (lobby instanceof Error) {
         console.log("Creating a new Tic Tac Toe game failed:");
+        console.log(lobby);
+        return;
+      }
+      if (application === null) {
+        console.log("Error: No application to update");
+        return;
+      }
+      application.update_lobby(lobby);
+      application.switch_game();
+    });
+    return;
+  }
+  if (command === "/fives") {
+    const data = new Fives();
+    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Creating a new Fives game failed:");
         console.log(lobby);
         return;
       }

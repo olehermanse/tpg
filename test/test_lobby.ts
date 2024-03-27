@@ -5,6 +5,7 @@ import * as sv from "../src/libcommon/schema.ts";
 import { BaseGame } from "../src/libcommon/game.ts";
 import { RedDots } from "../src/games/red_dots.ts";
 import { TicTacToe } from "../src/games/tic_tac_toe.ts";
+import { Fives } from "../src/games/fives.ts";
 
 describe("User", () => {
   test("constructor", () => {
@@ -279,6 +280,7 @@ describe("Lobby", () => {
   test("schema", () => {
     const lobby = new Lobby();
     lobby.id = "1234";
+    lobby.games = [new TicTacToe()];
     lobby.games[0].id = "84594780818949";
     const string =
       '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
@@ -298,8 +300,9 @@ describe("Lobby", () => {
   });
   test("multiple games", () => {
     const lobby = new Lobby();
+    expect(lobby.games[0]).toBeInstanceOf(BaseGame);
+    lobby.games = [new TicTacToe(), new RedDots()];
     lobby.games[0].id = "84594780818949";
-    lobby.games.push(new RedDots());
     lobby.games[1].id = "84594780818948";
 
     const string = '{"id":"","chat":{"messages":[],"users":[]},"games":[' +

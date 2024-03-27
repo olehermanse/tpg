@@ -5,6 +5,7 @@ import { User } from "../libcommon/user.ts";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
 import { BaseGame } from "../libcommon/game.ts";
+import { Fives } from "../games/fives.ts";
 
 const lobbies: { [key: string]: Lobby } = {};
 
@@ -52,6 +53,9 @@ function game_from_request(body) {
     } else if (body.name === "TicTacToe") {
       console.log("TicTacToe");
       cls = TicTacToe;
+    } else if (body.name === "Fives") {
+      console.log("Fives");
+      cls = Fives;
     }
   }
   if (cls === null) {
