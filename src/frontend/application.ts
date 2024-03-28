@@ -77,19 +77,23 @@ class CanvasGame {
   refresh() {
     const lobby_id = get_lobby_id();
     const game_id = this.game.id;
-    http_get("/api/lobbies/" + lobby_id + "/games/" + game_id).then((data) => {
-      const game = sv.to_class_selector(data, game_selector);
-      if (game instanceof Error) {
-        console.log("Creating a new Tic Tac Toe game failed:");
-        console.log(game);
+    http_get("/api/lobbies/" + lobby_id).then((data) => {
+      const lobby = sv.to_class(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Creating a new Lobby failed:");
+        console.log(lobby);
         return;
       }
-      if (game === null) {
-        console.log("Error: No game to update");
+      if (lobby === null) {
+        console.log("Error: lobby found");
         return;
       }
-      if (game instanceof BaseGame) {
+
+      const game = lobby.games[0];
+      if (game instanceof BaseGame && game.id === game_id) {
         this.game.receive(game);
+      } else {
+        this.game = game;
       }
     });
   }
@@ -112,7 +116,7 @@ class CanvasGame {
             console.log("Error: No game to update");
             return;
           }
-          if (game instanceof BaseGame) {
+          if (game instanceof BaseGame && game.id === this.game.id) {
             this.game.receive(game);
           }
           //this.update_game(game);

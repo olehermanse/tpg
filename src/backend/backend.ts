@@ -21,7 +21,7 @@ function should_log(request: Request): boolean {
   if (filepath.startsWith("/api/chat")) {
     return false;
   }
-  if (filepath.startsWith("/api/lobbies") && filepath.includes("/games/")) {
+  if (filepath.startsWith("/api/lobbies")) {
     return false;
   }
   return true;
