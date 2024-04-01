@@ -2,12 +2,8 @@ import { Lobby, Message } from "../libcommon/lobby.ts";
 import { randint } from "../libcommon/utils.ts";
 import * as sv from "../libcommon/schema.ts";
 import { User } from "../libcommon/user.ts";
-import { TicTacToe } from "../games/tic_tac_toe.ts";
-import { RedDots } from "../games/red_dots.ts";
 import { BaseGame } from "../libcommon/game.ts";
-import { Fives } from "../games/fives.ts";
-import { Twelves } from "../games/twelves.ts";
-import { NTacToe } from "../games/ntactoe.ts";
+import { game_selector } from "../games/game_selector.ts";
 
 const lobbies: { [key: string]: Lobby } = {};
 
@@ -46,26 +42,7 @@ export function create_lobby(): string {
 }
 
 function game_from_request(body) {
-  let cls: sv.Class<BaseGame> | null = null;
-  if (body instanceof Object) {
-    console.log("Object");
-    if (body.name === "RedDots") {
-      console.log("RedDots");
-      cls = RedDots;
-    } else if (body.name === "TicTacToe") {
-      console.log("TicTacToe");
-      cls = TicTacToe;
-    } else if (body.name === "NTacToe") {
-      console.log("NTacToe");
-      cls = NTacToe;
-    } else if (body.name === "Fives") {
-      console.log("Fives");
-      cls = Fives;
-    } else if (body.name === "Twelves") {
-      console.log("Twelves");
-      cls = Twelves;
-    }
-  }
+  const cls: sv.Class<BaseGame> | null = game_selector(body);
   if (cls === null) {
     return null;
   }

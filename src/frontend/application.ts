@@ -6,9 +6,10 @@ import {
 import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { BaseGame } from "../libcommon/game.ts";
-import { game_selector, Lobby } from "../libcommon/lobby.ts";
+import { Lobby } from "../libcommon/lobby.ts";
 import { http_delete, http_get, http_put } from "./http.ts";
 import * as sv from "../libcommon/schema.ts";
+import { game_selector } from "../games/game_selector.ts";
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);

@@ -1,12 +1,8 @@
-import { RedDots } from "../games/red_dots.ts";
 import { User } from "./user.ts";
-import { Class, Schema, SchemaClass } from "./schema.ts";
+import { Schema, SchemaClass } from "./schema.ts";
 import * as sv from "./schema.ts";
-import { BaseGame } from "./game.ts";
-import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { Fives } from "../games/fives.ts";
-import { Twelves } from "../games/twelves.ts";
-import { NTacToe } from "../games/ntactoe.ts";
+import { game_selector } from "../games/game_selector.ts";
 
 export class Message implements SchemaClass {
   user: User;
@@ -100,25 +96,6 @@ export class Chat implements SchemaClass {
       }
     }
   }
-}
-
-export function game_selector(data: any): Class<BaseGame> | null {
-  if (data.name === "RedDots") {
-    return RedDots;
-  }
-  if (data.name === "NTacToe") {
-    return NTacToe;
-  }
-  if (data.name === "TicTacToe") {
-    return TicTacToe;
-  }
-  if (data.name === "Fives") {
-    return Fives;
-  }
-  if (data.name === "Twelves") {
-    return Twelves;
-  }
-  return null;
 }
 
 export class Lobby implements SchemaClass {
