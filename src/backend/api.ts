@@ -114,6 +114,21 @@ export function api_get_lobby(lobby_id: string): object | null {
   return sv.to_object(lobby);
 }
 
+export function api_post_login(lobby_id: string, body: any) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    console.log("Error: Could not find lobby - " + lobby_id);
+    return null;
+  }
+  const user = sv.to_class(body, new User());
+  if (user instanceof Error) {
+    console.log("Error: Could not convert user - " + body);
+    return null;
+  }
+  lobby.login(user);
+  return sv.to_object(lobby.chat);
+}
+
 export function api_get_chat(lobby_id: string) {
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {

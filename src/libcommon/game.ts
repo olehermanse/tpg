@@ -16,9 +16,9 @@ export abstract class BaseGame extends SchemaClass {
   needs_sync: boolean;
 
   abstract draw(ctx: any): void;
-  abstract mouse_click(x: number, y: number): void;
   abstract class_name(): string;
-  abstract receive(game: BaseGame): void;
+  abstract mouse_click(x: number, y: number): void;
+  abstract on_receive(game: BaseGame): void;
 
   constructor(id?: string) {
     super();
@@ -28,6 +28,11 @@ export abstract class BaseGame extends SchemaClass {
     this.width = standard_canvas_width();
     this.height = standard_canvas_height();
     this.needs_sync = false;
+  }
+
+  receive(game: BaseGame) {
+    this.players = game.players;
+    this.on_receive(game);
   }
 
   base_schema(): Schema {

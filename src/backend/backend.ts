@@ -5,6 +5,7 @@ import {
   api_get_chat,
   api_get_game,
   api_get_lobby,
+  api_post_login,
   api_put_chat,
   api_put_game,
   api_put_new_game,
@@ -87,6 +88,13 @@ async function run_backend() {
         root: `${Deno.cwd()}/dist`,
         path: "index.html",
       });
+      return next();
+    })
+    .post("/api/login/:lobby_id(\\d{5})", async (ctx, next) => {
+      ctx.response.body = api_post_login(
+        ctx.params.lobby_id,
+        await ctx.request.body.json(),
+      );
       return next();
     })
     .get("/api/chat/:lobby_id(\\d{5})", (ctx, next) => {

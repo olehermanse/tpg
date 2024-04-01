@@ -131,6 +131,27 @@ export class Lobby implements SchemaClass {
     }
     return null;
   }
+
+  refresh_users() {
+    for (const game of this.games) {
+      game.players = this.chat.users;
+    }
+  }
+
+  login(user: User) {
+    for (const u of this.chat.users) {
+      if (u.userid !== user.userid) {
+        continue;
+      }
+      if (u.username !== user.username) {
+        u.username = user.username;
+        this.refresh_users();
+      }
+      return;
+    }
+    this.chat.users.push(user);
+    this.refresh_users();
+  }
 }
 
 export function runtime_tests(): boolean {

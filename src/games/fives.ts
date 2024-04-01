@@ -216,7 +216,7 @@ export class Fives extends BaseGame {
     }
   }
 
-  receive(game: BaseGame) {
+  on_receive(game: BaseGame) {
     console.assert(game.name === this.name);
     console.assert(game instanceof Fives);
     if (!(game instanceof Fives)) {

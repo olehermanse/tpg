@@ -275,6 +275,8 @@ function canvas_init() {
     // canvas.style.width = `${application.width}px`;
     // canvas.style.height = `${application.height}px`;
 
+    const user = get_current_user();
+    application.login(user);
     setInterval(() => {
       if (application != null) {
         application.tick(10);

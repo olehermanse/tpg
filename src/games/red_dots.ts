@@ -70,7 +70,7 @@ export class RedDots extends BaseGame {
     this.schedule_sync();
   }
 
-  receive(game: BaseGame) {
+  on_receive(game: BaseGame) {
     console.assert(game.name === this.name);
     console.assert(game instanceof RedDots);
     if (!(game instanceof RedDots)) {

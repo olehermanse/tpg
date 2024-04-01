@@ -277,7 +277,7 @@ export class NTacToe extends BaseGame {
     }
   }
 
-  receive(game: BaseGame) {
+  on_receive(game: BaseGame) {
     console.assert(game.name === this.name);
     console.assert(game instanceof NTacToe);
     if (!(game instanceof NTacToe)) {

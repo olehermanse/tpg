@@ -7,9 +7,10 @@ import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby } from "../libcommon/lobby.ts";
-import { http_delete, http_get, http_put } from "./http.ts";
+import { http_delete, http_get, http_post, http_put } from "./http.ts";
 import * as sv from "../libcommon/schema.ts";
 import { game_selector } from "../games/game_selector.ts";
+import { User } from "../libcommon/user.ts";
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -252,6 +253,14 @@ class Application {
         this.get_lobby();
       },
     );
+  }
+
+  login(user: User) {
+    console.log("Logging in ");
+    console.log(user);
+    http_post("/api/login/" + get_lobby_id(), user).then((_data) => {
+      return;
+    });
   }
 }
 
