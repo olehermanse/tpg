@@ -6,6 +6,7 @@ import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
 import { BaseGame } from "../libcommon/game.ts";
 import { Fives } from "../games/fives.ts";
+import { Twelves } from "../games/twelves.ts";
 
 const lobbies: { [key: string]: Lobby } = {};
 
@@ -56,6 +57,9 @@ function game_from_request(body) {
     } else if (body.name === "Fives") {
       console.log("Fives");
       cls = Fives;
+    } else if (body.name === "Twelves") {
+      console.log("Twelves");
+      cls = Twelves;
     }
   }
   if (cls === null) {

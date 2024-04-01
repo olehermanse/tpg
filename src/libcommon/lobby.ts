@@ -5,6 +5,7 @@ import * as sv from "./schema.ts";
 import { BaseGame } from "./game.ts";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { Fives } from "../games/fives.ts";
+import { Twelves } from "../games/twelves.ts";
 
 export class Message implements SchemaClass {
   user: User;
@@ -109,6 +110,9 @@ export function game_selector(data: any): Class<BaseGame> | null {
   }
   if (data.name === "Fives") {
     return Fives;
+  }
+  if (data.name === "Twelves") {
+    return Twelves;
   }
   return null;
 }
