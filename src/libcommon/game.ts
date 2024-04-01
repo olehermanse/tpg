@@ -43,8 +43,4 @@ export abstract class BaseGame extends SchemaClass {
   schedule_sync() {
     this.needs_sync = true;
   }
-
-  on_create() {
-    return;
-  }
 }

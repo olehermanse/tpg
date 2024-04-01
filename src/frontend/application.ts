@@ -98,7 +98,6 @@ class CanvasGame {
         this.game.receive(game);
       } else {
         this.game = game;
-        this.game.on_create();
       }
     });
   }
@@ -220,7 +219,6 @@ class Application {
   update_lobby(lobby: Lobby) {
     this.lobby = lobby;
     this.set_active_game(0);
-    this.canvas_game.game.on_create();
   }
 
   tick(_ms: number) {

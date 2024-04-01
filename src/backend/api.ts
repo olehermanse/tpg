@@ -87,7 +87,6 @@ export function api_put_new_game(lobby_id, body) {
     return null;
   }
 
-  game.on_create();
   lobby.games.push(game);
   lobby.chat.messages.push(
     new Message(new User("0", "System"), `Created new ${game.name} game`),
