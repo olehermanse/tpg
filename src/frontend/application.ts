@@ -90,10 +90,15 @@ class CanvasGame {
       }
 
       const game = lobby.games[0];
-      if (game instanceof BaseGame && game.id === game_id) {
+      if (!(game instanceof BaseGame)) {
+        console.log("Error: That's not a game");
+        return;
+      }
+      if (game.id === game_id) {
         this.game.receive(game);
       } else {
         this.game = game;
+        this.game.on_create();
       }
     });
   }
@@ -215,6 +220,7 @@ class Application {
   update_lobby(lobby: Lobby) {
     this.lobby = lobby;
     this.set_active_game(0);
+    this.canvas_game.game.on_create();
   }
 
   tick(_ms: number) {

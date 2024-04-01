@@ -7,6 +7,7 @@ import { RedDots } from "../games/red_dots.ts";
 import { BaseGame } from "../libcommon/game.ts";
 import { Fives } from "../games/fives.ts";
 import { Twelves } from "../games/twelves.ts";
+import { NTacToe } from "../games/ntactoe.ts";
 
 const lobbies: { [key: string]: Lobby } = {};
 
@@ -54,6 +55,9 @@ function game_from_request(body) {
     } else if (body.name === "TicTacToe") {
       console.log("TicTacToe");
       cls = TicTacToe;
+    } else if (body.name === "NTacToe") {
+      console.log("NTacToe");
+      cls = NTacToe;
     } else if (body.name === "Fives") {
       console.log("Fives");
       cls = Fives;
@@ -83,6 +87,7 @@ export function api_put_new_game(lobby_id, body) {
     return null;
   }
 
+  game.on_create();
   lobby.games.push(game);
   lobby.chat.messages.push(
     new Message(new User("0", "System"), `Created new ${game.name} game`),

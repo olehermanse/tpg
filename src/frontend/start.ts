@@ -14,6 +14,7 @@ import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
 import { Fives } from "../games/fives.ts";
 import { Twelves } from "../games/twelves.ts";
+import { NTacToe } from "../games/ntactoe.ts";
 
 let application: Application | null = null;
 
@@ -60,6 +61,29 @@ function set_current_user(user: User) {
 }
 
 function on_chat_command(command: string) {
+  const regex = /^\/n ([1-9][0-9]*) ([1-9][0-9]*)$/;
+  const match = command.match(regex);
+  if (match != null) {
+    const n = Number(match[1]);
+    const t = Number(match[2]);
+    const data = new NTacToe(n, t);
+    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Creating a new NTacToe game failed:");
+        console.log(lobby);
+        return;
+      }
+      if (application === null) {
+        console.log("Error: No application to update");
+        return;
+      }
+      application.update_lobby(lobby);
+      application.switch_game();
+      links_init();
+    });
+    return;
+  }
   if (command === "/tictactoe") {
     const data = new TicTacToe();
     http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
@@ -75,6 +99,7 @@ function on_chat_command(command: string) {
       }
       application.update_lobby(lobby);
       application.switch_game();
+      links_init();
     });
     return;
   }
@@ -93,6 +118,7 @@ function on_chat_command(command: string) {
       }
       application.update_lobby(lobby);
       application.switch_game();
+      links_init();
     });
     return;
   }
@@ -111,6 +137,7 @@ function on_chat_command(command: string) {
       }
       application.update_lobby(lobby);
       application.switch_game();
+      links_init();
     });
     return;
   }
@@ -129,6 +156,7 @@ function on_chat_command(command: string) {
       }
       application.update_lobby(lobby);
       application.switch_game();
+      links_init();
     });
     return;
   }
@@ -253,13 +281,30 @@ function canvas_init() {
       }
     }, 10);
     network_refresh(application);
+    links_init();
   });
+}
+
+function links_init() {
+  const links = document.getElementById("links");
+  if (links === null) {
+    return;
+  }
+  if (application === null) {
+    return;
+  }
+  const lobby = "/api/lobbies/" + get_lobby_id();
+  const game = lobby + "/games/" + application.canvas_game.game.id;
+  const chat = "/api/chat/" + get_lobby_id();
+  links.innerHTML =
+    `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
 }
 
 function start() {
   user_init();
   chat_init();
   canvas_init();
+  links_init();
   runtime_tests();
 }
 
