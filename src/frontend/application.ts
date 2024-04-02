@@ -1,4 +1,5 @@
 import {
+  left_pad,
   standard_canvas_height,
   standard_canvas_width,
   xy,
@@ -6,11 +7,18 @@ import {
 import { XY } from "../libcommon/interfaces.ts";
 import { Draw } from "../libdraw/draw";
 import { BaseGame } from "../libcommon/game.ts";
-import { Lobby } from "../libcommon/lobby.ts";
+import { Lobby, Message } from "../libcommon/lobby.ts";
 import { http_delete, http_get, http_post, http_put } from "./http.ts";
 import * as sv from "../libcommon/schema.ts";
 import { game_selector } from "../games/game_selector.ts";
 import { User } from "../libcommon/user.ts";
+import { WebSocketAction, WebSocketMessage } from "../libcommon/websocket.ts";
+
+function short_time(date: Date) {
+  const hours = left_pad(date.getHours(), 2, "0");
+  const minutes = left_pad(date.getMinutes(), 2, "0");
+  return "[" + hours + ":" + minutes + "]";
+}
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -192,21 +200,104 @@ class Application {
   _active_game: number;
   canvas_game: CanvasGame;
   lobby: Lobby;
+  websocket: WebSocket;
+  user: User;
+  address: string;
+  queue: string[];
 
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
     lobby: Lobby,
+    address: string,
+    user: User,
   ) {
     this.lobby = lobby;
+    this.user = user;
+    this.address = address;
     this._active_game = 0;
+    this.queue = [];
     this.canvas_game = new CanvasGame(
       canvas,
       ctx,
       scale,
       this.get_active_game(),
     );
+    // ws_client.ts
+    this.websocket = new WebSocket(`ws://${address}/api/ws`);
+    this.websocket.onopen = () => console.log("Connected to server");
+    this.websocket.onmessage = (m) => {
+      this.websocket_onmessage(m);
+    };
+    this.websocket.onclose = () => console.log("Disconnected from server");
+    this.websocket_send("login", user);
+    this.render_chat_log();
+  }
+
+  attempt_send() {
+    if (this.queue.length === 0) {
+      return;
+    }
+    if (this.websocket.readyState === 1) {
+      const data = <string> this.queue.shift();
+      this.websocket.send(data);
+      console.log("-> Sent: " + data);
+      this.attempt_send();
+      return;
+    }
+    setTimeout(function () {
+      this.attempt_send();
+    }, 100);
+  }
+
+  websocket_send(action: WebSocketAction, data: sv.SchemaClass) {
+    const msg = new WebSocketMessage(
+      action,
+      this.lobby.id,
+      this.canvas_game.game.id,
+      sv.to_string(data),
+    );
+    this.queue.push(sv.to_string(msg));
+    this.attempt_send();
+  }
+
+  render_chat_log() {
+    const chat_element = document.getElementById("chat-log");
+    if (chat_element === null) {
+      return;
+    }
+    chat_element.innerHTML = this.lobby.chat.messages
+      .map(
+        (v: Message) =>
+          short_time(new Date(v.timestamp)) +
+          " <b>" +
+          v.user.username +
+          ":</b> " +
+          v.body +
+          "<br>",
+      )
+      .reduce((accumulator, currentValue) => accumulator + currentValue, "");
+  }
+
+  websocket_onmessage(m: MessageEvent) {
+    console.log("<- Received: " + m.data);
+    const message = sv.to_class(m.data, new WebSocketMessage());
+    if (message instanceof Error) {
+      console.log("Received invalid websocket message");
+      console.log(m.data);
+      return;
+    }
+    if (message.action === "chat") {
+      const chat_message = sv.to_class(message.payload, new Message());
+      if (chat_message instanceof Error) {
+        console.log("Received invalid chat message");
+        console.log(message.payload);
+        return;
+      }
+      this.lobby.chat.messages.push(chat_message);
+      this.render_chat_log();
+    }
   }
 
   get_active_game(): BaseGame {
@@ -261,6 +352,18 @@ class Application {
     http_post("/api/login/" + get_lobby_id(), user).then((_data) => {
       return;
     });
+  }
+
+  send_chat_message(text: string) {
+    const user = this.user;
+    const message = new Message(user, text);
+    const payload = new WebSocketMessage(
+      "chat",
+      this.lobby.id,
+      "",
+      sv.to_string(message),
+    );
+    this.websocket.send(sv.to_string(payload));
   }
 }
 

@@ -2,10 +2,129 @@ import { Lobby, Message } from "../libcommon/lobby.ts";
 import { randint } from "../libcommon/utils.ts";
 import * as sv from "../libcommon/schema.ts";
 import { User } from "../libcommon/user.ts";
+import { WebSocketMessage } from "../libcommon/websocket.ts";
 import { BaseGame } from "../libcommon/game.ts";
 import { game_selector } from "../games/game_selector.ts";
 
+class WebSocketConnection {
+  ws: any;
+  user: User | null;
+  queue: string[];
+  constructor(ws: any) {
+    this.ws = ws;
+    this.user = null;
+    this.queue = [];
+  }
+
+  onopen() {
+    return;
+  }
+
+  onclose() {
+    return;
+  }
+
+  onmessage(m: MessageEvent) {
+    console.log("<- Received: " + m.data);
+    const message = sv.to_class(m.data, new WebSocketMessage());
+    if (message instanceof Error) {
+      console.log("Error, invalid web socket message received");
+      return;
+    }
+    handle_ws_message(this, message);
+  }
+
+  attempt_send() {
+    if (this.queue.length === 0) {
+      return;
+    }
+    if (this.ws.readyState === 1) {
+      const data = <string> this.queue.shift();
+      this.ws.send(data);
+      console.log("-> Sent: " + data);
+      this.attempt_send();
+      return;
+    }
+    setTimeout(function () {
+      this.attempt_send();
+    }, 100);
+  }
+
+  send(msg: WebSocketMessage) {
+    this.queue.push(sv.to_string(msg));
+    this.attempt_send();
+  }
+}
+
+function ws_broadcast(_lobby: Lobby, message: WebSocketMessage) {
+  for (const connection of clients) {
+    connection.send(message);
+  }
+}
+
+function handle_ws_message(
+  connection: WebSocketConnection,
+  data: WebSocketMessage,
+) {
+  const lobby_id = data.lobby_id;
+  let lobby: Lobby | null = null;
+  if (lobby_id !== "") {
+    lobby = get_lobby(lobby_id);
+    if (lobby === null) {
+      return;
+    }
+  }
+  const game_id = data.game_id;
+  let game = null;
+  if (game_id !== "") {
+    if (lobby === null) {
+      return;
+    }
+    game = lobby.find_game(game_id);
+    if (game === null) {
+      return;
+    }
+  }
+  if (data.action === "login") {
+    const user = sv.to_class(data.payload, new User());
+    if (user instanceof Error) {
+      console.log("Error: Could not convert user - " + data.payload);
+      return;
+    }
+    if (lobby === null) {
+      console.log("Error: Missing lobby for user - " + data.payload);
+      return;
+    }
+    connection.user = user;
+    ws_broadcast(lobby, data);
+    return;
+  }
+  if (lobby === null) {
+    console.log("Error: Missing lobby for chat message - " + data.payload);
+    return;
+  }
+  if (connection.user === null) {
+    console.log("Error: User not logged in - " + data.payload);
+    return;
+  }
+  if (data.action === "chat") {
+    const message = sv.to_class(data.payload, new Message());
+    if (message instanceof Error) {
+      console.log("Error: Could not convert message - " + data.payload);
+      return;
+    }
+    if (message.user.userid !== connection.user.userid) {
+      console.log("Error: Wrong userid");
+      return;
+    }
+    lobby.chat.add(message);
+    ws_broadcast(lobby, data);
+  }
+  return;
+}
+
 const lobbies: { [key: string]: Lobby } = {};
+const clients: WebSocketConnection[] = [];
 
 function get_lobby(lobby_id: string): Lobby | null {
   if (lobby_id in lobbies) {
@@ -150,4 +269,19 @@ export function api_put_chat(lobby_id: string, body: any) {
   }
   lobby.chat.add(message);
   return sv.to_object(lobby.chat);
+}
+
+export function api_ws(ctx) {
+  const ws = ctx.upgrade();
+  const client = new WebSocketConnection(ws);
+  ws.onopen = () => {
+    client.onopen();
+  };
+  ws.onmessage = (m) => {
+    client.onmessage(m);
+  };
+  ws.onclose = () => {
+    client.onclose();
+  };
+  clients.push(client);
 }

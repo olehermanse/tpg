@@ -3,11 +3,10 @@ import {
   get_cookie,
   get_random_userid,
   get_random_username,
-  left_pad,
   set_cookie,
 } from "../libcommon/utils";
 import { http_get, http_put } from "./http.ts";
-import { Chat, Lobby, Message, runtime_tests } from "../libcommon/lobby.ts";
+import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "../libcommon/schema.ts";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
@@ -22,43 +21,16 @@ function get_lobby_id() {
   return window.location.pathname.slice(1);
 }
 
-function short_time(date: Date) {
-  const hours = left_pad(date.getHours(), 2, "0");
-  const minutes = left_pad(date.getMinutes(), 2, "0");
-  return "[" + hours + ":" + minutes + "]";
-}
-
-function render_chat_log(chat_log: Chat | null) {
-  if (chat_log === null) {
-    return;
-  }
-  const chat = document.getElementById("chat-log");
-  if (chat === null) {
-    return;
-  }
-  chat.innerHTML = chat_log.messages
-    .map(
-      (v: Message) =>
-        short_time(new Date(v.timestamp)) +
-        " <b>" +
-        v.user.username +
-        ":</b> " +
-        v.body +
-        "<br>",
-    )
-    .reduce((accumulator, currentValue) => accumulator + currentValue, "");
-}
-
 function get_current_user(): User {
   const userid = get_cookie("userid") ?? "";
   const username = get_cookie("username") ?? "Unknown";
   return new User(userid, username);
 }
 
-function set_current_user(user: User) {
-  set_cookie("userid", user.userid);
-  set_cookie("username", user.username);
-}
+// function set_current_user(user: User) {
+//   set_cookie("userid", user.userid);
+//   set_cookie("username", user.username);
+// }
 
 function on_chat_command(command: string) {
   const regex = /^\/n ([1-9][0-9]*) ([1-9][0-9]*)$/;
@@ -161,19 +133,19 @@ function on_chat_command(command: string) {
     return;
   }
   if (command.startsWith("/username ")) {
-    const user = get_current_user();
-    const new_username = command.slice(10);
-    const message = new Message(user, "Changing username to " + new_username);
-    http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-      const chat = sv.to_class<Chat>(data, new Chat());
-      if (chat instanceof Error) {
-        console.log(chat);
-        return;
-      }
-      render_chat_log(chat);
-      user.username = new_username;
-      set_current_user(user);
-    });
+    // const user = get_current_user();
+    // const new_username = command.slice(10);
+    // const message = new Message(user, "Changing username to " + new_username);
+    //    http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
+    //      const chat = sv.to_class<Chat>(data, new Chat());
+    //      if (chat instanceof Error) {
+    //        console.log(chat);
+    //        return;
+    //      }
+    //      application.render_chat_log(chat);
+    //      user.username = new_username;
+    //      set_current_user(user);
+    //    });
     return;
   }
   console.log("Uknown command: " + command);
@@ -193,31 +165,7 @@ function on_chat_send() {
     return;
   }
   input.value = "";
-  const user = get_current_user();
-  const message = new Message(user, body);
-  http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    const chat = sv.to_class<Chat>(data, new Chat());
-    if (chat instanceof Error) {
-      console.log(chat);
-      return;
-    }
-    render_chat_log(chat);
-  });
-}
-
-function chat_refresh() {
-  const lobby = get_lobby_id();
-  http_get("/api/chat/" + lobby).then((data) => {
-    const chat = sv.to_class<Chat>(data, new Chat());
-    if (chat instanceof Error) {
-      console.log(chat);
-      return;
-    }
-    render_chat_log(chat);
-    setTimeout(() => {
-      chat_refresh();
-    }, 250);
-  });
+  application?.send_chat_message(body);
 }
 
 function user_init() {
@@ -238,7 +186,6 @@ function user_init() {
 }
 
 function chat_init() {
-  chat_refresh();
   const form = document.getElementById("chat-input-form");
   if (form === null) {
     return;
@@ -257,6 +204,7 @@ function network_refresh(application: Application) {
 }
 
 function canvas_init() {
+  const address = window.location.host;
   const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
   const scale = window.devicePixelRatio;
   const ctx = canvas.getContext("2d");
@@ -271,11 +219,12 @@ function canvas_init() {
       console.log(lobby);
       return;
     }
-    application = new Application(canvas, ctx, scale, lobby);
+
+    const user = get_current_user();
+    application = new Application(canvas, ctx, scale, lobby, address, user);
     // canvas.style.width = `${application.width}px`;
     // canvas.style.height = `${application.height}px`;
 
-    const user = get_current_user();
     application.login(user);
     setInterval(() => {
       if (application != null) {

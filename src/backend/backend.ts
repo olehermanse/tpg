@@ -9,6 +9,7 @@ import {
   api_put_chat,
   api_put_game,
   api_put_new_game,
+  api_ws,
   create_lobby,
 } from "./api.ts";
 import { runtime_tests } from "../libcommon/lobby.ts";
@@ -19,6 +20,9 @@ function should_log(request: Request): boolean {
   }
   const url = new URL(request.url);
   const filepath = decodeURIComponent(url.pathname);
+  if (filepath.startsWith("/api/ws")) {
+    return false;
+  }
   if (filepath.startsWith("/api/chat")) {
     return false;
   }
@@ -88,6 +92,13 @@ async function run_backend() {
         root: `${Deno.cwd()}/dist`,
         path: "index.html",
       });
+      return next();
+    })
+    .get("/api/ws", (ctx, next) => {
+      if (!ctx.isUpgradable) {
+        ctx.throw(501);
+      }
+      api_ws(ctx);
       return next();
     })
     .post("/api/login/:lobby_id(\\d{5})", async (ctx, next) => {
