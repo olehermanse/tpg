@@ -12,7 +12,11 @@ import { http_delete, http_get, http_post, http_put } from "./http.ts";
 import * as sv from "../libcommon/schema.ts";
 import { game_selector } from "../games/game_selector.ts";
 import { User } from "../libcommon/user.ts";
-import { WebSocketAction, WebSocketMessage } from "../libcommon/websocket.ts";
+import {
+  WebSocketAction,
+  WebSocketMessage,
+  WebSocketWrapper,
+} from "../libcommon/websocket.ts";
 
 function short_time(date: Date) {
   const hours = left_pad(date.getHours(), 2, "0");
@@ -196,11 +200,41 @@ class CanvasGame {
   key_up(_key: string) {}
 }
 
+class FrontendWebSocket {
+  websocket: WebSocketWrapper;
+  user: User;
+  lobby: Lobby;
+  canvas_game: CanvasGame;
+  constructor(
+    ws: WebSocket,
+    user: User,
+    lobby: Lobby,
+    canvas_game: CanvasGame,
+    onmessage: (msg: WebSocketMessage) => void,
+  ) {
+    this.websocket = new WebSocketWrapper(ws);
+    this.websocket.onmessage = onmessage;
+    this.user = user;
+    this.lobby = lobby;
+    this.canvas_game = canvas_game;
+  }
+
+  send(action: WebSocketAction, data: sv.SchemaClass) {
+    const msg = new WebSocketMessage(
+      action,
+      this.lobby.id,
+      this.canvas_game.game.id,
+      sv.to_string(data),
+    );
+    this.websocket.send(msg);
+  }
+}
+
 class Application {
   _active_game: number;
   canvas_game: CanvasGame;
   lobby: Lobby;
-  websocket: WebSocket;
+  websocket: FrontendWebSocket;
   user: User;
   address: string;
   queue: string[];
@@ -225,41 +259,17 @@ class Application {
       this.get_active_game(),
     );
     // ws_client.ts
-    this.websocket = new WebSocket(`ws://${address}/api/ws`);
-    this.websocket.onopen = () => console.log("Connected to server");
-    this.websocket.onmessage = (m) => {
-      this.websocket_onmessage(m);
-    };
-    this.websocket.onclose = () => console.log("Disconnected from server");
-    this.websocket_send("login", user);
-    this.render_chat_log();
-  }
-
-  attempt_send() {
-    if (this.queue.length === 0) {
-      return;
-    }
-    if (this.websocket.readyState === 1) {
-      const data = <string> this.queue.shift();
-      this.websocket.send(data);
-      console.log("-> Sent: " + data);
-      this.attempt_send();
-      return;
-    }
-    setTimeout(function () {
-      this.attempt_send();
-    }, 100);
-  }
-
-  websocket_send(action: WebSocketAction, data: sv.SchemaClass) {
-    const msg = new WebSocketMessage(
-      action,
-      this.lobby.id,
-      this.canvas_game.game.id,
-      sv.to_string(data),
+    this.websocket = new FrontendWebSocket(
+      new WebSocket(`ws://${address}/api/ws`),
+      user,
+      lobby,
+      this.canvas_game,
+      (m: WebSocketMessage) => {
+        this.ws_receive(m);
+      },
     );
-    this.queue.push(sv.to_string(msg));
-    this.attempt_send();
+    this.websocket.send("login", user);
+    this.render_chat_log();
   }
 
   render_chat_log() {
@@ -280,12 +290,8 @@ class Application {
       .reduce((accumulator, currentValue) => accumulator + currentValue, "");
   }
 
-  websocket_onmessage(m: MessageEvent) {
-    console.log("<- Received: " + m.data);
-    const message = sv.to_class(m.data, new WebSocketMessage());
-    if (message instanceof Error) {
-      console.log("Received invalid websocket message");
-      console.log(m.data);
+  ws_receive(message: WebSocketMessage) {
+    if (message.lobby_id !== this.lobby.id) {
       return;
     }
     if (message.action === "chat") {
@@ -357,13 +363,7 @@ class Application {
   send_chat_message(text: string) {
     const user = this.user;
     const message = new Message(user, text);
-    const payload = new WebSocketMessage(
-      "chat",
-      this.lobby.id,
-      "",
-      sv.to_string(message),
-    );
-    this.websocket.send(sv.to_string(payload));
+    this.websocket.send("chat", message);
   }
 }
 

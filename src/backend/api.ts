@@ -2,68 +2,31 @@ import { Lobby, Message } from "../libcommon/lobby.ts";
 import { randint } from "../libcommon/utils.ts";
 import * as sv from "../libcommon/schema.ts";
 import { User } from "../libcommon/user.ts";
-import { WebSocketMessage } from "../libcommon/websocket.ts";
+import { WebSocketMessage, WebSocketWrapper } from "../libcommon/websocket.ts";
 import { BaseGame } from "../libcommon/game.ts";
 import { game_selector } from "../games/game_selector.ts";
 
-class WebSocketConnection {
-  ws: any;
-  user: User | null;
-  queue: string[];
-  constructor(ws: any) {
-    this.ws = ws;
-    this.user = null;
-    this.queue = [];
-  }
+class BackendWebSocket {
+  websocket: WebSocketWrapper;
+  remote_user?: User;
 
-  onopen() {
-    return;
-  }
-
-  onclose() {
-    return;
-  }
-
-  onmessage(m: MessageEvent) {
-    console.log("<- Received: " + m.data);
-    const message = sv.to_class(m.data, new WebSocketMessage());
-    if (message instanceof Error) {
-      console.log("Error, invalid web socket message received");
-      return;
-    }
-    handle_ws_message(this, message);
-  }
-
-  attempt_send() {
-    if (this.queue.length === 0) {
-      return;
-    }
-    if (this.ws.readyState === 1) {
-      const data = <string> this.queue.shift();
-      this.ws.send(data);
-      console.log("-> Sent: " + data);
-      this.attempt_send();
-      return;
-    }
-    setTimeout(function () {
-      this.attempt_send();
-    }, 100);
-  }
-
-  send(msg: WebSocketMessage) {
-    this.queue.push(sv.to_string(msg));
-    this.attempt_send();
+  constructor(websocket: WebSocket, remote_user?: User) {
+    this.remote_user = remote_user;
+    this.websocket = new WebSocketWrapper(websocket);
+    this.websocket.onmessage = (m: WebSocketMessage) => {
+      handle_ws_message(this, m);
+    };
   }
 }
 
 function ws_broadcast(_lobby: Lobby, message: WebSocketMessage) {
-  for (const connection of clients) {
-    connection.send(message);
+  for (const connection of sockets) {
+    connection.websocket.send(message);
   }
 }
 
 function handle_ws_message(
-  connection: WebSocketConnection,
+  connection: BackendWebSocket,
   data: WebSocketMessage,
 ) {
   const lobby_id = data.lobby_id;
@@ -95,7 +58,7 @@ function handle_ws_message(
       console.log("Error: Missing lobby for user - " + data.payload);
       return;
     }
-    connection.user = user;
+    connection.remote_user = user;
     ws_broadcast(lobby, data);
     return;
   }
@@ -103,7 +66,7 @@ function handle_ws_message(
     console.log("Error: Missing lobby for chat message - " + data.payload);
     return;
   }
-  if (connection.user === null) {
+  if (connection.remote_user === undefined) {
     console.log("Error: User not logged in - " + data.payload);
     return;
   }
@@ -113,7 +76,7 @@ function handle_ws_message(
       console.log("Error: Could not convert message - " + data.payload);
       return;
     }
-    if (message.user.userid !== connection.user.userid) {
+    if (message.user.userid !== connection.remote_user.userid) {
       console.log("Error: Wrong userid");
       return;
     }
@@ -124,7 +87,7 @@ function handle_ws_message(
 }
 
 const lobbies: { [key: string]: Lobby } = {};
-const clients: WebSocketConnection[] = [];
+const sockets: BackendWebSocket[] = [];
 
 function get_lobby(lobby_id: string): Lobby | null {
   if (lobby_id in lobbies) {
@@ -273,15 +236,6 @@ export function api_put_chat(lobby_id: string, body: any) {
 
 export function api_ws(ctx) {
   const ws = ctx.upgrade();
-  const client = new WebSocketConnection(ws);
-  ws.onopen = () => {
-    client.onopen();
-  };
-  ws.onmessage = (m) => {
-    client.onmessage(m);
-  };
-  ws.onclose = () => {
-    client.onclose();
-  };
-  clients.push(client);
+  const client = new BackendWebSocket(ws);
+  sockets.push(client);
 }
