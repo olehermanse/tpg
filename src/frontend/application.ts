@@ -259,8 +259,12 @@ class Application {
       this.get_active_game(),
     );
     // ws_client.ts
+    let protocol = "ws:";
+    if (window.location.protocol === "https:") {
+      protocol = "wss:";
+    }
     this.websocket = new FrontendWebSocket(
-      new WebSocket(`ws://${address}/api/ws`),
+      new WebSocket(`${protocol}//${address}/api/ws`),
       user,
       lobby,
       this.canvas_game,
