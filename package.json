@@ -23,9 +23,9 @@
   "homepage": "https://github.com/olehermanse/tpg#readme",
   "dependencies": {
     "typescript": "^5.4.5",
-    "vite": "^5.2.8"
+    "vite": "^5.2.10"
   },
   "devDependencies": {
-    "vitest": "^1.4.0"
+    "vitest": "^1.5.3"
   }
 }
