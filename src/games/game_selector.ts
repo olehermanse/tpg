@@ -1,5 +1,5 @@
 import { BaseGame } from "../libcommon/game.ts";
-import { Class } from "../libcommon/schema.ts";
+import { Class } from "@olehermanse/utils/schema.js";
 import { Fives } from "./fives.ts";
 import { NTacToe } from "./ntactoe.ts";
 import { RedDots } from "./red_dots.ts";

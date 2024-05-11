@@ -1,5 +1,5 @@
 import { User } from "./user.ts";
-import { Schema, SchemaClass } from "./schema.ts";
+import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
 import {
   get_random_userid,
   standard_canvas_height,

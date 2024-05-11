@@ -1,4 +1,4 @@
-import { Schema, SchemaClass } from "./schema.ts";
+import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
 
 export class User implements SchemaClass {
   userid: string;

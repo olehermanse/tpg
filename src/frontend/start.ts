@@ -8,7 +8,7 @@ import {
 import { http_get, http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
-import * as sv from "../libcommon/schema.ts";
+import * as sv from "@olehermanse/utils/schema.js";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
 import { Fives } from "../games/fives.ts";
@@ -152,7 +152,7 @@ function on_chat_command(command: string) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement> (
+  const input: HTMLInputElement = <HTMLInputElement>(
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;
@@ -247,8 +247,7 @@ function links_init() {
   const lobby = "/api/lobbies/" + get_lobby_id();
   const game = lobby + "/games/" + application.canvas_game.game.id;
   const chat = "/api/chat/" + get_lobby_id();
-  links.innerHTML =
-    `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
+  links.innerHTML = `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
 }
 
 function start() {

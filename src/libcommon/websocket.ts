@@ -1,4 +1,9 @@
-import { Schema, SchemaClass, to_class, to_string } from "./schema.ts";
+import {
+  Schema,
+  SchemaClass,
+  to_class,
+  to_string,
+} from "@olehermanse/utils/schema.js";
 
 const web_socket_actions = ["", "chat", "login"] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
@@ -13,7 +18,7 @@ export class WebSocketMessage implements SchemaClass {
     action: WebSocketAction = "",
     lobby_id = "",
     game_id = "",
-    payload = "",
+    payload = ""
   ) {
     this.action = action;
     this.lobby_id = lobby_id;
@@ -47,7 +52,7 @@ export class WebSocketWrapper {
     ws: WebSocket,
     onopen?: () => void,
     onclose?: () => void,
-    onmessage?: (msg: WebSocketMessage) => void,
+    onmessage?: (msg: WebSocketMessage) => void
   ) {
     this.onopen = onopen ?? null;
     this.onclose = onclose ?? null;
@@ -91,7 +96,7 @@ export class WebSocketWrapper {
       return;
     }
     if (this.ws.readyState === 1) {
-      const data = <string> this.queue.shift();
+      const data = <string>this.queue.shift();
       this.ws.send(data);
       console.log("-> Sent: " + data);
       this.attempt_send();

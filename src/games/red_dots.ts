@@ -1,7 +1,7 @@
 import { BaseGame } from "../libcommon/game.ts";
 import { Draw } from "../libdraw/draw.ts";
-import { Schema } from "../libcommon/schema.ts";
-import * as sv from "../libcommon/schema.ts";
+import { Schema } from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 
 class XY {
   x: number;
@@ -45,7 +45,7 @@ function merge_dots(a: XY[], b: XY[]): XY[] {
   const dots = unique_strings.map((d) => {
     return sv.to_class(d, new XY());
   });
-  return <XY[]> dots;
+  return <XY[]>dots;
 }
 
 export class RedDots extends BaseGame {

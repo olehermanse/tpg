@@ -1,4 +1,4 @@
-import { Schema } from "../libcommon/schema.ts";
+import { Schema } from "@olehermanse/utils/schema.js";
 import { Fives } from "./fives.ts";
 
 export class TicTacToe extends Fives {
