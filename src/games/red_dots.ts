@@ -45,7 +45,7 @@ function merge_dots(a: XY[], b: XY[]): XY[] {
   const dots = unique_strings.map((d) => {
     return sv.to_class(d, new XY());
   });
-  return <XY[]>dots;
+  return <XY[]> dots;
 }
 
 export class RedDots extends BaseGame {

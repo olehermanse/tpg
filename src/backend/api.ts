@@ -27,7 +27,7 @@ function ws_broadcast(_lobby: Lobby, message: WebSocketMessage) {
 
 function handle_ws_message(
   connection: BackendWebSocket,
-  data: WebSocketMessage
+  data: WebSocketMessage,
 ) {
   const lobby_id = data.lobby_id;
   let lobby: Lobby | null = null;
@@ -111,13 +111,13 @@ export function create_lobby(): string {
   }
   const lobby = new Lobby(lobby_id);
   lobby.chat.messages.push(
-    new Message(new User("0", "System"), "New lobby created")
+    new Message(new User("0", "System"), "New lobby created"),
   );
   lobby.chat.messages.push(
     new Message(
       new User("0", "System"),
-      `New ${lobby.games[0].class_name()} game created`
-    )
+      `New ${lobby.games[0].class_name()} game created`,
+    ),
   );
   lobbies[lobby_id] = lobby;
   return lobby_id;
@@ -148,7 +148,7 @@ export function api_put_new_game(lobby_id, body) {
 
   lobby.games.push(game);
   lobby.chat.messages.push(
-    new Message(new User("0", "System"), `Created new ${game.name} game`)
+    new Message(new User("0", "System"), `Created new ${game.name} game`),
   );
   return sv.to_object(lobby);
 }

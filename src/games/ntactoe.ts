@@ -347,7 +347,7 @@ export class NTacToe extends BaseGame {
           rect.x + 0.8 * rect.w,
           rect.y + 0.8 * rect.h,
           rect.highlight ? "yellow" : "white",
-          4
+          4,
         );
         Draw.line(
           ctx,
@@ -356,7 +356,7 @@ export class NTacToe extends BaseGame {
           rect.x + 0.2 * rect.w,
           rect.y + 0.8 * rect.h,
           rect.highlight ? "yellow" : "white",
-          4
+          4,
         );
       }
       if (rect.symbol === "O") {
@@ -370,7 +370,7 @@ export class NTacToe extends BaseGame {
           0.8 * radius,
           null,
           rect.highlight ? "yellow" : "white",
-          4
+          4,
         );
       }
     }

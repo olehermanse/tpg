@@ -71,7 +71,7 @@ export class Chat implements SchemaClass {
 
   constructor(
     messages: null | Message[] | object[] = null,
-    users: null | User[] | object[] = null
+    users: null | User[] | object[] = null,
   ) {
     this.messages = [];
     if (messages != null) {
@@ -160,7 +160,7 @@ export function runtime_tests(): boolean {
     console.log("sv.type_of(" + rep + ") = " + sv.type_of(actual));
     return sv.assertion(
       sv.type_of(actual) === expected,
-      `type_of(${rep}) === ${expected}`
+      `type_of(${rep}) === ${expected}`,
     );
   }
 
@@ -190,7 +190,7 @@ export function runtime_tests(): boolean {
   console.log('new User("12345678901234", "Alice") -> ' + sv.to_string(a));
   success &&= sv.assertion(
     sv.to_string(a) === '{"userid":"12345678901234","username":"Alice"}',
-    "to_string should have predictable output"
+    "to_string should have predictable output",
   );
   if (success != true) {
     return false;
@@ -200,7 +200,7 @@ export function runtime_tests(): boolean {
   console.log(`is_valid('${b}', new User()) -> ` + sv.is_valid(b, new User()));
   success &&= sv.assertion(
     sv.is_valid(b, new User()) === false,
-    "is_valid should stop missing fields"
+    "is_valid should stop missing fields",
   );
   if (success != true) {
     return false;
@@ -210,7 +210,7 @@ export function runtime_tests(): boolean {
   console.log(`is_valid('${c}', new User()) -> ` + sv.is_valid(c, new User()));
   success &&= sv.assertion(
     sv.is_valid(c, new User()) === true,
-    "is_valid should accept a well-formed User"
+    "is_valid should accept a well-formed User",
   );
   if (success != true) {
     return false;
@@ -219,25 +219,25 @@ export function runtime_tests(): boolean {
   const d = new Message();
   success &&= sv.assertion(
     d.timestamp > 1709436801425,
-    "Message timestamp should be after this test was written"
+    "Message timestamp should be after this test was written",
   );
   d.timestamp = 1709436801425;
   console.log("new Message() -> " + sv.to_string(d));
   success &&= sv.assertion(
     sv.to_string(d) ===
       '{"user":{"userid":"","username":""},"body":"","timestamp":1709436801425}',
-    "to_string should have predictable output for Message"
+    "to_string should have predictable output for Message",
   );
   if (success != true) {
     return false;
   }
   console.log(
     `is_valid('${sv.to_string(d)}', new Message()) -> ` +
-      sv.is_valid(sv.to_string(d), new Message())
+      sv.is_valid(sv.to_string(d), new Message()),
   );
   success &&= sv.assertion(
     sv.is_valid(d, new Message()) === true,
-    "is_valid should accept a well-formed Message"
+    "is_valid should accept a well-formed Message",
   );
   if (success != true) {
     return false;
@@ -247,18 +247,18 @@ export function runtime_tests(): boolean {
   console.log("new Chat() -> " + sv.to_string(e));
   success &&= sv.assertion(
     sv.to_string(e) === '{"messages":[],"users":[]}',
-    "to_string should have predictable output for Chat"
+    "to_string should have predictable output for Chat",
   );
   if (success != true) {
     return false;
   }
   console.log(
     `is_valid('${sv.to_string(e)}', new Chat()) -> ` +
-      sv.is_valid(sv.to_string(e), new Chat())
+      sv.is_valid(sv.to_string(e), new Chat()),
   );
   success &&= sv.assertion(
     sv.is_valid(e, new Chat()) === true,
-    "is_valid should accept a well-formed Chat"
+    "is_valid should accept a well-formed Chat",
   );
   return success;
 }
