@@ -4,7 +4,7 @@ import {
   get_random_userid,
   get_random_username,
   set_cookie,
-} from "../libcommon/utils";
+} from "@olehermanse/utils/funcs.js";
 import { http_get, http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";

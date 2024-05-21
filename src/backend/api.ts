@@ -1,5 +1,5 @@
 import { Lobby, Message } from "../libcommon/lobby.ts";
-import { randint } from "../libcommon/utils.ts";
+import { randint } from "@olehermanse/utils/funcs.js";
 import * as sv from "@olehermanse/utils/schema.js";
 import { User } from "../libcommon/user.ts";
 import { WebSocketMessage, WebSocketWrapper } from "../libcommon/websocket.ts";

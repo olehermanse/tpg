@@ -4,7 +4,7 @@ import {
   get_random_userid,
   standard_canvas_height,
   standard_canvas_width,
-} from "./utils.ts";
+} from "@olehermanse/utils/funcs.js";
 
 export abstract class BaseGame extends SchemaClass {
   id: string;

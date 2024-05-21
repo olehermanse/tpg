@@ -3,9 +3,9 @@ import {
   standard_canvas_height,
   standard_canvas_width,
   xy,
-} from "../libcommon/utils";
+} from "@olehermanse/utils/funcs.js";
 import { XY } from "../libcommon/interfaces.ts";
-import { Draw } from "../libdraw/draw";
+import { Draw } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
 import { http_delete, http_get, http_post, http_put } from "./http.ts";
@@ -43,7 +43,7 @@ class CanvasGame {
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
-    game: BaseGame,
+    game: BaseGame
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -61,13 +61,13 @@ class CanvasGame {
 
   x_to_canvas(x: number) {
     return Math.round(
-      (x / this.canvas.getBoundingClientRect().width) * this.canvas_width,
+      (x / this.canvas.getBoundingClientRect().width) * this.canvas_width
     );
   }
 
   y_to_canvas(y: number) {
     return Math.round(
-      (y / this.canvas.getBoundingClientRect().height) * this.canvas_height,
+      (y / this.canvas.getBoundingClientRect().height) * this.canvas_height
     );
   }
 
@@ -78,7 +78,7 @@ class CanvasGame {
       0,
       this.canvas_width,
       this.canvas_height,
-      "#000000",
+      "#000000"
     );
     this.game.draw(this.ctx);
   }
@@ -138,7 +138,7 @@ class CanvasGame {
             this.game.receive(game);
           }
           //this.update_game(game);
-        },
+        }
       );
     }
   }
@@ -175,7 +175,7 @@ class CanvasGame {
         }
         this.key_down(event.key);
       },
-      false,
+      false
     );
 
     document.addEventListener(
@@ -183,7 +183,7 @@ class CanvasGame {
       (event) => {
         this.key_up(event.key);
       },
-      false,
+      false
     );
   }
 
@@ -210,7 +210,7 @@ class FrontendWebSocket {
     user: User,
     lobby: Lobby,
     canvas_game: CanvasGame,
-    onmessage: (msg: WebSocketMessage) => void,
+    onmessage: (msg: WebSocketMessage) => void
   ) {
     this.websocket = new WebSocketWrapper(ws);
     this.websocket.onmessage = onmessage;
@@ -224,7 +224,7 @@ class FrontendWebSocket {
       action,
       this.lobby.id,
       this.canvas_game.game.id,
-      sv.to_string(data),
+      sv.to_string(data)
     );
     this.websocket.send(msg);
   }
@@ -245,7 +245,7 @@ class Application {
     scale: number,
     lobby: Lobby,
     address: string,
-    user: User,
+    user: User
   ) {
     this.lobby = lobby;
     this.user = user;
@@ -256,7 +256,7 @@ class Application {
       canvas,
       ctx,
       scale,
-      this.get_active_game(),
+      this.get_active_game()
     );
     // ws_client.ts
     let protocol = "ws:";
@@ -270,7 +270,7 @@ class Application {
       this.canvas_game,
       (m: WebSocketMessage) => {
         this.ws_receive(m);
-      },
+      }
     );
     this.websocket.send("login", user);
     this.render_chat_log();
@@ -289,7 +289,7 @@ class Application {
           v.user.username +
           ":</b> " +
           v.body +
-          "<br>",
+          "<br>"
       )
       .reduce((accumulator, currentValue) => accumulator + currentValue, "");
   }
@@ -352,7 +352,7 @@ class Application {
       (_data: any) => {
         console.log("Deleted first game");
         this.get_lobby();
-      },
+      }
     );
   }
 

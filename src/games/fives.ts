@@ -1,7 +1,7 @@
 import { BaseGame } from "../libcommon/game.ts";
 import { Schema } from "@olehermanse/utils/schema.js";
-import { limit, xy } from "../libcommon/utils.ts";
-import { Draw } from "../libdraw/draw.ts";
+import { limit, xy } from "@olehermanse/utils/funcs.js";
+import { Draw } from "@olehermanse/utils/draw.js";
 
 type FivesSymbol = " " | "X" | "O";
 
