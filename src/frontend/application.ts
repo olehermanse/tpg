@@ -4,7 +4,7 @@ import {
   standard_canvas_width,
   xy,
 } from "@olehermanse/utils/funcs.js";
-import { XY } from "../libcommon/interfaces.ts";
+import { XY } from "@olehermanse/utils";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
