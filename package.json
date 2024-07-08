@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/olehermanse/tpg#readme",
   "dependencies": {
-    "@olehermanse/utils": "^0.0.18",
+    "@olehermanse/utils": "^0.0.19",
     "typescript": "^5.4.5",
     "vite": "^5.3.3"
   },
