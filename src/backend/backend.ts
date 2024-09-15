@@ -1,7 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import "./deno_types.ts";
 import {
-  api_check_auth,
   api_delete_game,
   api_get_chat,
   api_get_game,

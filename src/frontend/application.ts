@@ -8,7 +8,7 @@ import { XY } from "@olehermanse/utils";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
-import { http_delete, http_get, http_post, http_put } from "./http.ts";
+import { http_delete, http_get, http_put } from "./http.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { game_selector } from "../games/game_selector.ts";
 import { User } from "../libcommon/user.ts";
@@ -88,32 +88,24 @@ class CanvasGame {
     this.game.mouse_click(this.mouse.x, this.mouse.y);
   }
 
-  refresh() {
-    const lobby_id = get_lobby_id();
-    const game_id = this.game.id;
-    http_get("/api/lobbies/" + lobby_id).then((data) => {
-      const lobby = sv.to_class(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new Lobby failed:");
-        console.log(lobby);
-        return;
-      }
-      if (lobby === null) {
-        console.log("Error: lobby found");
-        return;
-      }
+  update_full_lobby(data: string | Lobby) {
+    const lobby = sv.to_class(data, new Lobby());
+    if (lobby instanceof Error) {
+      console.log("Creating a new Lobby failed:");
+      console.log(lobby);
+      return;
+    }
+    if (lobby === null) {
+      console.log("Error: lobby found");
+      return;
+    }
 
-      const game = lobby.games[0];
-      if (!(game instanceof BaseGame)) {
-        console.log("Error: That's not a game");
-        return;
-      }
-      if (game.id === game_id) {
-        this.game.receive(game);
-      } else {
-        this.game = game;
-      }
-    });
+    const game = lobby.games[0];
+    if (!(game instanceof BaseGame)) {
+      console.log("Error: That's not a game");
+      return;
+    }
+    this.game.receive(game);
   }
 
   push() {
@@ -354,14 +346,6 @@ class Application {
         this.get_lobby();
       },
     );
-  }
-
-  login(user: User) {
-    console.log("Logging in ");
-    console.log(user);
-    http_post("/api/login/" + get_lobby_id(), user).then((_data) => {
-      return;
-    });
   }
 
   send_chat_message(text: string) {

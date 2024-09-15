@@ -26,4 +26,5 @@ WORKDIR /tpg
 COPY --from=build /tpg/dist/ dist/
 COPY src/ src/
 COPY --from=test /tpg/package.json /tpg/package.json
+RUN deno cache src/backend/backend.ts
 CMD [ "deno" , "run", "--allow-net", "--allow-read", "--allow-env", "src/backend/backend.ts"]

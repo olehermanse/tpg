@@ -1,14 +1,8 @@
 import { Application } from "./application.ts";
-import {
-  get_cookie,
-  get_random_userid,
-  get_random_username,
-  http_post,
-  set_cookie,
-} from "@olehermanse/utils/funcs.js";
+import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
 import { http_get, http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
-import { AuthObject, User } from "../libcommon/user.ts";
+import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
@@ -22,10 +16,16 @@ function get_lobby_id() {
   return window.location.pathname.slice(1);
 }
 
-function get_current_user(): User {
-  const userid = get_cookie("userid") ?? "";
-  const username = get_cookie("username") ?? "Unknown";
-  return new User(userid, username);
+export function get_current_user(): User | null {
+  const user_string = get_cookie("User") ?? "";
+  if (user_string === "") {
+    return null;
+  }
+  const user = sv.to_class(user_string, new User());
+  if (user instanceof Error) {
+    return null;
+  }
+  return user;
 }
 
 // function set_current_user(user: User) {
@@ -169,23 +169,6 @@ function on_chat_send() {
   application?.send_chat_message(body);
 }
 
-function user_init() {
-  let username = get_cookie("username");
-  console.log("Existing username: " + username);
-  if (username === null || username === "") {
-    username = get_random_username();
-    set_cookie("username", username);
-    console.log("Created new username: " + username);
-  }
-  let userid = get_cookie("userid");
-  console.log("Existing userid: " + userid);
-  if (userid === null || userid === "") {
-    userid = get_random_userid();
-    set_cookie("userid", userid);
-    console.log("Created new userid: " + userid);
-  }
-}
-
 function chat_init() {
   const form = document.getElementById("chat-input-form");
   if (form === null) {
@@ -197,13 +180,6 @@ function chat_init() {
   });
 }
 
-function network_refresh(application: Application) {
-  application.canvas_game.refresh();
-  setTimeout(() => {
-    network_refresh(application);
-  }, 500);
-}
-
 function canvas_init() {
   const address = window.location.host;
   const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
@@ -213,36 +189,31 @@ function canvas_init() {
     return;
   }
   const lobby = get_lobby_id();
-  const user = get_current_user();
-  const auth_object = sv.to_class({
-    userid: user.userid,
-    username: user.username,
-    lobby_id: lobby,
-  }, new AuthObject());
-  http_post("/api/auth/" + lobby, auth_object).then((data) => {
-    console.log(data);
-  });
-
-  http_get("/api/lobbies/" + lobby).then((data) => {
-    const lobby = sv.to_class<Lobby>(data, new Lobby());
-    if (lobby instanceof Error) {
-      console.log(lobby);
+  const obj = { "url": window.location.href };
+  http_post("/api/auth/" + lobby, obj).then((data) => {
+    console.log("Received from auth: " + JSON.stringify(data));
+    const user = sv.to_class(data, new User());
+    if (user instanceof Error) {
       return;
     }
-
-    const user = get_current_user();
-    application = new Application(canvas, ctx, scale, lobby, address, user);
-    // canvas.style.width = `${application.width}px`;
-    // canvas.style.height = `${application.height}px`;
-
-    application.login(user);
-    setInterval(() => {
-      if (application != null) {
-        application.tick(10);
+    http_get("/api/lobbies/" + lobby).then((data) => {
+      const lobby = sv.to_class<Lobby>(data, new Lobby());
+      if (lobby instanceof Error) {
+        console.log(lobby);
+        return;
       }
-    }, 10);
-    network_refresh(application);
-    links_init();
+
+      application = new Application(canvas, ctx, scale, lobby, address, user);
+      // canvas.style.width = `${application.width}px`;
+      // canvas.style.height = `${application.height}px`;
+
+      setInterval(() => {
+        if (application != null) {
+          application.tick(10);
+        }
+      }, 10);
+      links_init();
+    });
   });
 }
 
@@ -262,7 +233,6 @@ function links_init() {
 }
 
 function start() {
-  user_init();
   chat_init();
   canvas_init();
   links_init();
