@@ -118,6 +118,7 @@ export class Lobby implements SchemaClass {
 
   constructor(path?: string) {
     this.id = path ?? "";
+    console.assert(this.id === "" || this.id[0] === "/");
     this.chat = new Chat();
     this.games = [];
     this.games.push(new Fives());

@@ -1,15 +1,18 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import "./deno_types.ts";
 import {
+  api_check_auth,
   api_delete_game,
   api_get_chat,
   api_get_game,
   api_get_lobby,
+  api_post_auth,
   api_post_login,
   api_put_chat,
   api_put_game,
   api_put_new_game,
   api_ws,
+  check_request_auth_headers,
   create_lobby,
 } from "./api.ts";
 import { runtime_tests } from "../libcommon/lobby.ts";
@@ -94,11 +97,15 @@ async function run_backend() {
       });
       return next();
     })
-    .get("/api/ws", (ctx, next) => {
+    .get("/api/ws/:lobby_id(\\d{5})", (ctx, next) => {
       if (!ctx.isUpgradable) {
         ctx.throw(501);
       }
-      api_ws(ctx);
+      api_ws(ctx, ctx.params.lobby_id);
+      return next();
+    })
+    .post("/api/auth/:lobby_id(\\d{5})", async (ctx, next) => {
+      api_post_auth(ctx);
       return next();
     })
     .post("/api/login/:lobby_id(\\d{5})", async (ctx, next) => {
@@ -162,6 +169,16 @@ async function run_backend() {
       },
     );
   const app = new Application();
+  app.use(async (ctx, next) => {
+    const pathname = ctx.request.url.pathname;
+    if (pathname.startsWith("/api") && !pathname.startsWith("/api/auth/")) {
+      if (!check_request_auth_headers(ctx)) {
+        console.log("check auth failed");
+        ctx.throw(404);
+      }
+    }
+    return await next();
+  });
   app.use(async (ctx, next) => {
     await next();
     log_response(ctx);

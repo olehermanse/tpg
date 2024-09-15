@@ -1,4 +1,5 @@
 export async function http_get(url: string): Promise<object> {
+  return {};
   const response = await fetch(url, {
     method: "GET",
     headers: {

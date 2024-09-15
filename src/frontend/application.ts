@@ -264,7 +264,7 @@ class Application {
       protocol = "wss:";
     }
     this.websocket = new FrontendWebSocket(
-      new WebSocket(`${protocol}//${address}/api/ws`),
+      new WebSocket(`${protocol}//${address}/api/ws/${lobby.id}`),
       user,
       lobby,
       this.canvas_game,

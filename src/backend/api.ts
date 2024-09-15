@@ -1,10 +1,15 @@
 import { Lobby, Message } from "../libcommon/lobby.ts";
-import { randint } from "@olehermanse/utils/funcs.js";
+import {
+  get_random_userid,
+  get_random_username,
+  randint,
+} from "@olehermanse/utils/funcs.js";
 import * as sv from "@olehermanse/utils/schema.js";
-import { User } from "../libcommon/user.ts";
+import { AuthObject, User } from "../libcommon/user.ts";
 import { WebSocketMessage, WebSocketWrapper } from "../libcommon/websocket.ts";
 import { BaseGame } from "../libcommon/game.ts";
 import { game_selector } from "../games/game_selector.ts";
+import { Use } from "../../../../.cache/deno/npm/registry.npmjs.org/@vitest/runner/2.1.1/dist/index.d.ts";
 
 class BackendWebSocket {
   websocket: WebSocketWrapper;
@@ -17,11 +22,29 @@ class BackendWebSocket {
       handle_ws_message(this, m);
     };
   }
+
+  send(msg: WebSocketMessage) {
+    this.websocket.send(msg);
+  }
 }
 
-function ws_broadcast(_lobby: Lobby, message: WebSocketMessage) {
-  for (const connection of sockets) {
-    connection.websocket.send(message);
+class BackendLobby {
+  lobby: Lobby;
+  websockets: BackendWebSocket[];
+  constructor(lobby: Lobby) {
+    this.lobby = lobby;
+    this.websockets = [];
+  }
+}
+
+const lobbies: { [key: string]: BackendLobby } = {};
+const users: { [key: string]: User } = {};
+const sessions: { [key: string]: User } = {};
+
+function ws_broadcast(lobby: Lobby, message: WebSocketMessage) {
+  const websockets = lobbies[lobby.id].websockets;
+  for (const websocket of websockets) {
+    websocket.websocket.send(message);
   }
 }
 
@@ -85,9 +108,6 @@ function handle_ws_message(
   }
   return;
 }
-
-const lobbies: { [key: string]: Lobby } = {};
-const sockets: BackendWebSocket[] = [];
 
 function get_lobby(lobby_id: string): Lobby | null {
   if (lobby_id in lobbies) {
@@ -234,8 +254,170 @@ export function api_put_chat(lobby_id: string, body: any) {
   return sv.to_object(lobby.chat);
 }
 
-export function api_ws(ctx) {
+function get_user(ctx): User | null {
+  const authorization: string | null = ctx.request.headers.get("Authorization");
+  if (authorization === null) {
+    return null;
+  }
+  const userid = authorization.split("|")[0];
+  return new User(undefined, userid);
+}
+
+export function api_ws(ctx, lobby_id: string) {
+  const user = get_user(ctx);
+  if (user === null) {
+    console.log("Failed ws user");
+    ctx.throw(404);
+    return;
+  }
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    console.log("Failed ws lobby");
+    ctx.throw(404);
+    return;
+  }
   const ws = ctx.upgrade();
   const client = new BackendWebSocket(ws);
-  sockets.push(client);
+  const session = new Session(user, lobby, client);
+  sessions.push(session);
+}
+
+export function api_check_auth(
+  auth: string,
+  auth_object?: AuthObject,
+): string | null {
+  const parts = auth.split("|");
+  if (parts.length !== 2) {
+    console.log("Failed auth split");
+    return null;
+  }
+  const userid = parts[0];
+  const secret = parts[1];
+
+  if (userid.length === 0 || secret.length === 0) {
+    console.log("Failed auth length");
+    return null;
+  }
+
+  let existing: string | undefined = authorizations[userid];
+  if (existing === undefined) {
+    authorizations[userid] = auth;
+    if (auth_object !== undefined) {
+      // TODO
+    }
+    return auth;
+  }
+  if (existing === auth) {
+    return auth;
+  }
+  console.log("Existing: " + existing);
+  console.log("Authorization: " + auth);
+  console.log("Failed secret");
+  return null;
+}
+
+export function api_post_auth_old(
+  body: any,
+  authorization: string | null,
+): string | null {
+  const input = JSON.stringify(body);
+  const obj = sv.to_class(input, new AuthObject());
+  if (obj instanceof Error) {
+    console.log("Failed conversion");
+    return null;
+  }
+  const userid: string = obj.userid;
+  if (userid.length === 0) {
+    console.log("Failed userid");
+    return null;
+  }
+  if (authorization !== null && !authorization.startsWith(userid + "|")) {
+    console.log("Failed authorization");
+    return null;
+  }
+  if (authorization === null) {
+    return api_check_auth(userid + "|" + get_random_userid(), obj);
+  }
+  return api_check_auth(authorization, obj);
+}
+
+function create_new_auth(ctx: any) {
+  const lobby_id: string = ctx.params.lobby_id;
+  const auth: string = get_random_userid();
+  const userid: string = get_random_userid();
+  const username: string = get_random_username();
+  const user: User = new User(userid, username);
+  const user_string: string = sv.to_string(user);
+  if (!(lobby_id in lobbies)) {
+    lobbies[lobby_id] = new BackendLobby(new Lobby("/" + lobby_id));
+  }
+  users[userid] = user;
+  sessions[auth] = user;
+
+  ctx.response.headers.set(
+    "Set-Cookie",
+    `Authorization=${auth}; Secure; HttpOnly; Max-Age=86400`,
+  );
+  ctx.response.headers.set(
+    "Set-Cookie",
+    `User=${user_string}; Secure; Max-Age=86400`,
+  );
+  ctx.response.body = sv.to_string(user);
+}
+
+function auth_is_valid(auth: string, user: User): boolean {
+  if (auth === "" || user.userid === "" || user.username === "") {
+    return false;
+  }
+  if (!(auth in sessions)) {
+    return false;
+  }
+  const existing: User = sessions[auth];
+  if (existing.userid === user.userid) {
+    return true;
+  }
+  return false;
+}
+
+export function check_request_auth_headers(ctx: any): boolean {
+  const auth: string | null = ctx.request.headers.get("Authorization");
+  const user: string | null = ctx.request.headers.get("User");
+  if (
+    user === null || auth === null
+  ) {
+    return false;
+  }
+  const user_object = sv.to_class(user, new User());
+  if (user_object instanceof Error) {
+    ctx.throw(404);
+    return false;
+  }
+  return auth_is_valid(auth, user_object);
+}
+
+export function api_post_auth(ctx: any) {
+  const auth: string | null = ctx.request.headers.get("Authorization");
+  const user: string | null = ctx.request.headers.get("User");
+  if (
+    user === null || user.length === 0 || auth === null || auth.length === 0
+  ) {
+    return create_new_auth(ctx);
+  }
+
+  const user_object = sv.to_class(user, new User());
+  if (user_object instanceof Error) {
+    return ctx.throw(404);
+  }
+  if (!auth_is_valid(auth, user_object)) {
+    return create_new_auth(ctx);
+  }
+
+  if (!(user_object.userid in users)) {
+    users[user_object.userid] = user_object;
+  } else {
+    users[user_object.userid].username = user_object.username;
+  }
+
+  ctx.response.body = sv.to_string(user_object);
+  return;
 }

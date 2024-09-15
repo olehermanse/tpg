@@ -3,11 +3,12 @@ import {
   get_cookie,
   get_random_userid,
   get_random_username,
+  http_post,
   set_cookie,
 } from "@olehermanse/utils/funcs.js";
 import { http_get, http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
-import { User } from "../libcommon/user.ts";
+import { AuthObject, User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
@@ -212,6 +213,15 @@ function canvas_init() {
     return;
   }
   const lobby = get_lobby_id();
+  const user = get_current_user();
+  const auth_object = sv.to_class({
+    userid: user.userid,
+    username: user.username,
+    lobby_id: lobby,
+  }, new AuthObject());
+  http_post("/api/auth/" + lobby, auth_object).then((data) => {
+    console.log(data);
+  });
 
   http_get("/api/lobbies/" + lobby).then((data) => {
     const lobby = sv.to_class<Lobby>(data, new Lobby());
