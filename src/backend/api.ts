@@ -5,10 +5,14 @@ import {
   randint,
 } from "@olehermanse/utils/funcs.js";
 import * as sv from "@olehermanse/utils/schema.js";
-import { AuthObject, User } from "../libcommon/user.ts";
-import { WebSocketMessage, WebSocketWrapper } from "../libcommon/websocket.ts";
+import { User } from "../libcommon/user.ts";
+import {
+  WebSocketAction,
+  WebSocketMessage,
+  WebSocketWrapper,
+} from "../libcommon/websocket.ts";
+import { game_selector, game_selector_new } from "../games/game_selector.ts";
 import { BaseGame } from "../libcommon/game.ts";
-import { game_selector } from "../games/game_selector.ts";
 
 class BackendWebSocket {
   websocket: WebSocketWrapper;
@@ -33,6 +37,25 @@ class BackendLobby {
   constructor(lobby: Lobby) {
     this.lobby = lobby;
     this.websockets = [];
+  }
+
+  update_game(game: BaseGame) {
+    const target = this.lobby.find_game(game.id);
+    if (target === null) {
+      return;
+    }
+    target.receive(game);
+    this.broadcast("update-game", sv.to_string(game), game.id);
+  }
+
+  broadcast(action: WebSocketAction, payload: string, game_id?: string) {
+    const message = new WebSocketMessage(
+      action,
+      this.lobby.id,
+      game_id,
+      payload,
+    );
+    ws_broadcast(this.lobby, message);
   }
 }
 
@@ -84,21 +107,25 @@ function handle_ws_message(
     ws_broadcast(lobby, data);
     return;
   }
-
-  if (data.action === "lobby") {
-    console.log("Error: lobby command not implemented server-side");
-    return;
-  }
-
-  if (lobby === null) {
-    console.log("Error: Missing lobby for chat message - " + data.payload);
-    return;
-  }
-  if (connection.remote_user === undefined) {
-    console.log("Error: User not logged in - " + data.payload);
+  if (data.action === "update-game") {
+    const game = game_selector_new(data.payload);
+    if (game === null) {
+      return;
+    }
+    const lobby_id = data.lobby_id;
+    const lobby = get_backend_lobby(lobby_id);
+    lobby.update_game(game);
     return;
   }
   if (data.action === "chat") {
+    if (connection.remote_user === undefined) {
+      console.log("Error: User not logged in - " + data.payload);
+      return;
+    }
+    if (lobby === null) {
+      console.log("Error: Missing lobby for chat message - " + data.payload);
+      return;
+    }
     const message = sv.to_class(data.payload, new Message());
     if (message instanceof Error) {
       console.log("Error: Could not convert message - " + data.payload);
@@ -111,6 +138,7 @@ function handle_ws_message(
     lobby.chat.add(message);
     ws_broadcast(lobby, data);
   }
+  console.log(`Error: action "${data.action}" not implemented server-side`);
   return;
 }
 
@@ -126,14 +154,6 @@ function get_backend_lobby(lobby_id: string): BackendLobby | null {
     return lobbies[lobby_id];
   }
   return null;
-}
-
-function get_game(lobby_id: string, game_id: string) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  return lobby.find_game(game_id);
 }
 
 export function create_lobby(): string {
@@ -155,111 +175,8 @@ export function create_lobby(): string {
   return lobby_id;
 }
 
-function game_from_request(body: any) {
-  const cls: sv.Class<BaseGame> | null = game_selector(body);
-  if (cls === null) {
-    return null;
-  }
-  const game = sv.to_class(body, new cls());
-  if (game instanceof Error) {
-    console.log("Error in to class");
-    return null;
-  }
-  return game;
-}
-
-export function api_put_new_game(lobby_id: string, body: any) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  const game = game_from_request(body);
-  if (game === null) {
-    return null;
-  }
-
-  lobby.games.push(game);
-  lobby.chat.messages.push(
-    new Message(new User("0", "System"), `Created new ${game.name} game`),
-  );
-  return sv.to_object(lobby);
-}
-
-export function api_put_game(lobby_id: string, game_id: string, body: any) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  const game = lobby.find_game(game_id);
-  if (game === null) {
-    return null;
-  }
-  const received = game_from_request(body);
-  if (received === null) {
-    return null;
-  }
-  game.receive(received);
-  return sv.to_object(game);
-}
-
-export function api_delete_game(lobby_id: string, game_id: string) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  console.log("Deleting game");
-  lobby.games = lobby.games.filter((game) => game.id !== game_id);
-  return sv.to_object(lobby);
-}
-
-export function api_get_game(lobby_id: string, game_id: string) {
-  const game = get_game(lobby_id, game_id);
-  if (game === null) {
-    return null;
-  }
-  return sv.to_object(game);
-}
-
 export function api_lobby_exists(lobby_id: string): boolean {
   return get_lobby(lobby_id) !== null;
-}
-
-export function api_post_login(lobby_id: string, body: any) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    console.log("Error: Could not find lobby - " + lobby_id);
-    return null;
-  }
-  const user = sv.to_class(body, new User());
-  if (user instanceof Error) {
-    console.log("Error: Could not convert user - " + body);
-    return null;
-  }
-  lobby.login(user);
-  return sv.to_object(lobby.chat);
-}
-
-export function api_get_chat(lobby_id: string) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  return sv.to_object(lobby.chat);
-}
-
-export function api_put_chat(lobby_id: string, body: any) {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    console.log("Error: Could not find lobby - " + lobby_id);
-    return null;
-  }
-  const message = sv.to_class(body, new Message());
-  if (message instanceof Error) {
-    console.log("Error: Could not convert message - " + body);
-    return null;
-  }
-  lobby.chat.add(message);
-  return sv.to_object(lobby.chat);
 }
 
 function get_user(ctx: any): User | null {
@@ -290,7 +207,7 @@ export function api_ws(ctx, lobby_id: string) {
     ctx.throw(404);
     return;
   }
-  const ws = new BackendWebSocket(ctx.upgrade());
+  const ws = new BackendWebSocket(ctx.upgrade(), user);
   const msg = new WebSocketMessage(
     "lobby",
     lobby_id,

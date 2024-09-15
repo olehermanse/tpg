@@ -5,7 +5,14 @@ import {
   to_string,
 } from "@olehermanse/utils/schema.js";
 
-const web_socket_actions = ["", "chat", "login", "lobby"] as const;
+const web_socket_actions = [
+  "",
+  "chat",
+  "login",
+  "lobby",
+  "new-game",
+  "update-game",
+] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
 
 export class WebSocketMessage implements SchemaClass {
@@ -24,6 +31,11 @@ export class WebSocketMessage implements SchemaClass {
     this.lobby_id = lobby_id;
     this.game_id = game_id;
     this.payload = payload;
+  }
+
+  pretty(): string {
+    const payload = JSON.stringify(JSON.parse(this.payload), undefined, 2);
+    return `action: "${this.action}", lobby_id: "${this.lobby_id}", game_id: "${this.game_id}", payload: \n${payload}`;
   }
 
   class_name(): string {
@@ -79,8 +91,8 @@ export class WebSocketWrapper {
   }
 
   on_message(m: MessageEvent) {
-    console.log("<- Received: " + m.data);
     if (this.onmessage === null) {
+      console.log("No handler defined");
       return;
     }
     const message = to_class(m.data, new WebSocketMessage());
@@ -88,6 +100,7 @@ export class WebSocketWrapper {
       console.log("Error, invalid web socket message received");
       return;
     }
+    console.log("<- Received: " + message.pretty());
     this.onmessage(message);
   }
 
@@ -98,7 +111,6 @@ export class WebSocketWrapper {
     if (this.ws.readyState === 1) {
       const data = <string> this.queue.shift();
       this.ws.send(data);
-      console.log("-> Sent: " + data);
       this.attempt_send();
       return;
     }
@@ -108,7 +120,8 @@ export class WebSocketWrapper {
   }
 
   send(msg: WebSocketMessage) {
-    this.queue.push(to_string(msg));
+    this.queue.push(to_string(msg, true));
     this.attempt_send();
+    console.log("-> Sent: " + msg.pretty());
   }
 }

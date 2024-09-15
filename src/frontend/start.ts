@@ -1,6 +1,5 @@
 import { Application, FrontendWebSocket } from "./application.ts";
 import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
-import { http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
@@ -41,97 +40,27 @@ function on_chat_command(command: string) {
     const n = Number(match[1]);
     const t = Number(match[2]);
     const data = new NTacToe(n, t);
-    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new NTacToe game failed:");
-        console.log(lobby);
-        return;
-      }
-      if (application === null) {
-        console.log("Error: No application to update");
-        return;
-      }
-      application.update_lobby(lobby);
-      application.switch_game();
-      links_init();
-    });
+    application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/tictactoe") {
     const data = new TicTacToe();
-    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new Tic Tac Toe game failed:");
-        console.log(lobby);
-        return;
-      }
-      if (application === null) {
-        console.log("Error: No application to update");
-        return;
-      }
-      application.update_lobby(lobby);
-      application.switch_game();
-      links_init();
-    });
+    application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/fives") {
     const data = new Fives();
-    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new Fives game failed:");
-        console.log(lobby);
-        return;
-      }
-      if (application === null) {
-        console.log("Error: No application to update");
-        return;
-      }
-      application.update_lobby(lobby);
-      application.switch_game();
-      links_init();
-    });
+    application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/twelves") {
     const data = new Twelves();
-    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new Twelves game failed:");
-        console.log(lobby);
-        return;
-      }
-      if (application === null) {
-        console.log("Error: No application to update");
-        return;
-      }
-      application.update_lobby(lobby);
-      application.switch_game();
-      links_init();
-    });
+    application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/reddots") {
     const data = new RedDots();
-    http_put("/api/lobbies/" + get_lobby_id() + "/games", data).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Creating a new RedDots game failed:");
-        console.log(lobby);
-        return;
-      }
-      if (application === null) {
-        console.log("Error: No application to update");
-        return;
-      }
-      application.update_lobby(lobby);
-      application.switch_game();
-      links_init();
-    });
+    application?.websocket.send("new-game", data);
     return;
   }
   if (command.startsWith("/username ")) {
@@ -238,9 +167,13 @@ function init_ws() {
         user,
         websocket,
       );
+      application.websocket.application = application;
+      application.update_lobby(lobby);
       console.log("Application created");
       console.log("Here is the game:");
       console.log(sv.to_string(application.canvas_game.game));
+      console.log("Here is the game's lobby:");
+      console.log(sv.to_string(application.lobby));
       setInterval(() => {
         if (application != null) {
           application.tick(10);

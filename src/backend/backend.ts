@@ -1,15 +1,8 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import "./deno_types.ts";
 import {
-  api_delete_game,
-  api_get_chat,
-  api_get_game,
   api_lobby_exists,
   api_post_auth,
-  api_post_login,
-  api_put_chat,
-  api_put_game,
-  api_put_new_game,
   api_ws,
   check_request_auth_headers,
   create_lobby,
@@ -94,73 +87,17 @@ async function run_backend() {
       });
       return next();
     })
+    .post("/api/auth/:lobby_id(\\d{5})", async (ctx, next) => {
+      api_post_auth(ctx);
+      return next();
+    })
     .get("/api/ws/:lobby_id(\\d{5})", (ctx, next) => {
       if (!ctx.isUpgradable) {
         ctx.throw(501);
       }
       api_ws(ctx, ctx.params.lobby_id);
       return next();
-    })
-    .post("/api/auth/:lobby_id(\\d{5})", async (ctx, next) => {
-      api_post_auth(ctx);
-      return next();
-    })
-    .post("/api/login/:lobby_id(\\d{5})", async (ctx, next) => {
-      ctx.response.body = api_post_login(
-        ctx.params.lobby_id,
-        await ctx.request.body.json(),
-      );
-      return next();
-    })
-    .get("/api/chat/:lobby_id(\\d{5})", (ctx, next) => {
-      ctx.response.body = api_get_chat(ctx.params.lobby_id);
-      return next();
-    })
-    .put("/api/chat/:lobby_id(\\d{5})", async (ctx, next) => {
-      ctx.response.body = api_put_chat(
-        ctx.params.lobby_id,
-        await ctx.request.body.json(),
-      );
-      return next();
-    })
-    .get(
-      "/api/lobbies/:lobby_id(\\d{5})/games/:game_id(\\d{14})",
-      (ctx, next) => {
-        ctx.response.body = api_get_game(
-          ctx.params.lobby_id,
-          ctx.params.game_id,
-        );
-        return next();
-      },
-    )
-    .put(
-      "/api/lobbies/:lobby_id(\\d{5})/games/:game_id(\\d{14})",
-      async (ctx, next) => {
-        ctx.response.body = api_put_game(
-          ctx.params.lobby_id,
-          ctx.params.game_id,
-          await ctx.request.body.json(),
-        );
-        return next();
-      },
-    )
-    .put("/api/lobbies/:lobby_id(\\d{5})/games", async (ctx, next) => {
-      ctx.response.body = api_put_new_game(
-        ctx.params.lobby_id,
-        await ctx.request.body.json(),
-      );
-      return next();
-    })
-    .delete(
-      "/api/lobbies/:lobby_id(\\d{5})/games/:game_id(\\d{14})",
-      (ctx, next) => {
-        ctx.response.body = api_delete_game(
-          ctx.params.lobby_id,
-          ctx.params.game_id,
-        );
-        return next();
-      },
-    );
+    });
   const app = new Application();
   app.use(async (ctx, next) => {
     const pathname = ctx.request.url.pathname;

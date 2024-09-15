@@ -8,9 +8,7 @@ import { XY } from "@olehermanse/utils";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
-import { http_delete, http_put } from "./http.ts";
 import * as sv from "@olehermanse/utils/schema.js";
-import { game_selector } from "../games/game_selector.ts";
 import { User } from "../libcommon/user.ts";
 import {
   WebSocketAction,
@@ -24,7 +22,7 @@ function short_time(date: Date) {
   return "[" + hours + ":" + minutes + "]";
 }
 
-function get_lobby_id() {
+export function get_lobby_id() {
   return window.location.pathname.slice(1);
 }
 
@@ -38,13 +36,16 @@ class CanvasGame {
   real_canvas_height: number;
   mouse: XY;
   game: BaseGame;
+  application: Application;
 
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
     scale: number,
     game: BaseGame,
+    application: Application,
   ) {
+    this.application = application;
     this.canvas = canvas;
     this.ctx = ctx;
     this.scale = scale;
@@ -111,26 +112,8 @@ class CanvasGame {
   push() {
     if (this.game.needs_sync) {
       this.game.needs_sync = false;
-      const lobby_id = get_lobby_id();
-      const game_id = this.game.id;
-      const data = sv.to_object(this.game);
-      http_put("/api/lobbies/" + lobby_id + "/games/" + game_id, data).then(
-        (data) => {
-          const game = sv.to_class_selector(data, game_selector);
-          if (game instanceof Error) {
-            console.log("Creating a new Tic Tac Toe game failed:");
-            console.log(game);
-            return;
-          }
-          if (game === null) {
-            console.log("Error: No game to update");
-            return;
-          }
-          if (game instanceof BaseGame && game.id === this.game.id) {
-            this.game.receive(game);
-          }
-        },
-      );
+      console.log("Sending update-game message");
+      this.application.websocket.send("update-game", this.game);
     }
   }
 
@@ -205,6 +188,7 @@ export class FrontendWebSocket {
 
   send(action: WebSocketAction, data: sv.SchemaClass) {
     if (this.application === null) {
+      console.log("Not ready to send websocket messages");
       return;
     }
     const lobby = this.application.lobby.id;
@@ -213,7 +197,7 @@ export class FrontendWebSocket {
       action,
       lobby,
       game,
-      sv.to_string(data),
+      sv.to_string(data, true),
     );
     this.websocket.send(msg);
   }
@@ -247,6 +231,7 @@ class Application {
       ctx,
       scale,
       this.get_active_game(),
+      this,
     );
     this.websocket = websocket;
   }
@@ -281,7 +266,6 @@ class Application {
         return;
       }
       this.update_lobby(lobby);
-      this.render_chat_log();
     }
     if (message.lobby_id !== this.lobby?.id) {
       return;
@@ -308,8 +292,10 @@ class Application {
   }
 
   update_lobby(lobby: Lobby) {
+    console.log("Update lobby: " + sv.to_string(lobby));
     this.lobby = lobby;
     this.set_active_game(0);
+    this.render_chat_log();
   }
 
   tick(_ms: number) {
@@ -323,13 +309,13 @@ class Application {
     if (this.lobby.games.length <= 1) {
       return;
     }
-    const game_id = this.lobby.games[0].id;
-    http_delete("/api/lobbies/" + this.lobby.id + "/games/" + game_id).then(
-      (_data: any) => {
-        console.log("Deleted first game");
-        // this.get_lobby();
-      },
-    );
+    // const game_id = this.lobby.games[0].id;
+    // http_delete("/api/lobbies/" + this.lobby.id + "/games/" + game_id).then(
+    //   (_data: any) => {
+    //     console.log("Deleted first game");
+    //     // this.get_lobby();
+    //   },
+    // );
   }
 
   send_chat_message(text: string) {
