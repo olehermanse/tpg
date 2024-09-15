@@ -1,6 +1,6 @@
-import { Application } from "./application.ts";
+import { Application, FrontendWebSocket } from "./application.ts";
 import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
-import { http_get, http_put } from "./http.ts";
+import { http_put } from "./http.ts";
 import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
@@ -9,6 +9,7 @@ import { RedDots } from "../games/red_dots.ts";
 import { Fives } from "../games/fives.ts";
 import { Twelves } from "../games/twelves.ts";
 import { NTacToe } from "../games/ntactoe.ts";
+import { WebSocketMessage } from "../libcommon/websocket.ts";
 
 let application: Application | null = null;
 
@@ -181,40 +182,74 @@ function chat_init() {
 }
 
 function canvas_init() {
-  const address = window.location.host;
-  const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
-  const scale = window.devicePixelRatio;
-  const ctx = canvas.getContext("2d");
-  if (ctx === null) {
-    return;
-  }
-  const lobby = get_lobby_id();
+  const lobby_id = get_lobby_id();
   const obj = { "url": window.location.href };
-  http_post("/api/auth/" + lobby, obj).then((data) => {
+  http_post("/api/auth/" + lobby_id, obj).then((data) => {
     console.log("Received from auth: " + JSON.stringify(data));
     const user = sv.to_class(data, new User());
     if (user instanceof Error) {
       return;
     }
-    http_get("/api/lobbies/" + lobby).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log(lobby);
+    init_ws();
+  });
+}
+
+function init_ws() {
+  const canvas = document.getElementById("tpg-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) {
+    return;
+  }
+  const address = window.location.host;
+  const scale = window.devicePixelRatio;
+  const lobby_id = get_lobby_id();
+  let protocol = "ws:";
+  if (window.location.protocol === "https:") {
+    protocol = "wss:";
+  }
+  const websocket = new FrontendWebSocket(
+    new WebSocket(`${protocol}//${address}/api/ws/${lobby_id}`),
+    (msg: WebSocketMessage) => {
+      console.log("Received message: " + msg.action);
+      if (application !== null) {
+        application.ws_receive(msg);
         return;
       }
-
-      application = new Application(canvas, ctx, scale, lobby, address, user);
-      // canvas.style.width = `${application.width}px`;
-      // canvas.style.height = `${application.height}px`;
-
+      if (msg.action !== "lobby") {
+        console.log("Application lobby not ready");
+        return;
+      }
+      const user = get_current_user();
+      if (user === null) {
+        console.log("Missing user");
+        return;
+      }
+      const lobby = sv.to_class(msg.payload, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Invalid lobby");
+        return;
+      }
+      application = new Application(
+        canvas,
+        ctx,
+        scale,
+        lobby,
+        address,
+        user,
+        websocket,
+      );
+      console.log("Application created");
+      console.log("Here is the game:");
+      console.log(sv.to_string(application.canvas_game.game));
       setInterval(() => {
         if (application != null) {
           application.tick(10);
         }
       }, 10);
       links_init();
-    });
-  });
+      return;
+    },
+  );
 }
 
 function links_init() {

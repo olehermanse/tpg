@@ -8,7 +8,7 @@ import { XY } from "@olehermanse/utils";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
-import { http_delete, http_get, http_put } from "./http.ts";
+import { http_delete, http_put } from "./http.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { game_selector } from "../games/game_selector.ts";
 import { User } from "../libcommon/user.ts";
@@ -129,7 +129,6 @@ class CanvasGame {
           if (game instanceof BaseGame && game.id === this.game.id) {
             this.game.receive(game);
           }
-          //this.update_game(game);
         },
       );
     }
@@ -192,30 +191,28 @@ class CanvasGame {
   key_up(_key: string) {}
 }
 
-class FrontendWebSocket {
+export class FrontendWebSocket {
   websocket: WebSocketWrapper;
-  user: User;
-  lobby: Lobby;
-  canvas_game: CanvasGame;
+  application: Application | null;
   constructor(
     ws: WebSocket,
-    user: User,
-    lobby: Lobby,
-    canvas_game: CanvasGame,
     onmessage: (msg: WebSocketMessage) => void,
   ) {
     this.websocket = new WebSocketWrapper(ws);
     this.websocket.onmessage = onmessage;
-    this.user = user;
-    this.lobby = lobby;
-    this.canvas_game = canvas_game;
+    this.application = null;
   }
 
   send(action: WebSocketAction, data: sv.SchemaClass) {
+    if (this.application === null) {
+      return;
+    }
+    const lobby = this.application.lobby.id;
+    const game = this.application.canvas_game.game.id;
     const msg = new WebSocketMessage(
       action,
-      this.lobby.id,
-      this.canvas_game.game.id,
+      lobby,
+      game,
       sv.to_string(data),
     );
     this.websocket.send(msg);
@@ -238,10 +235,11 @@ class Application {
     lobby: Lobby,
     address: string,
     user: User,
+    websocket: FrontendWebSocket,
   ) {
-    this.lobby = lobby;
     this.user = user;
     this.address = address;
+    this.lobby = lobby;
     this._active_game = 0;
     this.queue = [];
     this.canvas_game = new CanvasGame(
@@ -250,25 +248,13 @@ class Application {
       scale,
       this.get_active_game(),
     );
-    // ws_client.ts
-    let protocol = "ws:";
-    if (window.location.protocol === "https:") {
-      protocol = "wss:";
-    }
-    this.websocket = new FrontendWebSocket(
-      new WebSocket(`${protocol}//${address}/api/ws/${lobby.id}`),
-      user,
-      lobby,
-      this.canvas_game,
-      (m: WebSocketMessage) => {
-        this.ws_receive(m);
-      },
-    );
-    this.websocket.send("login", user);
-    this.render_chat_log();
+    this.websocket = websocket;
   }
 
   render_chat_log() {
+    if (this.lobby === null) {
+      return;
+    }
     const chat_element = document.getElementById("chat-log");
     if (chat_element === null) {
       return;
@@ -287,7 +273,17 @@ class Application {
   }
 
   ws_receive(message: WebSocketMessage) {
-    if (message.lobby_id !== this.lobby.id) {
+    if (message.action === "lobby") {
+      const lobby = sv.to_class(message.payload, new Lobby());
+      if (lobby instanceof Error) {
+        console.log("Received invalid lobby");
+        console.log(message.payload);
+        return;
+      }
+      this.update_lobby(lobby);
+      this.render_chat_log();
+    }
+    if (message.lobby_id !== this.lobby?.id) {
       return;
     }
     if (message.action === "chat") {
@@ -320,18 +316,6 @@ class Application {
     this.canvas_game.draw();
   }
 
-  get_lobby() {
-    http_get("/api/lobbies/" + this.lobby.id).then((data) => {
-      const lobby = sv.to_class<Lobby>(data, new Lobby());
-      if (lobby instanceof Error) {
-        console.log("Received invalid lobby:");
-        console.log(lobby);
-        return;
-      }
-      this.update_lobby(lobby);
-    });
-  }
-
   switch_game() {
     if (this === null) {
       return;
@@ -343,7 +327,7 @@ class Application {
     http_delete("/api/lobbies/" + this.lobby.id + "/games/" + game_id).then(
       (_data: any) => {
         console.log("Deleted first game");
-        this.get_lobby();
+        // this.get_lobby();
       },
     );
   }

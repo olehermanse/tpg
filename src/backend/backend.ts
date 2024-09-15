@@ -4,7 +4,7 @@ import {
   api_delete_game,
   api_get_chat,
   api_get_game,
-  api_get_lobby,
+  api_lobby_exists,
   api_post_auth,
   api_post_login,
   api_put_chat,
@@ -84,9 +84,7 @@ async function run_backend() {
       return next();
     })
     .get("/:lobby_id(\\d{5})", async (ctx, next) => {
-      const lobby_id = ctx.params.lobby_id;
-      const lobby = api_get_lobby(lobby_id);
-      if (lobby === null) {
+      if (!api_lobby_exists(ctx.params.lobby_id)) {
         ctx.response.redirect(create_lobby());
         return next();
       }
@@ -123,10 +121,6 @@ async function run_backend() {
         ctx.params.lobby_id,
         await ctx.request.body.json(),
       );
-      return next();
-    })
-    .get("/api/lobbies/:lobby_id(\\d{5})", (ctx, next) => {
-      ctx.response.body = api_get_lobby(ctx.params.lobby_id);
       return next();
     })
     .get(

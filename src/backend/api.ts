@@ -84,6 +84,12 @@ function handle_ws_message(
     ws_broadcast(lobby, data);
     return;
   }
+
+  if (data.action === "lobby") {
+    console.log("Error: lobby command not implemented server-side");
+    return;
+  }
+
   if (lobby === null) {
     console.log("Error: Missing lobby for chat message - " + data.payload);
     return;
@@ -214,12 +220,8 @@ export function api_get_game(lobby_id: string, game_id: string) {
   return sv.to_object(game);
 }
 
-export function api_get_lobby(lobby_id: string): object | null {
-  const lobby = get_lobby(lobby_id);
-  if (lobby === null) {
-    return null;
-  }
-  return sv.to_object(lobby);
+export function api_lobby_exists(lobby_id: string): boolean {
+  return get_lobby(lobby_id) !== null;
 }
 
 export function api_post_login(lobby_id: string, body: any) {
@@ -288,8 +290,15 @@ export function api_ws(ctx, lobby_id: string) {
     ctx.throw(404);
     return;
   }
-  const ws = ctx.upgrade();
-  lobby.websockets.push(new BackendWebSocket(ws));
+  const ws = new BackendWebSocket(ctx.upgrade());
+  const msg = new WebSocketMessage(
+    "lobby",
+    lobby_id,
+    undefined,
+    sv.to_string(lobby.lobby),
+  );
+  ws.send(msg);
+  lobby.websockets.push(ws);
 }
 
 function create_new_session(ctx: any) {
@@ -311,7 +320,7 @@ function create_new_session(ctx: any) {
   );
   ctx.response.headers.append(
     "Set-Cookie",
-    `User=${user_string}; Secure; Path=/api; SameSite=Strict; Max-Age=86400`,
+    `User=${user_string}; Secure; Path=/; SameSite=Strict; Max-Age=86400`,
   );
   ctx.response.body = sv.to_string(user);
 }

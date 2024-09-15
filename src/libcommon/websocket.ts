@@ -5,7 +5,7 @@ import {
   to_string,
 } from "@olehermanse/utils/schema.js";
 
-const web_socket_actions = ["", "chat", "login"] as const;
+const web_socket_actions = ["", "chat", "login", "lobby"] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
 
 export class WebSocketMessage implements SchemaClass {
