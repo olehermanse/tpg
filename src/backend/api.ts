@@ -46,7 +46,13 @@ class BackendLobby {
     }
     target.receive(game);
     target.refresh();
-    this.broadcast("update-game", sv.to_string(game), game.id);
+    this.broadcast("update_game", sv.to_string(game), game.id);
+  }
+
+  replace_game(game: BaseGame) {
+    this.lobby.games = [game];
+    game.refresh();
+    this.broadcast("replace_game", sv.to_string(game), game.id);
   }
 
   broadcast(action: WebSocketAction, payload: string, game_id?: string) {
@@ -108,14 +114,38 @@ function handle_ws_message(
     ws_broadcast(lobby, data);
     return;
   }
-  if (data.action === "update-game") {
+  if (data.action === "update_game") {
     const game = game_selector_new(data.payload);
     if (game === null) {
       return;
     }
     const lobby_id = data.lobby_id;
     const lobby = get_backend_lobby(lobby_id);
+    if (lobby === null) {
+      console.log(
+        "Error: Received update_game message for non-existing lobby: " +
+          lobby_id,
+      );
+      return;
+    }
     lobby.update_game(game);
+    return;
+  }
+  if (data.action === "replace_game") {
+    const game = game_selector_new(data.payload);
+    if (game === null) {
+      return;
+    }
+    const lobby_id = data.lobby_id;
+    const lobby = get_backend_lobby(lobby_id);
+    if (lobby === null) {
+      console.log(
+        "Error: Received replace_game message for non-existing lobby: " +
+          lobby_id,
+      );
+      return;
+    }
+    lobby.replace_game(game);
     return;
   }
   if (data.action === "chat") {

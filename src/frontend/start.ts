@@ -38,27 +38,27 @@ function on_chat_command(command: string) {
     const n = Number(match[1]);
     const t = Number(match[2]);
     const data = new NTacToe(n, t);
-    application?.websocket.send("new-game", data);
+    application?.websocket.send("replace_game", data);
     return;
   }
   if (command === "/tictactoe") {
     const data = new NTacToe(3, 3);
-    application?.websocket.send("new-game", data);
+    application?.websocket.send("replace_game", data);
     return;
   }
   if (command === "/fives") {
     const data = new NTacToe(5, 4);
-    application?.websocket.send("new-game", data);
+    application?.websocket.send("replace_game", data);
     return;
   }
   if (command === "/twelves") {
     const data = new NTacToe(12, 5);
-    application?.websocket.send("new-game", data);
+    application?.websocket.send("replace_game", data);
     return;
   }
   if (command === "/reddots") {
     const data = new RedDots();
-    application?.websocket.send("new-game", data);
+    application?.websocket.send("replace_game", data);
     return;
   }
   if (command.startsWith("/username ")) {

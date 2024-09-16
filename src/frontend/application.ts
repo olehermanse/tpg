@@ -114,8 +114,8 @@ class CanvasGame {
   push() {
     if (this.game.needs_sync) {
       this.game.needs_sync = false;
-      console.log("Sending update-game message");
-      this.application.websocket.send("update-game", this.game);
+      console.log("Sending update_game message");
+      this.application.websocket.send("update_game", this.game);
     }
   }
 
@@ -284,7 +284,7 @@ class Application {
       this.render_chat_log();
       return;
     }
-    if (message.action === "update-game") {
+    if (message.action === "update_game") {
       const game = game_selector_new(message.payload);
       if (game === null) {
         console.log("Received invalid game");
@@ -294,7 +294,21 @@ class Application {
       this.canvas_game.game.receive(game);
       return;
     }
-    console.log(`Error: action "${message.action}" not implemented client-side`);
+    if (message.action === "replace_game") {
+      const game = game_selector_new(message.payload);
+      if (game === null) {
+        console.log("Received invalid game");
+        console.log(message.payload);
+        return;
+      }
+      this.lobby.games = [game];
+      this.set_active_game(0);
+      game.refresh();
+      return;
+    }
+    console.log(
+      `Error: action "${message.action}" not implemented client-side`,
+    );
   }
 
   get_active_game(): BaseGame {

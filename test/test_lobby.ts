@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import * as sv from "@olehermanse/utils/schema.js";
 import { BaseGame } from "../src/libcommon/game.ts";
 import { RedDots } from "../src/games/red_dots.ts";
-import { TicTacToe } from "../src/games/tic_tac_toe.ts";
+import { NTacToe } from "../src/games/ntactoe.ts";
 
 describe("User", () => {
   test("constructor", () => {
@@ -279,10 +279,10 @@ describe("Lobby", () => {
   test("schema", () => {
     const lobby = new Lobby();
     lobby.id = "1234";
-    lobby.games = [new TicTacToe()];
+    lobby.games = [new NTacToe()];
     lobby.games[0].id = "84594780818949";
     const string =
-      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]}]}';
+      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"moves":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
     const object: any = sv.to_object(lobby);
@@ -293,19 +293,19 @@ describe("Lobby", () => {
     const new_lobby: any = sv.to_class(object, new Lobby());
     expect(new_lobby).toBeInstanceOf(Lobby);
     expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
-    expect(new_lobby.games[0]).toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[0]).toBeInstanceOf(NTacToe);
     expect(new_lobby.id).toBe("1234");
     expect(sv.to_string(new_lobby)).toBe(string);
   });
   test("multiple games", () => {
     const lobby = new Lobby();
     expect(lobby.games[0]).toBeInstanceOf(BaseGame);
-    lobby.games = [new TicTacToe(), new RedDots()];
+    lobby.games = [new NTacToe(), new RedDots()];
     lobby.games[0].id = "84594780818949";
     lobby.games[1].id = "84594780818948";
 
     const string = '{"id":"","chat":{"messages":[],"users":[]},"games":[' +
-      '{"id":"84594780818949","name":"TicTacToe","players":[],"board":[" "," "," "," "," "," "," "," "," "]},' +
+      '{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"moves":[]},' +
       '{"id":"84594780818948","name":"RedDots","players":[],"dots":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
@@ -313,9 +313,9 @@ describe("Lobby", () => {
     expect(new_lobby).toBeInstanceOf(Lobby);
     expect(new_lobby.games[0]).toBeInstanceOf(BaseGame);
     expect(new_lobby.games[0]).not.toBeInstanceOf(RedDots);
-    expect(new_lobby.games[0]).toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[0]).toBeInstanceOf(NTacToe);
     expect(new_lobby.games[1]).toBeInstanceOf(BaseGame);
     expect(new_lobby.games[1]).toBeInstanceOf(RedDots);
-    expect(new_lobby.games[1]).not.toBeInstanceOf(TicTacToe);
+    expect(new_lobby.games[1]).not.toBeInstanceOf(NTacToe);
   });
 });
