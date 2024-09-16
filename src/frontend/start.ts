@@ -112,7 +112,6 @@ function canvas_init() {
   const lobby_id = get_lobby_id();
   const obj = { "url": window.location.href };
   http_post("/api/auth/" + lobby_id, obj).then((data) => {
-    console.log("Received from auth: " + JSON.stringify(data));
     const user = sv.to_class(data, new User());
     if (user instanceof Error) {
       return;
@@ -137,7 +136,6 @@ function init_ws() {
   websocket = new FrontendWebSocket(
     new WebSocket(`${protocol}//${address}/api/ws/${lobby_id}`),
     (msg: WebSocketMessage) => {
-      console.log("Received message: " + msg.action);
       if (application !== null) {
         application.ws_receive(msg);
         return;
@@ -170,11 +168,6 @@ function init_ws() {
       );
       application.websocket.application = application;
       application.update_lobby(lobby);
-      console.log("Application created");
-      console.log("Here is the game:");
-      console.log(sv.to_string(application.canvas_game.game));
-      console.log("Here is the game's lobby:");
-      console.log(sv.to_string(application.lobby));
       setInterval(() => {
         if (application != null) {
           application.tick(10);

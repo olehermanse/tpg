@@ -4,6 +4,9 @@ import {
   api_lobby_exists,
   api_post_auth,
   api_ws,
+  api_get_chat,
+  api_get_game,
+  api_get_lobby,
   check_request_auth_headers,
   create_lobby,
 } from "./api.ts";
@@ -88,7 +91,25 @@ async function run_backend() {
       }
       api_ws(ctx, ctx.params.lobby_id);
       return next();
-    });
+    })
+    .get("/api/chat/:lobby_id(\\d{5})", (ctx, next) => {
+      ctx.response.body = api_get_chat(ctx.params.lobby_id);
+      return next();
+    })
+    .get("/api/lobbies/:lobby_id(\\d{5})", (ctx, next) => {
+      ctx.response.body = api_get_lobby(ctx.params.lobby_id);
+      return next();
+    })
+    .get(
+      "/api/lobbies/:lobby_id(\\d{5})/games/:game_id(\\d{14})",
+      (ctx, next) => {
+        ctx.response.body = api_get_game(
+          ctx.params.lobby_id,
+          ctx.params.game_id,
+        );
+        return next();
+      },
+    );
   const app = new Application();
   app.use(async (ctx, next) => {
     const pathname = ctx.request.url.pathname;

@@ -47,7 +47,6 @@ export abstract class BaseGame extends SchemaClass {
   }
 
   schedule_sync() {
-    console.log("Scheduled sync");
     this.needs_sync = true;
   }
 }

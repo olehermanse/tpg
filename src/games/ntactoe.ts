@@ -313,9 +313,7 @@ export class NTacToe extends BaseGame {
 
   make_move(r: number, c: number, s: NTacToeSymbol) {
     const move = new NTacToeMove(s, r, c);
-    console.log("Attempting to make move");
     if (move.is_valid(this)) {
-      console.log("Valid move made");
       this.moves.push(move);
       this.schedule_sync();
       this.refresh_cache();

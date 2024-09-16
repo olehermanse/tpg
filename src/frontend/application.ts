@@ -114,7 +114,6 @@ class CanvasGame {
   push() {
     if (this.game.needs_sync) {
       this.game.needs_sync = false;
-      console.log("Sending update_game message");
       this.application.websocket.send("update_game", this.game);
     }
   }
@@ -321,7 +320,6 @@ class Application {
   }
 
   update_lobby(lobby: Lobby) {
-    console.log("Update lobby: " + sv.to_string(lobby));
     this.lobby = lobby;
     this.set_active_game(0);
     this.render_chat_log();

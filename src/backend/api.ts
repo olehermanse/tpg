@@ -360,3 +360,33 @@ export function api_post_auth(ctx: any) {
   ctx.response.body = sv.to_string(user_object);
   return;
 }
+
+// These GET APIs are not necessary for the game / app to work,
+// they're only used for testing / the links to show JSON data.
+export function api_get_game(lobby_id: string, game_id: string) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  const game = lobby.find_game(game_id);
+  if (game === null) {
+    return null;
+  }
+  return sv.to_object(game);
+}
+
+export function api_get_chat(lobby_id: string) {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  return sv.to_object(lobby.chat);
+}
+
+export function api_get_lobby(lobby_id: string): object | null {
+  const lobby = get_lobby(lobby_id);
+  if (lobby === null) {
+    return null;
+  }
+  return sv.to_object(lobby);
+}
