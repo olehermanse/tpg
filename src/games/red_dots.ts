@@ -1,6 +1,5 @@
 import { BaseGame } from "../libcommon/game.ts";
 import { Draw } from "@olehermanse/utils/draw.js";
-import { Schema } from "@olehermanse/utils/schema.js";
 import * as sv from "@olehermanse/utils/schema.js";
 
 class XY {
@@ -10,7 +9,7 @@ class XY {
     this.x = x ?? 0;
     this.y = y ?? 0;
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         x: { type: "number" },
@@ -59,7 +58,7 @@ export class RedDots extends BaseGame {
     return "RedDots";
   }
 
-  schema(): Schema {
+  schema(): sv.Schema {
     const schema = super.base_schema();
     schema["properties"]["dots"] = { type: XY, array: true };
     return schema;

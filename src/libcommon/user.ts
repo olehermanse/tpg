@@ -1,13 +1,13 @@
-import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 
-export class User implements SchemaClass {
+export class User implements sv.SchemaClass {
   userid: string;
   username: string;
 
   class_name(): string {
     return "User";
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         userid: { type: "string" },
@@ -22,7 +22,7 @@ export class User implements SchemaClass {
   }
 }
 
-export class AuthObject implements SchemaClass {
+export class AuthObject implements sv.SchemaClass {
   userid: string;
   username: string;
   lobby_id: string;
@@ -30,7 +30,7 @@ export class AuthObject implements SchemaClass {
   class_name(): string {
     return "AuthObject";
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         userid: { type: "string" },

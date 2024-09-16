@@ -1,5 +1,5 @@
 import { BaseGame } from "../libcommon/game.ts";
-import { Schema, SchemaClass, to_string } from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 import { limit, xy } from "@olehermanse/utils/funcs.js";
 import { Draw } from "@olehermanse/utils/draw.js";
 
@@ -27,7 +27,7 @@ class Rect {
   }
 }
 
-export class NTacToeMove implements SchemaClass {
+export class NTacToeMove implements sv.SchemaClass {
   s: NTacToeSymbol;
   r: number;
   c: number;
@@ -42,7 +42,7 @@ export class NTacToeMove implements SchemaClass {
     return "NTacToeMove";
   }
 
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         s: { type: "string" },
@@ -95,7 +95,7 @@ export class NTacToe extends BaseGame {
     return "NTacToe";
   }
 
-  schema(): Schema {
+  schema(): sv.Schema {
     const schema = super.base_schema();
     schema["properties"]["n"] = { type: "number" };
     schema["properties"]["t"] = { type: "number" };
@@ -122,7 +122,7 @@ export class NTacToe extends BaseGame {
   }
 
   refresh_cache() {
-    const cache_string = to_string(this);
+    const cache_string = sv.to_string(this);
     if (cache_string === this.cache_string) {
       return;
     }
@@ -141,7 +141,7 @@ export class NTacToe extends BaseGame {
     this.board = new Array(this.n * this.n).fill(" ");
     for (const move of this.moves) {
       if (!move.is_valid(this)) {
-        console.log("Invalid move: " + to_string(move));
+        console.log("Invalid move: " + sv.to_string(move));
         continue;
       }
       this.board[this.index(move.r, move.c)] = move.s;

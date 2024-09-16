@@ -1,10 +1,9 @@
 import { User } from "./user.ts";
-import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
 import * as sv from "@olehermanse/utils/schema.js";
 import { game_selector } from "../games/game_selector.ts";
 import { NTacToe } from "../games/ntactoe.ts";
 
-export class Message implements SchemaClass {
+export class Message implements sv.SchemaClass {
   user: User;
   body: string;
   timestamp: number;
@@ -12,7 +11,7 @@ export class Message implements SchemaClass {
   class_name(): string {
     return "Message";
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         user: { type: User },
@@ -29,14 +28,14 @@ export class Message implements SchemaClass {
   }
 }
 
-export class Chat implements SchemaClass {
+export class Chat implements sv.SchemaClass {
   messages: Message[];
   users: User[];
 
   class_name(): string {
     return "Chat";
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         messages: { type: Message, array: true },
@@ -98,7 +97,7 @@ export class Chat implements SchemaClass {
   }
 }
 
-export class Lobby implements SchemaClass {
+export class Lobby implements sv.SchemaClass {
   id: string;
   chat: Chat;
   games: any[];
@@ -106,7 +105,7 @@ export class Lobby implements SchemaClass {
   class_name(): string {
     return "Lobby";
   }
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         id: { type: "string" },

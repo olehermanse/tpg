@@ -1,9 +1,9 @@
 import { BaseGame } from "../libcommon/game.ts";
-import { Class, to_class } from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 import { NTacToe } from "./ntactoe.ts";
 import { RedDots } from "./red_dots.ts";
 
-export function game_selector(data: any): Class<BaseGame> | null {
+export function game_selector(data: any): sv.Class<BaseGame> | null {
   if (data.name === "RedDots") {
     return RedDots;
   }
@@ -23,7 +23,7 @@ export function game_selector_new(input: string): BaseGame | null {
   if (cls === null) {
     return null;
   }
-  const result = to_class(data, new cls());
+  const result = sv.to_class(data, new cls());
   if (result instanceof Error) {
     return null;
   }

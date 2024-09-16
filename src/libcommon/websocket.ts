@@ -1,9 +1,4 @@
-import {
-  Schema,
-  SchemaClass,
-  to_class,
-  to_string,
-} from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 
 const web_socket_actions = [
   "",
@@ -15,7 +10,7 @@ const web_socket_actions = [
 ] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
 
-export class WebSocketMessage implements SchemaClass {
+export class WebSocketMessage implements sv.SchemaClass {
   action: WebSocketAction;
   lobby_id: string;
   game_id: string;
@@ -42,7 +37,7 @@ export class WebSocketMessage implements SchemaClass {
     return "WebSocketMessage";
   }
 
-  schema(): Schema {
+  schema(): sv.Schema {
     return {
       properties: {
         action: { type: "string" },
@@ -95,7 +90,7 @@ export class WebSocketWrapper {
       console.log("No handler defined");
       return;
     }
-    const message = to_class(m.data, new WebSocketMessage());
+    const message = sv.to_class(m.data, new WebSocketMessage());
     if (message instanceof Error) {
       console.log("Error, invalid web socket message received");
       return;
@@ -120,7 +115,7 @@ export class WebSocketWrapper {
   }
 
   send(msg: WebSocketMessage) {
-    this.queue.push(to_string(msg, true));
+    this.queue.push(sv.to_string(msg, true));
     this.attempt_send();
     console.log("-> Sent: " + msg.pretty());
   }

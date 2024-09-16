@@ -1,12 +1,12 @@
 import { User } from "./user.ts";
-import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
+import * as sv from "@olehermanse/utils/schema.js";
 import {
   get_random_userid,
   standard_canvas_height,
   standard_canvas_width,
 } from "@olehermanse/utils/funcs.js";
 
-export abstract class BaseGame extends SchemaClass {
+export abstract class BaseGame extends sv.SchemaClass {
   id: string;
   name: string;
   players: User[];
@@ -36,7 +36,7 @@ export abstract class BaseGame extends SchemaClass {
     this.on_receive(game);
   }
 
-  base_schema(): Schema {
+  base_schema(): sv.Schema {
     return {
       properties: {
         id: { type: "string" },
