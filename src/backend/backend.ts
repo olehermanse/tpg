@@ -114,6 +114,13 @@ async function run_backend() {
   app.use(async (ctx, next) => {
     const pathname = ctx.request.url.pathname;
     if (pathname.startsWith("/api") && !pathname.startsWith("/api/auth/")) {
+      // Set Content-Type to application/json, even if our API code gives us
+      // pretty-printed strings which actually are JSON. Deno would default
+      // to text/plain.
+      ctx.response.headers.set(
+        "Content-Type",
+        "application/json; charset=UTF-8",
+      );
       if (!check_request_auth_headers(ctx)) {
         console.log("check auth failed");
         ctx.throw(404);

@@ -290,15 +290,11 @@ export function check_request_auth_headers(ctx: any): boolean {
   const cookies = split_cookie(ctx.request.headers.get("Cookie"));
   const auth: string = cookies["Session"] ?? "";
   const user: string = cookies["User"] ?? "";
-  if (
-    user === "" || auth === ""
-  ) {
+  if (user === "" || auth === "") {
     console.log("Missing headers");
     return create_new_session(ctx);
   }
-  if (
-    user === null || auth === null
-  ) {
+  if (user === null || auth === null) {
     return false;
   }
   const user_object = sv.to_class(user, new User());
@@ -332,9 +328,7 @@ export function api_post_auth(ctx: any) {
   const cookies = split_cookie(ctx.request.headers.get("Cookie"));
   const auth: string = cookies["Session"] ?? "";
   const user: string = cookies["User"] ?? "";
-  if (
-    user.length === 0 || auth.length === 0
-  ) {
+  if (user.length === 0 || auth.length === 0) {
     console.log("Missing headers");
     return create_new_session(ctx);
   }
@@ -361,7 +355,7 @@ export function api_post_auth(ctx: any) {
 
 // These GET APIs are not necessary for the game / app to work,
 // they're only used for testing / the links to show JSON data.
-export function api_get_game(lobby_id: string, game_id: string) {
+export function api_get_game(lobby_id: string, game_id: string): string | null {
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {
     return null;
@@ -370,21 +364,21 @@ export function api_get_game(lobby_id: string, game_id: string) {
   if (game === null) {
     return null;
   }
-  return sv.to_object(game);
+  return sv.to_string(game, true);
 }
 
-export function api_get_chat(lobby_id: string) {
+export function api_get_chat(lobby_id: string): string | null {
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {
     return null;
   }
-  return sv.to_object(lobby.chat);
+  return sv.to_string(lobby.chat, true);
 }
 
-export function api_get_lobby(lobby_id: string): object | null {
+export function api_get_lobby(lobby_id: string): string | null {
   const lobby = get_lobby(lobby_id);
   if (lobby === null) {
     return null;
   }
-  return sv.to_object(lobby);
+  return sv.to_string(lobby, true);
 }
