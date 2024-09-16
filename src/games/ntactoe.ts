@@ -333,6 +333,7 @@ export class NTacToe extends BaseGame {
       const r = limit(0, Math.floor(i / this.n), this.n - 1);
       const c = limit(0, Math.floor(i % this.n), this.n - 1);
       this.make_move(r, c, this.next());
+      return;
     }
   }
 
