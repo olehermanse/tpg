@@ -1,12 +1,12 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import "./deno_types.ts";
 import {
-  api_lobby_exists,
-  api_post_auth,
-  api_ws,
   api_get_chat,
   api_get_game,
   api_get_lobby,
+  api_lobby_exists,
+  api_post_auth,
+  api_ws,
   check_request_auth_headers,
   create_lobby,
 } from "./api.ts";

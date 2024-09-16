@@ -277,6 +277,9 @@ export class NTacToe extends BaseGame {
         }
         symbol = current;
         streak = [i];
+        if (this.t === 1) {
+          this.mark_win(streak);
+        }
       }
     }
   }
