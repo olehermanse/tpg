@@ -59,6 +59,10 @@ export class Fives extends BaseGame {
     this.generate_rects();
   }
 
+  refresh() {
+    this.refresh_rects();
+  }
+
   generate_rects() {
     const size = (this.height * 2) / 3;
     const half = size / 2;
@@ -217,11 +221,13 @@ export class Fives extends BaseGame {
   }
 
   on_receive(game: BaseGame) {
+    console.log("on_receive");
     console.assert(game.name === this.name);
     console.assert(game instanceof Fives);
     if (!(game instanceof Fives)) {
       return;
     }
+
     const source: Fives = game;
     if (source.board != this.board) {
       this.board = source.board;

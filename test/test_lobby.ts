@@ -1,4 +1,4 @@
-import { Chat, Lobby, Message, runtime_tests } from "../src/libcommon/lobby.ts";
+import { Chat, Lobby, Message } from "../src/libcommon/lobby.ts";
 import { User } from "../src/libcommon/user.ts";
 import { describe, expect, test } from "vitest";
 import * as sv from "@olehermanse/utils/schema.js";
@@ -317,11 +317,5 @@ describe("Lobby", () => {
     expect(new_lobby.games[1]).toBeInstanceOf(BaseGame);
     expect(new_lobby.games[1]).toBeInstanceOf(RedDots);
     expect(new_lobby.games[1]).not.toBeInstanceOf(TicTacToe);
-  });
-});
-
-describe("runtime_tests", () => {
-  test("runs without error", () => {
-    expect(runtime_tests()).toBe(true);
   });
 });

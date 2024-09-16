@@ -65,6 +65,9 @@ export class RedDots extends BaseGame {
     return schema;
   }
 
+  refresh() {
+  }
+
   mouse_click(x: number, y: number) {
     this.dots.push(new XY(x, y));
     this.schedule_sync();

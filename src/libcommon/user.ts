@@ -40,7 +40,7 @@ export class AuthObject implements SchemaClass {
     };
   }
 
-constructor(userid?: string, username?: string, lobby_id?: string) {
+  constructor(userid?: string, username?: string, lobby_id?: string) {
     this.userid = userid ?? "";
     this.username = username ?? "";
     this.lobby_id = lobby_id ?? "";

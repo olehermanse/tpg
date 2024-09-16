@@ -11,7 +11,7 @@ import {
   WebSocketMessage,
   WebSocketWrapper,
 } from "../libcommon/websocket.ts";
-import { game_selector, game_selector_new } from "../games/game_selector.ts";
+import { game_selector_new } from "../games/game_selector.ts";
 import { BaseGame } from "../libcommon/game.ts";
 
 class BackendWebSocket {
@@ -45,6 +45,7 @@ class BackendLobby {
       return;
     }
     target.receive(game);
+    target.refresh();
     this.broadcast("update-game", sv.to_string(game), game.id);
   }
 

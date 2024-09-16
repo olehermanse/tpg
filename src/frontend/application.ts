@@ -15,6 +15,7 @@ import {
   WebSocketMessage,
   WebSocketWrapper,
 } from "../libcommon/websocket.ts";
+import { game_selector_new } from "../games/game_selector.ts";
 
 function short_time(date: Date) {
   const hours = left_pad(date.getHours(), 2, "0");
@@ -57,6 +58,7 @@ class CanvasGame {
     canvas.height = this.real_canvas_height;
     this.mouse = xy(0, 0);
     this.game = game;
+    this.game.refresh();
     this.setup_events(canvas);
   }
 
@@ -266,6 +268,7 @@ class Application {
         return;
       }
       this.update_lobby(lobby);
+      return;
     }
     if (message.lobby_id !== this.lobby?.id) {
       return;
@@ -279,7 +282,19 @@ class Application {
       }
       this.lobby.chat.messages.push(chat_message);
       this.render_chat_log();
+      return;
     }
+    if (message.action === "update-game") {
+      const game = game_selector_new(message.payload);
+      if (game === null) {
+        console.log("Received invalid game");
+        console.log(message.payload);
+        return;
+      }
+      this.canvas_game.game.receive(game);
+      return;
+    }
+    console.log(`Error: action "${message.action}" not implemented client-side`);
   }
 
   get_active_game(): BaseGame {

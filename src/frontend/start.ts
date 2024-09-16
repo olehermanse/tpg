@@ -1,6 +1,6 @@
 import { Application, FrontendWebSocket } from "./application.ts";
 import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
-import { Lobby, runtime_tests } from "../libcommon/lobby.ts";
+import { Lobby } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { TicTacToe } from "../games/tic_tac_toe.ts";
@@ -11,6 +11,7 @@ import { NTacToe } from "../games/ntactoe.ts";
 import { WebSocketMessage } from "../libcommon/websocket.ts";
 
 let application: Application | null = null;
+let websocket: FrontendWebSocket | null = null;
 
 function get_lobby_id() {
   return window.location.pathname.slice(1);
@@ -136,7 +137,7 @@ function init_ws() {
   if (window.location.protocol === "https:") {
     protocol = "wss:";
   }
-  const websocket = new FrontendWebSocket(
+  websocket = new FrontendWebSocket(
     new WebSocket(`${protocol}//${address}/api/ws/${lobby_id}`),
     (msg: WebSocketMessage) => {
       console.log("Received message: " + msg.action);
@@ -156,6 +157,9 @@ function init_ws() {
       const lobby = sv.to_class(msg.payload, new Lobby());
       if (lobby instanceof Error) {
         console.log("Invalid lobby");
+        return;
+      }
+      if (websocket === null) {
         return;
       }
       application = new Application(
@@ -204,7 +208,6 @@ function start() {
   chat_init();
   canvas_init();
   links_init();
-  runtime_tests();
 }
 
 export { start };

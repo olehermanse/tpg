@@ -117,6 +117,10 @@ export class NTacToe extends BaseGame {
     this.cache_string = "Default";
   }
 
+  refresh() {
+    this.refresh_cache();
+  }
+
   refresh_cache() {
     const cache_string = to_string(this);
     if (cache_string === this.cache_string) {

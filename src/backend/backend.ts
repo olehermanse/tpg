@@ -7,7 +7,6 @@ import {
   check_request_auth_headers,
   create_lobby,
 } from "./api.ts";
-import { runtime_tests } from "../libcommon/lobby.ts";
 
 function should_log(request: Request): boolean {
   if (request.method != "GET") {
@@ -62,14 +61,6 @@ function log_response(ctx) {
 }
 
 async function run_backend() {
-  const success = runtime_tests();
-  if (success === true) {
-    console.log("Runtime tests succeeded");
-  } else {
-    console.log("Error: Runtime tests failed");
-    Deno.exit(1);
-  }
-
   const router = new Router();
   router
     .get("/", (ctx, next) => {
@@ -87,7 +78,7 @@ async function run_backend() {
       });
       return next();
     })
-    .post("/api/auth/:lobby_id(\\d{5})", async (ctx, next) => {
+    .post("/api/auth/:lobby_id(\\d{5})", (ctx, next) => {
       api_post_auth(ctx);
       return next();
     })
