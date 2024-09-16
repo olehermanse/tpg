@@ -19,7 +19,6 @@ export abstract class BaseGame extends sv.SchemaClass {
   abstract class_name(): string;
   abstract mouse_click(x: number, y: number): void;
   abstract on_receive(game: BaseGame): void;
-  abstract refresh(): void;
 
   constructor(id?: string) {
     super();

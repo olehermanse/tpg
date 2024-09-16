@@ -58,7 +58,6 @@ class CanvasGame {
     canvas.height = this.real_canvas_height;
     this.mouse = xy(0, 0);
     this.game = game;
-    this.game.refresh();
     this.setup_events(canvas);
   }
 
@@ -302,7 +301,6 @@ class Application {
       }
       this.lobby.games = [game];
       this.set_active_game(0);
-      game.refresh();
       return;
     }
     console.log(

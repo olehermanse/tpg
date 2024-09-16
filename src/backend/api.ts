@@ -45,13 +45,11 @@ class BackendLobby {
       return;
     }
     target.receive(game);
-    target.refresh();
     this.broadcast("update_game", sv.to_string(game), game.id);
   }
 
   replace_game(game: BaseGame) {
     this.lobby.games = [game];
-    game.refresh();
     this.broadcast("replace_game", sv.to_string(game), game.id);
   }
 
