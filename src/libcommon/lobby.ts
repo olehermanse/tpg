@@ -1,8 +1,8 @@
 import { User } from "./user.ts";
 import { Schema, SchemaClass } from "@olehermanse/utils/schema.js";
 import * as sv from "@olehermanse/utils/schema.js";
-import { Fives } from "../games/fives.ts";
 import { game_selector } from "../games/game_selector.ts";
+import { NTacToe } from "../games/ntactoe.ts";
 
 export class Message implements SchemaClass {
   user: User;
@@ -121,7 +121,7 @@ export class Lobby implements SchemaClass {
     console.assert(this.id === "" || this.id[0] === "/");
     this.chat = new Chat();
     this.games = [];
-    this.games.push(new Fives());
+    this.games.push(new NTacToe(5, 4));
   }
 
   find_game(game_id: string): any | null {

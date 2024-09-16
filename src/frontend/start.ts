@@ -3,10 +3,7 @@ import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
 import { Lobby } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
-import { TicTacToe } from "../games/tic_tac_toe.ts";
 import { RedDots } from "../games/red_dots.ts";
-import { Fives } from "../games/fives.ts";
-import { Twelves } from "../games/twelves.ts";
 import { NTacToe } from "../games/ntactoe.ts";
 import { WebSocketMessage } from "../libcommon/websocket.ts";
 
@@ -45,17 +42,17 @@ function on_chat_command(command: string) {
     return;
   }
   if (command === "/tictactoe") {
-    const data = new TicTacToe();
+    const data = new NTacToe(3, 3);
     application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/fives") {
-    const data = new Fives();
+    const data = new NTacToe(5, 4);
     application?.websocket.send("new-game", data);
     return;
   }
   if (command === "/twelves") {
-    const data = new Twelves();
+    const data = new NTacToe(12, 5);
     application?.websocket.send("new-game", data);
     return;
   }

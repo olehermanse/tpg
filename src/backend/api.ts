@@ -138,6 +138,7 @@ function handle_ws_message(
     }
     lobby.chat.add(message);
     ws_broadcast(lobby, data);
+    return;
   }
   console.log(`Error: action "${data.action}" not implemented server-side`);
   return;
