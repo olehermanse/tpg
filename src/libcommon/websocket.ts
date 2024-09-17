@@ -7,6 +7,7 @@ const web_socket_actions = [
   "lobby",
   "replace_game",
   "update_game",
+  "game_move",
 ] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
 

@@ -1,6 +1,7 @@
 import { BaseGame } from "../libcommon/game.ts";
 import { Draw } from "@olehermanse/utils/draw.js";
 import * as sv from "@olehermanse/utils/schema.js";
+import { User } from "../libcommon/user.ts";
 
 class XY {
   x: number;
@@ -64,7 +65,7 @@ export class RedDots extends BaseGame {
     return schema;
   }
 
-  mouse_click(x: number, y: number) {
+  mouse_click(x: number, y: number, _user: User) {
     this.dots.push(new XY(x, y));
     this.schedule_sync();
   }

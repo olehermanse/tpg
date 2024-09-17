@@ -16,6 +16,7 @@ import {
   WebSocketWrapper,
 } from "../libcommon/websocket.ts";
 import { game_selector_new } from "../games/game_selector.ts";
+import { get_current_user } from "./start.ts";
 
 function short_time(date: Date) {
   const hours = left_pad(date.getHours(), 2, "0");
@@ -85,9 +86,9 @@ class CanvasGame {
     this.game.draw(this.ctx);
   }
 
-  mouse_click(x: number, y: number): void {
+  mouse_click(x: number, y: number, user: User): void {
     this.mouse = xy(x, y);
-    this.game.mouse_click(this.mouse.x, this.mouse.y);
+    this.game.mouse_click(this.mouse.x, this.mouse.y, user);
   }
 
   update_full_lobby(data: string | Lobby) {
@@ -115,13 +116,24 @@ class CanvasGame {
       this.game.needs_sync = false;
       this.application.websocket.send("update_game", this.game);
     }
+    while (true) {
+      const move = this.game.move_queue.shift();
+      if (move === undefined) {
+        break;
+      }
+      this.application.websocket.send("game_move", move);
+    }
   }
 
   setup_events(canvas: HTMLCanvasElement) {
     canvas.addEventListener("mousedown", (e) => {
       const x = this.x_to_canvas(e.offsetX);
       const y = this.y_to_canvas(e.offsetY);
-      this.mouse_click(x, y);
+      const user = get_current_user();
+      if (user === null) {
+        return;
+      }
+      this.mouse_click(x, y, user);
       this.mouse_move(x, y);
       this.push();
     });
@@ -177,10 +189,7 @@ class CanvasGame {
 export class FrontendWebSocket {
   websocket: WebSocketWrapper;
   application: Application | null;
-  constructor(
-    ws: WebSocket,
-    onmessage: (msg: WebSocketMessage) => void,
-  ) {
+  constructor(ws: WebSocket, onmessage: (msg: WebSocketMessage) => void) {
     this.websocket = new WebSocketWrapper(ws);
     this.websocket.onmessage = onmessage;
     this.application = null;
@@ -290,6 +299,10 @@ class Application {
         return;
       }
       this.canvas_game.game.receive(game);
+      return;
+    }
+    if (message.action === "game_move") {
+      this.canvas_game.game.receive_move(message.payload);
       return;
     }
     if (message.action === "replace_game") {

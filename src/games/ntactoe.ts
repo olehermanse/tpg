@@ -1,7 +1,8 @@
-import { BaseGame } from "../libcommon/game.ts";
+import { BaseGame, BaseGameMove } from "../libcommon/game.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { limit, xy } from "@olehermanse/utils/funcs.js";
 import { Draw } from "@olehermanse/utils/draw.js";
+import { User } from "../libcommon/user.ts";
 
 type NTacToeSymbol = "X" | "O" | " ";
 
@@ -27,12 +28,18 @@ class Rect {
   }
 }
 
-export class NTacToeMove implements sv.SchemaClass {
+export class NTacToeMove extends BaseGameMove {
   s: NTacToeSymbol;
   r: number;
   c: number;
 
-  constructor(s: NTacToeSymbol = "X", r: number = 0, c: number = 0) {
+  constructor(
+    s: NTacToeSymbol = "X",
+    r: number = 0,
+    c: number = 0,
+    user?: User,
+  ) {
+    super(user);
     this.s = s;
     this.r = r;
     this.c = c;
@@ -43,40 +50,11 @@ export class NTacToeMove implements sv.SchemaClass {
   }
 
   schema(): sv.Schema {
-    return {
-      properties: {
-        s: { type: "string" },
-        r: { type: "number" },
-        c: { type: "number" },
-      },
-    };
-  }
-
-  is_valid(game: NTacToe) {
-    // if (this.s !== game.next()) {
-    //   console.log("Next does not match");
-    //   return false;
-    // }
-    const r = this.r;
-    const c = this.c;
-    if (
-      r < 0 ||
-      c < 0 ||
-      r >= game.n ||
-      c >= game.n ||
-      !Number.isInteger(r) ||
-      !Number.isInteger(c)
-    ) {
-      console.log("Invalid row or column");
-      return false;
-    }
-    const board = game.board;
-    const i = r * game.n + c;
-    if (board[i] !== " ") {
-      console.log("Board space not empty");
-      return false;
-    }
-    return true;
+    const schema = super.schema();
+    schema["properties"]["s"] = { type: "string" };
+    schema["properties"]["r"] = { type: "number" };
+    schema["properties"]["c"] = { type: "number" };
+    return schema;
   }
 }
 
@@ -133,13 +111,49 @@ export class NTacToe extends BaseGame {
     return this.n * r + c;
   }
 
+  is_valid_move(move: NTacToeMove, user: User): boolean {
+    this.refresh_cache();
+    if (this.game_over) {
+      return false;
+    }
+    if (this.has_player(user.userid) && this.last_player() === user.userid) {
+      return false;
+    }
+    if (
+      this.players.length === this.max_players() &&
+      !this.has_player(user.userid)
+    ) {
+      console.log("Error: No more player spots");
+      return false;
+    }
+    if (move.s !== this.next()) {
+      return false;
+    }
+    const r = move.r;
+    const c = move.c;
+    if (
+      r < 0 ||
+      c < 0 ||
+      r >= this.n ||
+      c >= this.n ||
+      !Number.isInteger(r) ||
+      !Number.isInteger(c)
+    ) {
+      console.log("Invalid row or column");
+      return false;
+    }
+    const board = this.board;
+    const i = r * this.n + c;
+    if (board[i] !== " ") {
+      console.log("Board space not empty");
+      return false;
+    }
+    return true;
+  }
+
   generate_board() {
     this.board = new Array(this.n * this.n).fill(" ");
     for (const move of this.moves) {
-      if (!move.is_valid(this)) {
-        console.log("Invalid move: " + sv.to_string(move));
-        continue;
-      }
       this.board[this.index(move.r, move.c)] = move.s;
     }
   }
@@ -301,6 +315,34 @@ export class NTacToe extends BaseGame {
     this.refresh_cache();
   }
 
+  create_move(payload: string | BaseGameMove): NTacToeMove | Error {
+    console.log("NTacToe create_move");
+    const move = sv.to_class(payload, new NTacToeMove());
+    return move;
+  }
+
+  on_receive_move(payload: BaseGameMove, user?: User): boolean {
+    const move = this.create_move(payload);
+    if (move instanceof Error) {
+      return false;
+    }
+    if (move.user === undefined) {
+      console.log("Missing move user");
+      return false;
+    }
+    if (user === undefined) {
+      user = move.user;
+    }
+    if (!this.is_valid_move(move, user)) {
+      return false;
+    }
+    this.moves.push(move);
+    if (!this.has_player(user.userid)) {
+      this.players.push(user);
+    }
+    return true;
+  }
+
   next(): NTacToeSymbol {
     const circles = this.moves.filter((m: NTacToeMove) => m.s === "O").length;
     const crosses = this.moves.filter((m: NTacToeMove) => m.s === "X").length;
@@ -310,20 +352,7 @@ export class NTacToe extends BaseGame {
     return "O";
   }
 
-  make_move(r: number, c: number, s: NTacToeSymbol) {
-    const move = new NTacToeMove(s, r, c);
-    if (move.is_valid(this)) {
-      this.moves.push(move);
-      this.schedule_sync();
-      this.refresh_cache();
-    }
-  }
-
-  mouse_click(x: number, y: number) {
-    this.refresh_cache();
-    if (this.game_over) {
-      return;
-    }
+  mouse_click(x: number, y: number, user: User) {
     const len = this.rects.length;
     for (let i = 0; i < len; i++) {
       const rect = this.rects[i];
@@ -332,7 +361,9 @@ export class NTacToe extends BaseGame {
       }
       const r = limit(0, Math.floor(i / this.n), this.n - 1);
       const c = limit(0, Math.floor(i % this.n), this.n - 1);
-      this.make_move(r, c, this.next());
+      const s = this.next();
+      const move = new NTacToeMove(s, r, c, user);
+      this.submit_move(move, user);
       return;
     }
   }

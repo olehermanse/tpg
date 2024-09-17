@@ -2,6 +2,7 @@ import { User } from "./user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { game_selector } from "../games/game_selector.ts";
 import { NTacToe } from "../games/ntactoe.ts";
+import { BaseGame } from "./game.ts";
 
 export class Message implements sv.SchemaClass {
   user: User;
@@ -100,7 +101,7 @@ export class Chat implements sv.SchemaClass {
 export class Lobby implements sv.SchemaClass {
   id: string;
   chat: Chat;
-  games: any[];
+  games: BaseGame[];
 
   class_name(): string {
     return "Lobby";

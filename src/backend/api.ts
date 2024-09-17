@@ -134,8 +134,8 @@ function handle_ws_message(
     if (game === null) {
       return;
     }
-    const lobby_id = data.lobby_id;
-    const lobby = get_backend_lobby(lobby_id);
+    const lobby_id: string = data.lobby_id;
+    const lobby: BackendLobby | null = get_backend_lobby(lobby_id);
     if (lobby === null) {
       console.log(
         "Error: Received replace_game message for non-existing lobby: " +
@@ -165,6 +165,30 @@ function handle_ws_message(
       return;
     }
     lobby.chat.add(message);
+    ws_broadcast(lobby, data);
+    return;
+  }
+  if (data.action === "game_move") {
+    const user = connection.remote_user;
+    if (user === undefined) {
+      console.log("Error: remote user undefined");
+      return;
+    }
+    const lobby_id = data.lobby_id;
+    const lobby = get_lobby(lobby_id);
+    if (lobby === null) {
+      console.log(
+        "Error: Received update_game message for non-existing lobby: " +
+          lobby_id,
+      );
+      return;
+    }
+    const game: BaseGame = lobby.games[0];
+    if (game.id !== data.game_id) {
+      console.log("Wrong game");
+      return;
+    }
+    game.receive_move(data.payload, user);
     ws_broadcast(lobby, data);
     return;
   }
