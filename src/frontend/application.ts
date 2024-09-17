@@ -16,7 +16,7 @@ import {
   WebSocketWrapper,
 } from "../libcommon/websocket.ts";
 import { game_selector_new } from "../games/game_selector.ts";
-import { get_current_user } from "./start.ts";
+import { get_current_user, set_current_user } from "./start.ts";
 
 function short_time(date: Date) {
   const hours = left_pad(date.getHours(), 2, "0");
@@ -303,6 +303,21 @@ class Application {
     }
     if (message.action === "game_move") {
       this.canvas_game.game.receive_move(message.payload);
+      return;
+    }
+    if (message.action === "username") {
+      const user: User | Error = sv.to_class(message.payload, new User());
+      if (user instanceof Error) {
+        console.log("Received invalid user");
+        return;
+      }
+      this.lobby.change_username(user);
+      const current_user = get_current_user();
+      if (current_user === null || current_user.userid !== user.userid) {
+        return;
+      }
+      current_user.username = user.username;
+      set_current_user(current_user);
       return;
     }
     if (message.action === "replace_game") {

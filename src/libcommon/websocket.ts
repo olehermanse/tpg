@@ -3,11 +3,11 @@ import * as sv from "@olehermanse/utils/schema.js";
 const web_socket_actions = [
   "",
   "chat",
-  "login",
   "lobby",
   "replace_game",
   "update_game",
   "game_move",
+  "username",
 ] as const;
 export type WebSocketAction = (typeof web_socket_actions)[number];
 
@@ -105,7 +105,7 @@ export class WebSocketWrapper {
       return;
     }
     if (this.ws.readyState === 1) {
-      const data = <string> this.queue.shift();
+      const data = <string>this.queue.shift();
       this.ws.send(data);
       this.attempt_send();
       return;

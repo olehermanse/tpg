@@ -133,24 +133,20 @@ export class Lobby implements sv.SchemaClass {
     return null;
   }
 
-  refresh_users() {
-    for (const game of this.games) {
-      game.players = this.chat.users;
-    }
-  }
-
-  login(user: User) {
+  change_username(user: User) {
     for (const u of this.chat.users) {
-      if (u.userid !== user.userid) {
-        continue;
-      }
-      if (u.username !== user.username) {
+      if (u.userid === user.userid) {
         u.username = user.username;
-        this.refresh_users();
+        break;
       }
-      return;
     }
-    this.chat.users.push(user);
-    this.refresh_users();
+    for (const g of this.games) {
+      for (const u of g.players) {
+        if (u.userid === user.userid) {
+          u.username = user.username;
+          break;
+        }
+      }
+    }
   }
 }

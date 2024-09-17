@@ -1,6 +1,6 @@
 import { Application, FrontendWebSocket } from "./application.ts";
-import { get_cookie, http_post } from "@olehermanse/utils/funcs.js";
-import { Lobby } from "../libcommon/lobby.ts";
+import { get_cookie, http_post, set_cookie } from "@olehermanse/utils/funcs.js";
+import { Lobby, Message } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { RedDots } from "../games/red_dots.ts";
@@ -26,12 +26,30 @@ export function get_current_user(): User | null {
   return user;
 }
 
+export function set_current_user(user: User) {
+  set_cookie(
+    "User",
+    sv.to_string(user) + "; Secure; Path=/; SameSite=Strict; Max-Age=86400",
+  );
+  if (application === null) {
+    return;
+  }
+  application.user = user;
+}
+
 // function set_current_user(user: User) {
 //   set_cookie("userid", user.userid);
 //   set_cookie("username", user.username);
 // }
 
 function on_chat_command(command: string) {
+  const user = get_current_user();
+  if (user === null) {
+    console.log("No");
+    return;
+  }
+  const message = new Message(user, command);
+  application?.websocket.send("chat", message);
   const regex = /^\/n ([1-9][0-9]*) ([1-9][0-9]*)$/;
   const match = command.match(regex);
   if (match != null) {
@@ -62,26 +80,21 @@ function on_chat_command(command: string) {
     return;
   }
   if (command.startsWith("/username ")) {
-    // const user = get_current_user();
-    // const new_username = command.slice(10);
-    // const message = new Message(user, "Changing username to " + new_username);
-    //    http_put("/api/chat/" + get_lobby_id(), message).then((data) => {
-    //      const chat = sv.to_class<Chat>(data, new Chat());
-    //      if (chat instanceof Error) {
-    //        console.log(chat);
-    //        return;
-    //      }
-    //      application.render_chat_log(chat);
-    //      user.username = new_username;
-    //      set_current_user(user);
-    //    });
+    const user = get_current_user();
+    if (user === null) {
+      return;
+    }
+    const new_username = command.slice(10);
+    user.username = new_username;
+
+    application?.websocket.send("username", user);
     return;
   }
   console.log("Uknown command: " + command);
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement> (
+  const input: HTMLInputElement = <HTMLInputElement>(
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;
@@ -110,7 +123,7 @@ function chat_init() {
 
 function canvas_init() {
   const lobby_id = get_lobby_id();
-  const obj = { "url": window.location.href };
+  const obj = { url: window.location.href };
   http_post("/api/auth/" + lobby_id, obj).then((data) => {
     const user = sv.to_class(data, new User());
     if (user instanceof Error) {
@@ -190,8 +203,7 @@ function links_init() {
   const lobby = "/api/lobbies/" + get_lobby_id();
   const game = lobby + "/games/" + application.canvas_game.game.id;
   const chat = "/api/chat/" + get_lobby_id();
-  links.innerHTML =
-    `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
+  links.innerHTML = `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
 }
 
 function start() {

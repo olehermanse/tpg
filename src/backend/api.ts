@@ -62,6 +62,12 @@ class BackendLobby {
     );
     ws_broadcast(this.lobby, message);
   }
+
+  system_message(message: string) {
+    const msg = new Message(new User("0", "System"), message);
+    this.lobby.chat.messages.push(msg);
+    this.broadcast("chat", sv.to_string(msg));
+  }
 }
 
 const lobbies: { [key: string]: BackendLobby } = {};
@@ -98,20 +104,6 @@ function handle_ws_message(
       return;
     }
   }
-  if (data.action === "login") {
-    const user = sv.to_class(data.payload, new User());
-    if (user instanceof Error) {
-      console.log("Error: Could not convert user - " + data.payload);
-      return;
-    }
-    if (lobby === null) {
-      console.log("Error: Missing lobby for user - " + data.payload);
-      return;
-    }
-    connection.remote_user = user;
-    ws_broadcast(lobby, data);
-    return;
-  }
   if (data.action === "update_game") {
     const game = game_selector_new(data.payload);
     if (game === null) {
@@ -127,6 +119,36 @@ function handle_ws_message(
       return;
     }
     lobby.update_game(game);
+    return;
+  }
+  if (data.action === "username") {
+    const user = sv.to_class(data.payload, new User());
+    if (user instanceof Error) {
+      console.log("Error: Invalid user received");
+      return;
+    }
+    const lobby_id = data.lobby_id;
+    const lobby = get_backend_lobby(lobby_id);
+    if (lobby === null) {
+      console.log(
+        "Error: Received username message for non-existing lobby: " + lobby_id,
+      );
+      return;
+    }
+    if (connection.remote_user === undefined) {
+      console.log("Error: Unclear user for username change");
+      return;
+    }
+    if (user.userid !== connection.remote_user.userid) {
+      console.log("Error: Attempted to change username of another user");
+      return;
+    }
+    lobby.system_message(
+      `The user '${connection.remote_user.username}' changed name to '${user.username}'.`,
+    );
+    connection.remote_user.username = user.username;
+    lobby.lobby.change_username(user);
+    ws_broadcast(lobby.lobby, data);
     return;
   }
   if (data.action === "replace_game") {
@@ -216,16 +238,12 @@ export function create_lobby(): string {
     lobby_id = "" + randint(10_000, 99_999);
   }
   const lobby = new Lobby(lobby_id);
-  lobby.chat.messages.push(
-    new Message(new User("0", "System"), "New lobby created"),
+  const backend_lobby = new BackendLobby(lobby);
+  lobbies[lobby_id] = backend_lobby;
+  backend_lobby.system_message("New lobby created.");
+  backend_lobby.system_message(
+    `New ${lobby.games[0].class_name()} game created.`,
   );
-  lobby.chat.messages.push(
-    new Message(
-      new User("0", "System"),
-      `New ${lobby.games[0].class_name()} game created`,
-    ),
-  );
-  lobbies[lobby_id] = new BackendLobby(lobby);
   return lobby_id;
 }
 
