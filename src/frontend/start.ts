@@ -94,7 +94,7 @@ function on_chat_command(command: string) {
 }
 
 function on_chat_send() {
-  const input: HTMLInputElement = <HTMLInputElement>(
+  const input: HTMLInputElement = <HTMLInputElement> (
     document.getElementById("chat-input-text")
   );
   const body: string = input.value;
@@ -203,7 +203,8 @@ function links_init() {
   const lobby = "/api/lobbies/" + get_lobby_id();
   const game = lobby + "/games/" + application.canvas_game.game.id;
   const chat = "/api/chat/" + get_lobby_id();
-  links.innerHTML = `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
+  links.innerHTML =
+    `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
 }
 
 function start() {

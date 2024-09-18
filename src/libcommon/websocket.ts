@@ -105,7 +105,7 @@ export class WebSocketWrapper {
       return;
     }
     if (this.ws.readyState === 1) {
-      const data = <string>this.queue.shift();
+      const data = <string> this.queue.shift();
       this.ws.send(data);
       this.attempt_send();
       return;

@@ -13,6 +13,7 @@ import {
 } from "../libcommon/websocket.ts";
 import { game_selector_new } from "../games/game_selector.ts";
 import { BaseGame } from "../libcommon/game.ts";
+import { NTacToe } from "../games/ntactoe.ts";
 
 class BackendWebSocket {
   websocket: WebSocketWrapper;
@@ -51,6 +52,11 @@ class BackendLobby {
   replace_game(game: BaseGame) {
     this.lobby.games = [game];
     this.broadcast("replace_game", sv.to_string(game), game.id);
+    if (game instanceof NTacToe) {
+      this.system_message(
+        `New game created: ${game.n}x${game.n} n-tac-toe to ${game.t}`,
+      );
+    }
   }
 
   broadcast(action: WebSocketAction, payload: string, game_id?: string) {
