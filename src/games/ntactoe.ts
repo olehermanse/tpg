@@ -1,8 +1,9 @@
 import { BaseGame, BaseGameMove } from "../libcommon/game.ts";
 import * as sv from "@olehermanse/utils/schema.js";
-import { limit, xy } from "@olehermanse/utils/funcs.js";
+import { cr, limit, xy } from "@olehermanse/utils/funcs.js";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { User } from "../libcommon/user.ts";
+import { CR } from "@olehermanse/utils";
 
 type NTacToeSymbol = "X" | "O" | " ";
 
@@ -13,12 +14,21 @@ class Rect {
   y: number;
   w: number;
   h: number;
+  cr: CR;
 
-  constructor(x: number, y: number, w: number, h: number) {
+  constructor(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    c: number,
+    r: number,
+  ) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
+    this.cr = cr(c, r);
   }
 
   contains(x: number, y: number): boolean {
@@ -68,6 +78,7 @@ export class NTacToe extends BaseGame {
   combinations: number[][];
   game_over: boolean;
   cache_string: string;
+  winner: NTacToeSymbol = " ";
 
   class_name(): string {
     return "NTacToe";
@@ -164,13 +175,13 @@ export class NTacToe extends BaseGame {
     const w = size / this.n;
     const h = w;
     const center = xy(this.width / 2, this.height / 2);
-    const top_left = xy(center.x - half, center.y - half);
+    const top_left = xy(center.x - half, center.y - half - this.height * 0.05);
     this.rects = [];
     for (let r = 0; r < this.n; r++) {
       for (let c = 0; c < this.n; c++) {
         const x = top_left.x + c * w;
         const y = top_left.y + r * h;
-        const rect = new Rect(x, y, w, h);
+        const rect = new Rect(x, y, w, h, c, r);
         rect.symbol = this.board[this.index(r, c)];
         this.rects.push(rect);
       }
@@ -260,6 +271,7 @@ export class NTacToe extends BaseGame {
 
   mark_win(streak: number[]) {
     this.game_over = true;
+    this.winner = this.rects[streak[0]].symbol;
     for (const i of streak) {
       this.rects[i].highlight = true;
     }
@@ -289,8 +301,12 @@ export class NTacToe extends BaseGame {
         streak = [i];
         if (this.t === 1) {
           this.mark_win(streak);
+          return;
         }
       }
+    }
+    if (this.moves.length === this.n * this.n) {
+      this.game_over = true;
     }
   }
 
@@ -368,10 +384,53 @@ export class NTacToe extends BaseGame {
     }
   }
 
+  draw_bottom_text(ctx: any, message: string) {
+    Draw.text(
+      ctx,
+      0.5 * this.width,
+      0.9 * this.height,
+      message,
+      "white",
+      this.height / 16,
+    );
+  }
+
   draw(ctx: any) {
     this.refresh_cache();
+    if (this.moves.length === 0) {
+      this.draw_bottom_text(ctx, "Anyone can make the first move.");
+    } else if (this.game_over) {
+      if (this.winner === " ") {
+        this.draw_bottom_text(ctx, "Game over - draw!");
+      } else if (this.winner === "X") {
+        this.draw_bottom_text(ctx, "Player X wins!");
+      } else if (this.winner === "O") {
+        this.draw_bottom_text(ctx, "Player O wins!");
+      }
+    }
+    const last_move =
+      this.moves.length === 0 ? null : this.moves[this.moves.length - 1];
     for (const rect of this.rects) {
       Draw.rectangle(ctx, rect.x, rect.y, rect.w, rect.h, null, "white", 4);
+      if (last_move === null || rect.symbol === " ") {
+        continue;
+      }
+      let color = "white";
+      if (rect.highlight) {
+        color = "green";
+      } else if (
+        rect.symbol === "X" &&
+        rect.cr.c === last_move.c &&
+        rect.cr.r === last_move.r
+      ) {
+        color = "orange";
+      } else if (
+        rect.symbol === "O" &&
+        rect.cr.c === last_move.c &&
+        rect.cr.r === last_move.r
+      ) {
+        color = "#9999ff";
+      }
       if (rect.symbol === "X") {
         Draw.line(
           ctx,
@@ -379,7 +438,7 @@ export class NTacToe extends BaseGame {
           rect.y + 0.2 * rect.h,
           rect.x + 0.8 * rect.w,
           rect.y + 0.8 * rect.h,
-          rect.highlight ? "yellow" : "white",
+          color,
           4,
         );
         Draw.line(
@@ -388,7 +447,7 @@ export class NTacToe extends BaseGame {
           rect.y + 0.2 * rect.h,
           rect.x + 0.2 * rect.w,
           rect.y + 0.8 * rect.h,
-          rect.highlight ? "yellow" : "white",
+          color,
           4,
         );
       }
@@ -396,15 +455,7 @@ export class NTacToe extends BaseGame {
         const radius = rect.w / 2;
         const x = rect.x + radius;
         const y = rect.y + radius;
-        Draw.circle(
-          ctx,
-          x,
-          y,
-          0.8 * radius,
-          null,
-          rect.highlight ? "yellow" : "white",
-          4,
-        );
+        Draw.circle(ctx, x, y, 0.8 * radius, null, color, 4);
       }
     }
   }
