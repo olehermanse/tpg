@@ -205,18 +205,10 @@ function init_ws() {
 }
 
 function links_init() {
-  const links = document.getElementById("links");
-  if (links === null) {
-    return;
-  }
   if (application === null) {
     return;
   }
-  const lobby = "/api/lobbies/" + get_lobby_id();
-  const game = lobby + "/games/" + application.canvas_game.game.id;
-  const chat = "/api/chat/" + get_lobby_id();
-  links.innerHTML =
-    `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
+  application.render_links();
 }
 
 function start() {

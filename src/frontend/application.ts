@@ -266,6 +266,18 @@ class Application {
       .reduce((accumulator, currentValue) => accumulator + currentValue, "");
   }
 
+  render_links() {
+    const links = document.getElementById("links");
+    if (links === null) {
+      return;
+    }
+    const lobby = "/api/lobbies/" + get_lobby_id();
+    const game = lobby + "/games/" + this.canvas_game.game.id;
+    const chat = "/api/chat/" + get_lobby_id();
+    links.innerHTML =
+      `<a href="${lobby}">Lobby</a> <a href="${game}">Game</a> <a href="${chat}">Chat</a>`;
+  }
+
   ws_receive(message: WebSocketMessage) {
     if (message.action === "lobby") {
       const lobby = sv.to_class(message.payload, new Lobby());
@@ -329,6 +341,7 @@ class Application {
       }
       this.lobby.games = [game];
       this.set_active_game(0);
+      this.render_links();
       return;
     }
     console.log(
