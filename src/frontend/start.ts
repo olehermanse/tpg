@@ -1,5 +1,10 @@
 import { Application, FrontendWebSocket } from "./application.ts";
-import { get_cookie, http_post, set_cookie } from "@olehermanse/utils/funcs.js";
+import {
+  get_cookie,
+  http_post,
+  limit,
+  set_cookie,
+} from "@olehermanse/utils/funcs.js";
 import { Lobby, Message } from "../libcommon/lobby.ts";
 import { User } from "../libcommon/user.ts";
 import * as sv from "@olehermanse/utils/schema.js";
@@ -50,12 +55,19 @@ function on_chat_command(command: string) {
   }
   const message = new Message(user, command);
   application?.websocket.send("chat", message);
-  const regex = /^\/n ([1-9][0-9]*) ([1-9][0-9]*)$/;
+  const regex = /^\/[nN] ([1-9][0-9]*) ([1-9][0-9]*)( [2-3])?$/;
   const match = command.match(regex);
   if (match != null) {
-    const n = Number(match[1]);
-    const t = Number(match[2]);
-    const data = new NTacToe(n, t);
+    const n = limit(3, Number(match[1]), 20);
+    const t = limit(2, Number(match[2]), n);
+    let p = 2;
+    if (match[3] !== undefined) {
+      p = Number(match[3]);
+    }
+    if (p !== 2 && p !== 3) {
+      p = 2;
+    }
+    const data = new NTacToe(n, t, p);
     application?.websocket.send("replace_game", data);
     return;
   }

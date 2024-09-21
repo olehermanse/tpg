@@ -282,7 +282,7 @@ describe("Lobby", () => {
     lobby.games = [new NTacToe()];
     lobby.games[0].id = "84594780818949";
     const string =
-      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"moves":[]}]}';
+      '{"id":"1234","chat":{"messages":[],"users":[]},"games":[{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"p":2,"moves":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 
     const object: any = sv.to_object(lobby);
@@ -305,7 +305,7 @@ describe("Lobby", () => {
     lobby.games[1].id = "84594780818948";
 
     const string = '{"id":"","chat":{"messages":[],"users":[]},"games":[' +
-      '{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"moves":[]},' +
+      '{"id":"84594780818949","name":"NTacToe","players":[],"n":5,"t":4,"p":2,"moves":[]},' +
       '{"id":"84594780818948","name":"RedDots","players":[],"dots":[]}]}';
     expect(sv.to_string(lobby)).toBe(string);
 

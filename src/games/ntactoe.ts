@@ -5,7 +5,7 @@ import { Draw } from "@olehermanse/utils/draw.js";
 import { User } from "../libcommon/user.ts";
 import { CR } from "@olehermanse/utils";
 
-type NTacToeSymbol = "X" | "O" | " ";
+type NTacToeSymbol = "X" | "O" | "▲" | " ";
 
 class Rect {
   symbol: NTacToeSymbol = " ";
@@ -71,6 +71,7 @@ export class NTacToeMove extends BaseGameMove {
 export class NTacToe extends BaseGame {
   n: number;
   t: number;
+  p: number;
   moves: NTacToeMove[];
 
   board: NTacToeSymbol[];
@@ -88,14 +89,16 @@ export class NTacToe extends BaseGame {
     const schema = super.base_schema();
     schema["properties"]["n"] = { type: "number" };
     schema["properties"]["t"] = { type: "number" };
+    schema["properties"]["p"] = { type: "number" };
     schema["properties"]["moves"] = { type: NTacToeMove, array: true };
     return schema;
   }
 
-  constructor(n = 5, t = 4) {
+  constructor(n = 5, t = 4, p = 2) {
     super();
-    this.n = n;
-    this.t = t;
+    this.n = limit(3, n, 20);
+    this.t = limit(2, t, n);
+    this.p = limit(2, p, 3);
     this.moves = [];
 
     // Cached, non-transmitted state:
@@ -104,6 +107,10 @@ export class NTacToe extends BaseGame {
     this.combinations = [];
     this.rects = [];
     this.cache_string = "Default";
+  }
+
+  max_players(): number {
+    return this.p;
   }
 
   refresh_cache() {
@@ -122,19 +129,73 @@ export class NTacToe extends BaseGame {
     return this.n * r + c;
   }
 
-  is_valid_move(move: NTacToeMove, user: User): boolean {
-    this.refresh_cache();
+  move_distance(symbol: NTacToeSymbol) {
+    if (symbol === " ") {
+      return 0;
+    }
+    if (this.moves.length === 0) {
+      return 0;
+    }
+    let distance = 0;
+    for (let i = this.moves.length - 1; i >= 0; i--) {
+      distance += 1;
+      if (this.moves[i].s === symbol) {
+        return distance;
+      }
+    }
+    return 0;
+  }
+
+  get_symbol_for_player(user: User): NTacToeSymbol {
+    for (const move of this.moves) {
+      if (move.user === undefined) {
+        continue;
+      }
+      if (move.user.userid === user.userid) {
+        return move.s;
+      }
+    }
+    return " ";
+  }
+
+  can_make_move(user: User): boolean {
     if (this.game_over) {
       return false;
     }
-    if (this.has_player(user.userid) && this.last_player() === user.userid) {
-      return false;
+    if (this.players.length < this.max_players()) {
+      if (this.has_player(user.userid)) {
+        return false;
+      }
+      return true;
     }
     if (
       this.players.length === this.max_players() &&
       !this.has_player(user.userid)
     ) {
       console.log("Error: No more player spots");
+      return false;
+    }
+
+    console.assert(this.players.length === this.max_players());
+    console.assert(this.moves.length >= this.players.length);
+
+    const symbol = this.get_symbol_for_player(user);
+    console.assert(symbol !== " ");
+    if (symbol === " ") {
+      return true;
+    }
+    const distance = this.move_distance(symbol);
+    if (distance < this.max_players()) {
+      return false;
+    }
+
+    console.assert(distance === this.max_players());
+    return true;
+  }
+
+  is_valid_move(move: NTacToeMove, user: User): boolean {
+    this.refresh_cache();
+    if (!this.can_make_move(user)) {
       return false;
     }
     if (move.s !== this.next()) {
@@ -360,10 +421,23 @@ export class NTacToe extends BaseGame {
   }
 
   next(): NTacToeSymbol {
-    const circles = this.moves.filter((m: NTacToeMove) => m.s === "O").length;
-    const crosses = this.moves.filter((m: NTacToeMove) => m.s === "X").length;
-    if (crosses < circles) {
+    if (this.moves.length === 0) {
+      return "O";
+    }
+    const last = this.moves[this.moves.length - 1].s;
+    console.assert(last !== " ");
+    if (last === " ") {
+      return " ";
+    }
+    if (last === "O") {
       return "X";
+    }
+    if (last === "▲") {
+      return "O";
+    }
+    console.assert(last === "X");
+    if (this.max_players() === 3) {
+      return "▲";
     }
     return "O";
   }
@@ -408,8 +482,9 @@ export class NTacToe extends BaseGame {
         this.draw_bottom_text(ctx, "Player O wins!");
       }
     }
-    const last_move =
-      this.moves.length === 0 ? null : this.moves[this.moves.length - 1];
+    const last_move = this.moves.length === 0
+      ? null
+      : this.moves[this.moves.length - 1];
     for (const rect of this.rects) {
       Draw.rectangle(ctx, rect.x, rect.y, rect.w, rect.h, null, "white", 4);
       if (last_move === null || rect.symbol === " ") {
@@ -418,44 +493,29 @@ export class NTacToe extends BaseGame {
       let color = "white";
       if (rect.highlight) {
         color = "green";
-      } else if (
-        rect.symbol === "X" &&
-        rect.cr.c === last_move.c &&
-        rect.cr.r === last_move.r
-      ) {
-        color = "orange";
-      } else if (
-        rect.symbol === "O" &&
-        rect.cr.c === last_move.c &&
-        rect.cr.r === last_move.r
-      ) {
+      } else if (rect.cr.c === last_move.c && rect.cr.r === last_move.r) {
         color = "#9999ff";
-      }
-      if (rect.symbol === "X") {
-        Draw.line(
-          ctx,
-          rect.x + 0.2 * rect.w,
-          rect.y + 0.2 * rect.h,
-          rect.x + 0.8 * rect.w,
-          rect.y + 0.8 * rect.h,
-          color,
-          4,
-        );
-        Draw.line(
-          ctx,
-          rect.x + 0.8 * rect.w,
-          rect.y + 0.2 * rect.h,
-          rect.x + 0.2 * rect.w,
-          rect.y + 0.8 * rect.h,
-          color,
-          4,
-        );
       }
       if (rect.symbol === "O") {
         const radius = rect.w / 2;
         const x = rect.x + radius;
         const y = rect.y + radius;
         Draw.circle(ctx, x, y, 0.8 * radius, null, color, 4);
+        continue;
+      }
+      const left = rect.x + 0.2 * rect.w;
+      const right = rect.x + 0.8 * rect.w;
+      const top = rect.y + 0.2 * rect.h;
+      const bottom = rect.y + 0.8 * rect.h;
+      if (rect.symbol === "X") {
+        Draw.line(ctx, left, top, right, bottom, color, 4);
+        Draw.line(ctx, right, top, left, bottom, color, 4);
+      }
+      if (rect.symbol === "▲") {
+        const center = rect.x + 0.5 * rect.w;
+        Draw.line(ctx, left, bottom, right, bottom, color, 4);
+        Draw.line(ctx, left, bottom, center, top, color, 4);
+        Draw.line(ctx, right, bottom, center, top, color, 4);
       }
     }
   }
