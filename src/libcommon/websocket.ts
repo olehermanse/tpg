@@ -88,7 +88,7 @@ export class WebSocketWrapper {
 
   on_message(m: MessageEvent) {
     if (this.onmessage === null) {
-      console.log("No handler defined");
+      console.log("Error: No handler defined");
       return;
     }
     const message = sv.to_class(m.data, new WebSocketMessage());

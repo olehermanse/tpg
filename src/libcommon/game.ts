@@ -89,8 +89,6 @@ export abstract class BaseGame extends sv.SchemaClass {
 
   receive_move(payload: string | BaseGameMove, user?: User): boolean {
     if (typeof payload === "string") {
-      console.log("Converting string payload");
-      console.log(payload);
       const move = this.create_move(payload);
       if (move instanceof Error) {
         return false;
@@ -102,9 +100,7 @@ export abstract class BaseGame extends sv.SchemaClass {
       return false;
     }
     // Move object (class)
-    console.log("Receiving non-string payload");
     const result = this.on_receive_move(payload, user);
-    console.log("Receiving non-string payload - on_receive_move done");
     return result;
   }
 
@@ -113,14 +109,10 @@ export abstract class BaseGame extends sv.SchemaClass {
   }
 
   submit_move(move: BaseGameMove, user: User) {
-    console.log("Submitting move:");
-    console.log(sv.to_string(move, true));
     if (this.receive_move(move, user)) {
-      console.log("Sending move:");
-      console.log(sv.to_string(move, true));
       this.send_move(move);
     } else {
-      console.log("receive_move failed");
+      console.log("Error: receive_move failed");
     }
   }
 

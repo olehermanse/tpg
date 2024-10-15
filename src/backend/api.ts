@@ -213,7 +213,7 @@ function handle_ws_message(
     }
     const game: BaseGame = lobby.games[0];
     if (game.id !== data.game_id) {
-      console.log("Wrong game");
+      console.log("Error: Wrong game");
       return;
     }
     game.receive_move(data.payload, user);
@@ -275,13 +275,13 @@ function get_user(ctx: any): User | null {
 export function api_ws(ctx, lobby_id: string) {
   const user = get_user(ctx);
   if (user === null) {
-    console.log("Failed ws user");
+    console.log("Error: Failed ws user");
     ctx.throw(404);
     return;
   }
   const lobby = get_backend_lobby(lobby_id);
   if (lobby === null) {
-    console.log("Failed ws lobby");
+    console.log("Error: Failed ws lobby");
     ctx.throw(404);
     return;
   }
@@ -339,7 +339,7 @@ export function check_request_auth_headers(ctx: any): boolean {
   const auth: string = cookies["Session"] ?? "";
   const user: string = cookies["User"] ?? "";
   if (user === "" || auth === "") {
-    console.log("Missing headers");
+    console.log("Error: Missing headers");
     return create_new_session(ctx);
   }
   if (user === null || auth === null) {
@@ -377,17 +377,17 @@ export function api_post_auth(ctx: any) {
   const auth: string = cookies["Session"] ?? "";
   const user: string = cookies["User"] ?? "";
   if (user.length === 0 || auth.length === 0) {
-    console.log("Missing headers");
+    console.log("Error: Missing headers");
     return create_new_session(ctx);
   }
 
   const user_object = sv.to_class(user, new User());
   if (user_object instanceof Error) {
-    console.log("Invalid user object");
+    console.log("Error: Invalid user object");
     return ctx.throw(404);
   }
   if (!auth_is_valid(auth, user_object)) {
-    console.log("Invalid auth");
+    console.log("Error: Invalid auth");
     return create_new_session(ctx);
   }
 

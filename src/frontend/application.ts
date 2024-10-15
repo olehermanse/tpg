@@ -94,7 +94,7 @@ class CanvasGame {
   update_full_lobby(data: string | Lobby) {
     const lobby = sv.to_class(data, new Lobby());
     if (lobby instanceof Error) {
-      console.log("Creating a new Lobby failed:");
+      console.log("Error: Creating a new Lobby failed:");
       console.log(lobby);
       return;
     }
@@ -197,7 +197,7 @@ export class FrontendWebSocket {
 
   send(action: WebSocketAction, data: sv.SchemaClass) {
     if (this.application === null) {
-      console.log("Not ready to send websocket messages");
+      console.log("Error: Not ready to send websocket messages");
       return;
     }
     const lobby = this.application.lobby.id;
@@ -282,7 +282,7 @@ class Application {
     if (message.action === "lobby") {
       const lobby = sv.to_class(message.payload, new Lobby());
       if (lobby instanceof Error) {
-        console.log("Received invalid lobby");
+        console.log("Error: Received invalid lobby");
         console.log(message.payload);
         return;
       }
@@ -295,7 +295,7 @@ class Application {
     if (message.action === "chat") {
       const chat_message = sv.to_class(message.payload, new Message());
       if (chat_message instanceof Error) {
-        console.log("Received invalid chat message");
+        console.log("Error: Received invalid chat message");
         console.log(message.payload);
         return;
       }
@@ -306,7 +306,7 @@ class Application {
     if (message.action === "update_game") {
       const game = game_selector_new(message.payload);
       if (game === null) {
-        console.log("Received invalid game");
+        console.log("Error: Received invalid game");
         console.log(message.payload);
         return;
       }
@@ -320,7 +320,7 @@ class Application {
     if (message.action === "username") {
       const user: User | Error = sv.to_class(message.payload, new User());
       if (user instanceof Error) {
-        console.log("Received invalid user");
+        console.log("Error: Received invalid user");
         return;
       }
       this.lobby.change_username(user);
@@ -335,7 +335,7 @@ class Application {
     if (message.action === "replace_game") {
       const game = game_selector_new(message.payload);
       if (game === null) {
-        console.log("Received invalid game");
+        console.log("Error: Received invalid game");
         console.log(message.payload);
         return;
       }

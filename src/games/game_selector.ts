@@ -16,7 +16,7 @@ export function game_selector(data: any): sv.Class<BaseGame> | null {
 export function game_selector_new(input: string): BaseGame | null {
   const data = JSON.parse(input);
   if (data === undefined) {
-    console.log("Undefined data");
+    console.log("Error: Undefined data");
     return null;
   }
   const cls = game_selector(data);

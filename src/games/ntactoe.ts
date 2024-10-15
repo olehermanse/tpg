@@ -211,13 +211,13 @@ export class NTacToe extends BaseGame {
       !Number.isInteger(r) ||
       !Number.isInteger(c)
     ) {
-      console.log("Invalid row or column");
+      console.log("Error: Invalid row or column");
       return false;
     }
     const board = this.board;
     const i = r * this.n + c;
     if (board[i] !== " ") {
-      console.log("Board space not empty");
+      console.log("Error: Board space not empty");
       return false;
     }
     return true;
@@ -393,7 +393,6 @@ export class NTacToe extends BaseGame {
   }
 
   create_move(payload: string | BaseGameMove): NTacToeMove | Error {
-    console.log("NTacToe create_move");
     const move = sv.to_class(payload, new NTacToeMove());
     return move;
   }
@@ -404,7 +403,6 @@ export class NTacToe extends BaseGame {
       return false;
     }
     if (move.user === undefined) {
-      console.log("Missing move user");
       return false;
     }
     if (user === undefined) {

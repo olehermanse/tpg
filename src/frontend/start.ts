@@ -50,7 +50,7 @@ export function set_current_user(user: User) {
 function on_chat_command(command: string) {
   const user = get_current_user();
   if (user === null) {
-    console.log("No");
+    console.log("Error: No user for chat command");
     return;
   }
   const message = new Message(user, command);
@@ -102,7 +102,7 @@ function on_chat_command(command: string) {
     application?.websocket.send("username", user);
     return;
   }
-  console.log("Uknown command: " + command);
+  console.log("Error: Uknown command - " + command);
 }
 
 function on_chat_send() {
@@ -166,12 +166,12 @@ function init_ws() {
         return;
       }
       if (msg.action !== "lobby") {
-        console.log("Application lobby not ready");
+        console.log("Error: Application lobby not ready");
         return;
       }
       const user = get_current_user();
       if (user === null) {
-        console.log("Missing user");
+        console.log("Error: Missing user");
         return;
       }
       const lobby = sv.to_class(msg.payload, new Lobby());

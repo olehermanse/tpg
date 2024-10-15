@@ -122,7 +122,7 @@ async function run_backend() {
         "application/json; charset=UTF-8",
       );
       if (!check_request_auth_headers(ctx)) {
-        console.log("check auth failed");
+        console.log("Error: check auth failed");
         ctx.throw(404);
       }
     }
