@@ -23,10 +23,10 @@
   "homepage": "https://github.com/olehermanse/tpg#readme",
   "dependencies": {
     "@olehermanse/utils": "^0.0.22",
-    "typescript": "^5.7.2",
-    "vite": "^5.4.11"
+    "typescript": "^5.8.2",
+    "vite": "^5.4.16"
   },
   "devDependencies": {
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   }
 }
