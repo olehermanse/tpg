@@ -1,7 +1,7 @@
 import { BaseGame, BaseGameMove } from "../libcommon/game.ts";
 import * as sv from "@olehermanse/utils/schema.js";
 import { cr, limit, xy } from "@olehermanse/utils/funcs.js";
-import { Draw } from "@olehermanse/utils/draw.js";
+import * as Draw from "@olehermanse/utils/draw.js";
 import { User } from "../libcommon/user.ts";
 import { CR } from "@olehermanse/utils";
 

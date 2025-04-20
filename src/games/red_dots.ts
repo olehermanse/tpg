@@ -1,5 +1,5 @@
 import { BaseGame } from "../libcommon/game.ts";
-import { Draw } from "@olehermanse/utils/draw.js";
+import * as Draw from "@olehermanse/utils/draw.js";
 import * as sv from "@olehermanse/utils/schema.js";
 import { User } from "../libcommon/user.ts";
 

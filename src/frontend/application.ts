@@ -5,7 +5,7 @@ import {
   xy,
 } from "@olehermanse/utils/funcs.js";
 import { XY } from "@olehermanse/utils";
-import { Draw } from "@olehermanse/utils/draw.js";
+import { rectangle } from "@olehermanse/utils/draw.js";
 import { BaseGame } from "../libcommon/game.ts";
 import { Lobby, Message } from "../libcommon/lobby.ts";
 import * as sv from "@olehermanse/utils/schema.js";
@@ -75,14 +75,7 @@ class CanvasGame {
   }
 
   draw() {
-    Draw.rectangle(
-      this.ctx,
-      0,
-      0,
-      this.canvas_width,
-      this.canvas_height,
-      "#000000",
-    );
+    rectangle(this.ctx, 0, 0, this.canvas_width, this.canvas_height, "#000000");
     this.game.draw(this.ctx);
   }
 
