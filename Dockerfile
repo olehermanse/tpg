@@ -1,7 +1,7 @@
-FROM node:20@sha256:6f076db82169a365abca591093bdf020f9e8827a8add8ea3826556c290b340c0 AS build
+FROM denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS build
 WORKDIR /tpg
 COPY package-lock.json package.json ./
-RUN npm install --only=prod
+RUN deno install
 COPY .git .git
 COPY src src
 COPY public public
@@ -10,7 +10,7 @@ COPY tsconfig.json tsconfig.json
 COPY vite.config.js vite.config.js
 COPY index.html index.html
 RUN rm -rf dist
-RUN npm run build
+RUN deno run build
 RUN bash add_version.sh
 
 FROM denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS test
