@@ -1,32 +1,16 @@
 {
+  "nodeModulesDir": "auto",
   "lint": {
-    "include": [
-      "src/"
-    ],
-    "exclude": [
-      "dist/",
-      "node_modelues/",
-      "src/backend/deno_types.ts"
-    ],
+    "include": ["src/"],
+    "exclude": ["dist/", "node_modelues/", "src/backend/deno_types.ts"],
     "rules": {
-      "tags": [
-        "recommended"
-      ],
+      "tags": ["recommended"],
       "include": [],
-      "exclude": [
-        "no-explicit-any",
-        "no-window"
-      ]
+      "exclude": ["no-explicit-any", "no-window"]
     }
   },
   "fmt": {
-    "include": [
-      "src/",
-      "test"
-    ],
-    "exclude": [
-      "src/testdata/",
-      "data/fixtures/**/*.ts"
-    ]
+    "include": ["src/", "test"],
+    "exclude": ["src/testdata/", "data/fixtures/**/*.ts"]
   }
 }
