@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: denoland/setup-deno@v1
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x # Run with latest stable Deno.
+          deno-version: v2.x # Run with latest stable Deno.
       # Check if the code is formatted according to Deno's default
       # formatting conventions.
       - run: deno fmt --check
