@@ -16,6 +16,14 @@ http://127.0.0.1:3000
 
 ## Containers
 
+### podman
+
+```
+podman build --tag tpg . && podman run -it -p 3000:3000 --name tpg --rm tpg
+```
+
+http://127.0.0.1:3000
+
 ### docker
 
 ```

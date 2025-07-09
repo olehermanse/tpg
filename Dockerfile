@@ -13,13 +13,12 @@ RUN rm -rf dist
 RUN npm run build
 RUN bash add_version.sh
 
-FROM node:20@sha256:6f076db82169a365abca591093bdf020f9e8827a8add8ea3826556c290b340c0 AS test
+FROM denoland/deno:1.46.3@sha256:5c2dd16fe7794631ce03f3ee48c983fe6240da4c574f4705ed52a091e1baa098 AS test
 WORKDIR /tpg
 COPY --from=build /tpg /tpg
 COPY test test
-RUN npm install --include=dev
-RUN npm run tsc
-RUN npm run test
+RUN deno task tsc
+RUN deno task test
 
 FROM denoland/deno:1.46.3@sha256:5c2dd16fe7794631ce03f3ee48c983fe6240da4c574f4705ed52a091e1baa098 AS run
 WORKDIR /tpg
