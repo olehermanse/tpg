@@ -1,5 +1,7 @@
 FROM denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS build
 WORKDIR /tpg
+RUN apt-get update -y
+RUN apt-get install -y git
 COPY package-lock.json package.json ./
 RUN deno install
 COPY .git .git
