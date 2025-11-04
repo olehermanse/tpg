@@ -1,4 +1,4 @@
-FROM docker.io/denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS build
+FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS build
 WORKDIR /tpg
 RUN apt-get update -y
 RUN apt-get install -y git
@@ -15,7 +15,7 @@ RUN rm -rf dist
 RUN deno run build
 RUN bash add_version.sh
 
-FROM docker.io/denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS test
+FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS test
 WORKDIR /tpg
 COPY --from=build /tpg /tpg
 COPY test test
@@ -23,7 +23,7 @@ RUN deno install
 RUN deno task tsc
 RUN deno task test
 
-FROM docker.io/denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS run
+FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS run
 WORKDIR /tpg
 COPY --from=build /tpg/dist/ dist/
 COPY src/ src/
