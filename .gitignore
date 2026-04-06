@@ -27,4 +27,5 @@ lerna-debug.log*
 *.sln
 *.sw?
 .gitpod.yml
-*.js
+src/*.js
+test/*.js
