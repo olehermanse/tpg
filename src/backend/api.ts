@@ -246,7 +246,7 @@ export function create_lobby(): string {
   const lobby = new Lobby(lobby_id);
   const backend_lobby = new BackendLobby(lobby);
   lobbies[lobby_id] = backend_lobby;
-  backend_lobby.system_message("Demo.");
+  backend_lobby.system_message("New lobby created.");
   backend_lobby.system_message(
     `New ${lobby.games[0].class_name()} game created.`,
   );
